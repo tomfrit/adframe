@@ -1,0 +1,35 @@
+Options FollowSymLinks
+RewriteEngine on
+RewriteBase  /
+
+
+
+
+ReWriteRule ^/?$ index.html
+ReWriteRule ^gallery/?$ gallery/article.html
+ReWriteRule ^impressum/?$ impressum.html
+
+
+
+
+RewriteCond %{REQUEST_URI} !^/cgi-bin/adframe/
+RewriteCond %{REQUEST_FILENAME} ^(.*)\.html
+RewriteRule ^(.*)$ /cgi-bin/adframe/$1 [T=application/x-httpd-cgi]
+
+RewriteCond %{REQUEST_URI} ^/(news|findus|festival)
+ReWriteRule ^([a-z]+)/?$ /cgi-bin/adframe/index.html?AREA=$1&%{QUERY_STRING} [T=application/x-httpd-cgi]
+
+RewriteCond %{REQUEST_URI} ^/(gallery)/
+RewriteRule ^([a-z]+)/([0-9]+)/([a-zA-Z0-9\-_]+)$ /cgi-bin/adframe/gallery/article.html?ADFRAME_MCMS_ID=$2&%{QUERY_STRING} [T=application/x-httpd-cgi]
+
+RewriteCond %{REQUEST_URI} ^/(news|findus|festival)/
+RewriteRule ^([a-z]+)/([0-9]+)/([a-zA-Z0-9\-_]+)$ /cgi-bin/adframe/article.html?ADFRAME_MCMS_ID=$2&%{QUERY_STRING} [T=application/x-httpd-cgi]
+
+AddType video/ogg .ogv
+AddType video/mp4 .mp4
+AddType video/webm .webm
+AddDefaultCharset utf-8
+
+
+
+

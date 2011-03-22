@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
-#use open IO => ":encoding(utf8)",":std";
-use utf8;
-$VERSION=20101103;
+$VERSION=20110322;
 use CGI::Carp qw(fatalsToBrowser);
 use de::adframe::core::RequestParser;
 use de::adframe::core::Main;
@@ -11,36 +9,29 @@ require 'ADFRAMECONF.pl';
 $TIMESTAMP_INDEX	= 9;
 my $req 	= new RequestParser();
 
-
-
 $adframe		= new Main($req);
 my $doc			= $ENV{PATH_INFO} || $in{doc};
 my $generated 	= 0;
 
-
-
-
 $adframe->initSession($in{id}) if ($ENV{ADFRAME_USE_SESSIONS});
-if ($doc eq '/cgi-bin/adframe')
-{
+
+if ($doc eq '/cgi-bin/adframe') {
 	$doc = $in{doc};
 }
-if (($doc eq '') || ($doc eq '/'))
-{
+
+if (($doc eq '') || ($doc eq '/')) {
 	login();
 }
-else
-{
+else {
 	newDoc($doc);
 }
-sub newDoc
-{
+
+sub newDoc {
 	my $doc 	= shift;
 	   $doc 	=~ s/^\///;
 	   $doc 	=~ s/\.*?$//;
 	   $doc	=~ s/(.*?)\.(.*)\s*$/$1/;
-	if ($doc 	=~ /\/$/)
-	{
+	if ($doc 	=~ /\/$/) {
 		$doc = $doc.'index';
 	}
 	my $doctype	= $2;
@@ -70,54 +61,37 @@ sub newDoc
 			$generate=1;		# KEIN GEN VORHANDEN!
 		}
 		else {
-
-
 			require  $genmodfile;
-
 			@snippets = __AgSn();
 			@dynamicsnippets = __AgDynSn();
-
 			for (@snippets) {
 				my @snpstat		= stat("$ENV{ADFRAME_DOC_PATH}/$_".'.snp');
 				my @snpmodstat 	= stat("$modpath/$_".'.adf');
-
 				if (($snpstat[$TIMESTAMP_INDEX]>$genstat[$TIMESTAMP_INDEX]) || ($snpmodstat[$TIMESTAMP_INDEX]>$genstat[$TIMESTAMP_INDEX])){
 					$generate=1;
 					$adframe->logger("timestamp $_ : snp:$snpstat[$TIMESTAMP_INDEX] snp-mod-timestamp: $snpmodstat[$TIMESTAMP_INDEX], doc timestamp:$genstat[$TIMESTAMP_INDEX]") if ($ENV{ADFRAME_ENABLE_SYSLOG});
 				}
-
 			}
 			__Ac();  # SUB AUS GENERIERTEM - PM
 
-
-
 			foreach my $k (@dynamicsnippets) {
-
 				my $dsnd		= $adframe->{dict}->{$k}->{replace};
 				my @dsnpstat		= stat($ENV{ADFRAME_DOC_PATH}.$adframe->{dict}->{$k}->{replace});
 				my @dsnpgenstat 	= stat($genpath.$adframe->{dict}->{$k}->{replace});
 				$dsnd=~ s/\.[^\/]*?$/\.adfd/g;
 				my @dsnpmodstat 	= stat($modpath.$dsnd);
 
-
-
-
-				if (($dsnpstat[$TIMESTAMP_INDEX]>$dsnpgenstat[$TIMESTAMP_INDEX]) || ($dsnpmodstat[$TIMESTAMP_INDEX]>$dsnpgenstat[$TIMESTAMP_INDEX]))
-				{
-
-
+				if (($dsnpstat[$TIMESTAMP_INDEX]>$dsnpgenstat[$TIMESTAMP_INDEX]) || ($dsnpmodstat[$TIMESTAMP_INDEX]>$dsnpgenstat[$TIMESTAMP_INDEX])) {
 					require de::adframe::core::DocumentGenerator;
 					my $builddyn = new DocumentGenerator();
-					if ($builddyn->generateDynamic($adframe->{dict}->{$k}->{replace},$k))
-					{
+					if ($builddyn->generateDynamic($adframe->{dict}->{$k}->{replace},$k)) {
 						$adframe->logger("timestamp $k :  dynamicsnp:$dsnpstat[$TIMESTAMP_INDEX] dynamicsnp-mod-timestamp: $dsnpmodstat[$TIMESTAMP_INDEX], doc timestamp:$genstat[$TIMESTAMP_INDEX]") if ($ENV{ADFRAME_ENABLE_SYSLOG});
 					}
 				}
 			}
-
 		}
-		if (($generate) && (! $generated)) {
 
+		if (($generate) && (! $generated)) {
 			require de::adframe::core::DocumentGenerator;
 			my $build = new DocumentGenerator();
 			if ($build->generate($doc,$doctype)) {
@@ -131,18 +105,11 @@ sub newDoc
 			}
 		}
 		else {
-
-			if ($adframe->loadDoc($doc,$doctype))
-			{
-
-				if ($ENV{ADFRAME_EVENT_ZONES} ne '')
-				{
-					foreach $zone (split(/,/,$ENV{ADFRAME_EVENT_ZONES}))
-					{
-						if ($doc =~ /^[\/]?$zone\//)
-						{
-							if (-e "./ADFRAMEZONES/$zone.adf")
-							{
+			if ($adframe->loadDoc($doc,$doctype)) {
+				if ($ENV{ADFRAME_EVENT_ZONES} ne '') {
+					foreach $zone (split(/,/,$ENV{ADFRAME_EVENT_ZONES})) {
+						if ($doc =~ /^[\/]?$zone\//) {
+							if (-e "./ADFRAMEZONES/$zone.adf") {
 								require "./ADFRAMEZONES/$zone.adf";
 								initAdframeZone();
 								$adframe->setZone($zone);
@@ -156,38 +123,26 @@ sub newDoc
 					@dynamicsnippets = __AgDynSn();
 				}
 				__Ac();
-				if (-e $modfile)
-				{
+				if (-e $modfile) {
 					require $modfile;
 					common();
 					dynSnp() if (*dynSnp{CODE});
 				}
-				for (@snippets)
-				{
-					if (-f "$modpath/$_".'.adf')
-					{
+				for (@snippets) {
+					if (-f "$modpath/$_".'.adf') {
 						require "$modpath/$_".'.adf';
 						common();
 						dynSnp() if (*dynSnp{CODE});
 					}
 				}
-
-				foreach my $k (@dynamicsnippets)
-				{
-
-					if ($adframe->_importDynamicGenSnippet($k))
-					{
-
+				foreach my $k (@dynamicsnippets) {
+					if ($adframe->_importDynamicGenSnippet($k)) {
 						my $dsnd = $adframe->{dict}->{$k}->{replace};
 						$dsnd=~ s/\.[^\/]*?$//;
 						my $dsndgenmodfile	= "$genpath$dsnd".'.pmd';
-
-
-
 						require  $dsndgenmodfile;
 						__AcD();
-						if (-f $modpath.$dsnd.'.adf')
-						{
+						if (-f $modpath.$dsnd.'.adf') {
 							require $modpath.$dsnd.'.adf';
 							common();
 						}
@@ -197,29 +152,24 @@ sub newDoc
 				$adframe->storeSession() if ($ENV{ADFRAME_USE_SESSIONS});
 				$adframe->sendDoc();
 			}
-			else
-			{
+			else {
 				$adframe->error('The requested Document "'.$doc.'.'.$doctype.'" does not exist in pool' );
 			}
 		}
 	}
-	else
-	{
+	else {
 		$adframe->error('The requested file "'.$doc.'.'.$doctype.'" does not exist !');
 	}
 	exit 0;
 }
-sub login
-{
+sub login {
 	my $id = $adframe->getSessionId();
 	my $query = '';
-	   $query = "$ENV{QUERY_STRING}" if ($ENV{QUERY_STRING} ne '');
-	if ($ENV{ADFRAME_USE_SESSIONS})
-	{
+	$query = "$ENV{QUERY_STRING}" if ($ENV{QUERY_STRING} ne '');
+	if ($ENV{ADFRAME_USE_SESSIONS}) {
 		print "Location: http://$ENV{ADFRAME_SERVER_NAME}/cgi-bin/adframe/".$ENV{ADFRAME_START_PAGE}."?id=$id".$query."\n\n";
 	}
-	else
-	{
+	else {
 		print "Location: http://$ENV{ADFRAME_SERVER_NAME}/cgi-bin/adframe/".$ENV{ADFRAME_START_PAGE}.'?'.$query."\n\n";
 	}
 	exit 0;
