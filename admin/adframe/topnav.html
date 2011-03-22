@@ -1,0 +1,295 @@
+<html>
+	<head>
+		<title>adframe</title>
+		<meta name="author" content="">
+		<meta name="publisher" content="">
+		<meta name="copyright" content="">
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<link rel="stylesheet" href="/admin/adframe/css/global.css">
+		<script language="JavaScript">
+		var loc = self.location.href;
+
+		function swapover(n) {if (document.images){document.images['image_'+n].src = eval("c_" + n + ".src");}}
+		function swapout(n) 
+		{
+			if (loc.indexOf("/"+n+"/") ==-1)
+			{
+				if (document.images){document.images['image_'+n].src = eval("b_" + n + ".src");}
+		}
+	} 
+
+      function noErrors() {
+        return true;
+      }
+      window.onerror = noErrors;
+
+      function checkBrowser() {
+        this.ver = navigator.appVersion;
+        this.dom = document.getElementById?1:0;
+        this.ie5 = (this.ver.indexOf("MSIE 5") > -1 && this.dom)?1:0;
+        this.ie4 = (document.all && !this.dom)?1:0;
+        this.ns5 = (this.dom && parseInt(this.ver) >= 5)?1:0;
+        this.ns4 = (document.layers && !this.dom)?1:0;
+        this.bw = (this.ie5 || this.ie4 || this.ns4 || this.ns5);
+        return this;
+      }
+
+      bw = new checkBrowser();
+
+      function show(div,nest) {
+        obj=bw.dom?document.getElementById(div).style:bw.ie4?document.all[div].style:bw.ns4?nest?document[nest].document[div]:document[div]:0;
+        obj.visibility='visible';
+      }
+
+      function hide(div,nest) {
+        obj=bw.dom?document.getElementById(div).style:bw.ie4?document.all[div].style:bw.ns4?nest?document[nest].document[div]:document[div]:0;
+        obj.visibility='hidden';
+      }
+
+      function showHideSubMenu(ID) {
+        if (ID == 1) {show('SubMenu01')} else {hide('SubMenu01')};
+		if (ID == 2) {show('SubMenu02')} else {hide('SubMenu02')};
+		if (ID == 3) {show('SubMenu03')} else {hide('SubMenu03')};
+		if (ID == 4) {show('SubMenu04')} else {hide('SubMenu04')};
+		if (ID == 5) {show('SubMenu05')} else {hide('SubMenu05')};
+		if (ID == 6) {show('SubMenu06')} else {hide('SubMenu06')};
+		if (ID == 7) {show('SubMenu07')} else {hide('SubMenu07')};
+		if (ID == 8) {show('SubMenu08')} else {hide('SubMenu08')};
+		if (ID == 9) {show('SubMenu09')} else {hide('SubMenu09')};
+		if (ID == 10) {show('SubMenu10')} else {hide('SubMenu10')};
+		if (ID == 11) {show('SubMenu11')} else {hide('SubMenu11')};
+      }		
+		</script>
+<!-- end subnavs -->
+<script language="JavaScript">
+<!--
+
+	function logOut()
+	{
+		var logoutmess = "Wollen Sie wirklich den Administrations-Bereich verlassen ?";
+		var logoutNow = confirm(logoutmess);
+		if (logoutNow)
+		{
+			top.location.href="/cgi-bin/adframe/admin/adframe/logout.html?id=<!-- #id# -->";
+		}
+	}
+//-->
+</script>		
+	</head>
+
+<body bgcolor="#cccccc" topmargin="0" marginheight="0" leftmargin="0" marginwidth="0" text="#000000" link="#000000" alink="#000000" vlink="#000000"  background="/admin/adframe/img/bg.gif" >
+<table cellpadding="0" cellspacing="1" border="0" height="20" width="1080" id="mainmenu">
+<tr>
+	<td width="90"><switch name="SWITCH_MENU_1"><a noadd href="#" onmouseover="showHideSubMenu(01); return true" onmouseout="" title="<!-- #TITLE_MENU_1# -->"><!-- #TITLE_MENU_1# --></a></switch name="SWITCH_MENU_1"></td>
+	<td width="90"><switch name="SWITCH_MENU_2"><a noadd href="#" onmouseover="showHideSubMenu(02); return true" onmouseout="" title="<!-- #TITLE_MENU_2# -->"><!-- #TITLE_MENU_2# --></a></switch name="SWITCH_MENU_2"></td>
+	<td width="90"><switch name="SWITCH_MENU_3"><a noadd href="#" onmouseover="showHideSubMenu(03); return true" onmouseout="" title="<!-- #TITLE_MENU_3# -->"><!-- #TITLE_MENU_3# --></a></switch name="SWITCH_MENU_3"></td>
+	<td width="90"><switch name="SWITCH_MENU_4"><a noadd href="#" onmouseover="showHideSubMenu(04); return true" onmouseout="" title="<!-- #TITLE_MENU_4# -->"><!-- #TITLE_MENU_4# --></a></switch name="SWITCH_MENU_4"></td>
+	<td width="90"><switch name="SWITCH_MENU_5"><a noadd href="#" onmouseover="showHideSubMenu(05); return true" onmouseout="" title="<!-- #TITLE_MENU_5# -->"><!-- #TITLE_MENU_5# --></a></switch name="SWITCH_MENU_5"></td>
+	<td width="90"><switch name="SWITCH_MENU_6"><a noadd href="#" onmouseover="showHideSubMenu(06); return true" onmouseout="" title="<!-- #TITLE_MENU_6# -->"><!-- #TITLE_MENU_6# --></a></switch name="SWITCH_MENU_6"></td>
+	<td width="90"><switch name="SWITCH_MENU_7"><a noadd href="#" onmouseover="showHideSubMenu(07); return true" onmouseout="" title="<!-- #TITLE_MENU_7# -->"><!-- #TITLE_MENU_7# --></a></switch name="SWITCH_MENU_7"></td>
+	<td width="90"><switch name="SWITCH_MENU_8"><a noadd href="#" onmouseover="showHideSubMenu(08); return true" onmouseout="" title="<!-- #TITLE_MENU_8# -->"><!-- #TITLE_MENU_8# --></a></switch name="SWITCH_MENU_8"></td>
+	<td width="90"><switch name="SWITCH_MENU_9"><a noadd href="#" onmouseover="showHideSubMenu(09); return true" onmouseout="" title="<!-- #TITLE_MENU_9# -->"><!-- #TITLE_MENU_9# --></a></switch name="SWITCH_MENU_9"></td>
+	<td width="90"><switch name="SWITCH_MENU_10"><a noadd href="#" onmouseover="showHideSubMenu(10); return true" onmouseout="" title="<!-- #TITLE_MENU_10# -->"><!-- #TITLE_MENU_10# --></a></switch name="SWITCH_MENU_10"></td>	
+	<td width="90"><switch name="SWITCH_MENU_11"><a noadd href="#" onmouseover="showHideSubMenu(11); return true" onmouseout="" title="<!-- #TITLE_MENU_11# -->"><!-- #TITLE_MENU_11# --></a></switch name="SWITCH_MENU_11"></td>
+	<td width="90"><a noadd href="#" onclick="logOut()" title="Logout">Logout</a></td>				
+</tr>
+</table>
+
+
+<div style="position:absolute;">
+<div id="SubMenu01" style="position: absolute; z-index: 20; visibility: hidden; left:0px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+	<repetition name="LOOP_menu1">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu1">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu02" style="position: absolute; z-index: 20; visibility: hidden; left:90px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu2">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu2">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu03" style="position: absolute; z-index: 20; visibility: hidden; left:180px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu3">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu3">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu04" style="position: absolute; z-index: 20; visibility: hidden; left:270px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu4">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu4">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu05" style="position: absolute; z-index: 20; visibility: hidden; left:360px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu5">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu5">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu06" style="position: absolute; z-index: 20; visibility: hidden; left:450px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu6">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu6">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu07" style="position: absolute; z-index: 20; visibility: hidden; left:540px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu7">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu7">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu08" style="position: absolute; z-index: 20; visibility: hidden; left:630px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu8">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu8">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu09" style="position: absolute; z-index: 20; visibility: hidden; left:720px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu9">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu9">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu10" style="position: absolute; z-index: 20; visibility: hidden; left:810px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu10">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu10">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+<div id="SubMenu11" style="position: absolute; z-index: 20; visibility: hidden; left:900px; top:0px;" onmouseover="" onmouseout="">
+<table border="0" cellpadding="0" cellspacing="0" id="submenu" width="90">
+
+	<repetition name="LOOP_menu11">
+	<tr>
+		<td><a href="/admin/adframe/tree.html?navtree=!navtree!" target="tree"><nobr>!title!</nobr></a></td>
+	</tr>
+	</repetition name="LOOP_menu11">
+	<tr>
+		<td><img src="/img/clear_dot.gif" width=1 height=15 alt="" border="0"></td>
+	</tr>
+	<tr>
+		<td onmouseover="showHideSubMenu(0);"><img src="/img/clear_dot.gif" width=1 height=10 alt="" border="0"></td>
+	</tr>
+</table>
+</div>
+
+</div>
+
+
+
+
+
+
+
+</body>
+</html>

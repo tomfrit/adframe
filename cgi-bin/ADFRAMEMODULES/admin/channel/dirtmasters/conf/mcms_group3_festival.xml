@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+<mcms channel="dirtmasters" area="mcms_group3_festival">
+
+	<category>festival</category>
+
+	<imagedir>/cms/festival/img</imagedir>
+	<videodir>/cms/festival/video</videodir>
+
+	<displayimport>&#60;link rel='stylesheet' href='/styles.css'&#62;</displayimport>
+	<hrefstyle>content</hrefstyle>
+
+	<articlelist>
+		<image name="listimage" src="IMG_0_2" attributes="width=80 height=80"/>
+	</articlelist>
+
+	<httpgenerator>
+
+	</httpgenerator>
+
+	<page id="0" title="Teaser" template="/">
+		<field name="ETIKETT" 		title="Bereich" 		values="Event#Event,Orga#Orga,Riders#Riders,Media#Media,Sponsors#Sponsors,N3rd#N3rd" />
+		<field name="A_NAME" 		title="Autor" 			chartest="none"/>
+		<field name="A_EMAIL" 		title="Autor-Email" 		chartest="email"/>
+		<field name="ITEM_1_1" 		title="Fotocredit" 			chartest="none"/>
+		<field name="HEADLINE" 		title="Headline&#60;br&#62;(deutsch)"  		chartest="none,max:255"/>
+		<field name="ITEM_1_2" 		title="Headline&#60;br&#62;(englisch)"  		chartest="none,max:255"/>
+		<field name="TEXT_0" 			title="Teaser-Text&#60;br&#62;(deutsch)" 		chartest="none,required," />
+		<field name="TEXT_3_1" 		title="Teaser-Text&#60;br&#62;(englisch)" 		chartest="none" />
+
+		<field name="IMG_0_2" 		title="TEASER-BILD klein  &#60;br&#62;(80x80 Px)" 		attributes="" default="DEFIMG_0_1.gif" size="80x80" />
+		<field name="IMG_0_3" 		title="TEASER-BILD gross  &#60;br&#62;(200x100 Px)" 		attributes="" default="DEFIMG_0_1.gif" size="200x100" />
+
+	</page>
+
+
+	<page id="1" title="Story Seite 1" template="/">
+		<field name="TEXT_1_1" 		title="Text 1&#60;br&#62;(deutsch)" 		chartest="none"  class="rte" />
+		<field name="TEXT_2_1" 		title="Text 1&#60;br&#62;(englisch)" 		chartest="none"  class="rte" />
+
+	</page>
+
+</mcms>
+</configuration>

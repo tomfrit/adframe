@@ -1,0 +1,121 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::user::AdframeUserDbManager;
+use de::adframe::lib::StringFunctions;
+1;
+%SORTDESCR = qw(ADFRAME_USER_ID Id CR_DATE Datum NAME Name FIRSTNAME Vorname EMAIL eMail ROLES Rolle);
+sub common
+{
+	my $ITEMS_PER_PAGE 	= 20;
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $userman 		= new AdframeUserDbManager();
+
+	configure($xmlfile,$componentname);
+	
+	my $USERDB_SEARCH_ITEM 		= $in{USERDB_SEARCH_ITEM};
+	my $USERDB_SEARCH_STRING 	= $in{USERDB_SEARCH_STRING};
+	   $USERDB_SEARCH_STRING =~ s/^\s+//g;
+	   $USERDB_SEARCH_STRING =~ s/\s+$//g;
+	   $USERDB_SEARCH_STRING =~ s/\*/\%/g;
+	   $USERDB_SEARCH_STRING =~ s/\%$//;
+	my $USERDB_SEARCH_OPTION	= $USERDB_SEARCH_ITEM.'='.$USERDB_SEARCH_STRING;
+	my $DB_CONDITION			= '';
+	if ($USERDB_SEARCH_STRING eq '')
+	{
+		$USERDB_SEARCH_OPTION = 'alle Benutzer';
+	}
+	else
+	{
+		$DB_CONDITION = $USERDB_SEARCH_ITEM." like '%".$USERDB_SEARCH_STRING."%'";
+	}
+	
+	# handle request:
+	if ($in{adframe_event} eq 'userdb_user_delete')
+	{
+		if ($in{ADFRAME_USER_ID} == $adframe->getFromSession('ADFRAME_USER_ID'))
+		{
+			$adframe->showAlert('Sie können sich nicht selbst aus der Datenbank löschen!');
+		}
+		elsif ($in{ADFRAME_USER_ID} > 0)
+		{
+			if ($userman->deleteUser($ENV{ADFRAME_CHANNEL},$in{ADFRAME_USER_ID}))
+			{
+				;
+			}
+			else
+			{
+				$adframe->showAlert('Der Datensatz konnte leider nicht gelöscht werden!');
+			}
+		}
+	}
+
+	# pages etc:
+	my $count		= $userman->getUserCount($ENV{ADFRAME_CHANNEL},$DB_CONDITION);
+
+	my $allpages	= int($count/$ITEMS_PER_PAGE);	
+
+	if ($count % $ITEMS_PER_PAGE > 0)
+	{
+		$allpages+=1;
+	}
+	my $page		= $in{page} || 1;
+
+	if ($in{nextpage} eq 'next')
+	{
+		if (($page*$ITEMS_PER_PAGE) >= $count)
+		{
+			$page = 1;
+		}
+		else
+		{
+			$page++;
+		}
+	}
+	elsif ($in{nextpage} eq 'prev')
+	{
+		$page--;
+		if ($page<1)
+		{
+			$page = $allpages;
+		}
+	}
+	
+	my $start	= ($page-1) * $ITEMS_PER_PAGE;
+			
+	$adframe->setValue('page',$page);
+	$adframe->setValue('allpages',$allpages);
+	$adframe->setValue('count',$count);
+	
+	my $orderby = $in{sortby};
+	
+	my $USERDB_SORT_OPTION		= $SORTDESCR{$orderby};
+	if ($orderby eq 'CR_DATE')
+	{
+		$orderby = 'CR_DATE desc, ADFRAME_USER_ID desc';
+	}
+	my $userRef = $userman->getUser($ENV{ADFRAME_CHANNEL},$orderby,$start,$ITEMS_PER_PAGE,$DB_CONDITION);
+
+	$adframe->makeRepetition('LOOP_USERDB_USER',$AdframeUserDbManager::QUAL,$userRef);
+	
+	$adframe->setValue('USERDB_SEARCH_ITEM_VALUE',$USERDB_SEARCH_ITEM);
+	$adframe->setValue('USERDB_SEARCH_STRING_VALUE',StringFunctions::encode2Http($USERDB_SEARCH_STRING));
+	$adframe->setValue('USERDB_SEARCH_OPTION',$USERDB_SEARCH_OPTION);
+	$adframe->setValue('USERDB_SORT_OPTION',$USERDB_SORT_OPTION);
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

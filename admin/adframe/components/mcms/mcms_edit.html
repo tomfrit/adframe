@@ -1,0 +1,426 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script type="text/javascript" src="/admin/adframe/js/jquery.js"></script>
+	<script type="text/javascript" src="/admin/adframe/js/jquery.rte.js"></script>
+	<script language="javascript" src="/js/global.js"></script>
+	<script language="javascript">
+
+	var changed = false;
+	function submitPage(nextpage)
+	{
+		waitScreen();
+		self.document.mcms_edit_form.nextevent.value = nextpage;
+		self.document.mcms_edit_form.submit();
+	}
+
+	function setChangesMade()
+	{
+		changed = true;
+	}
+
+	function goBack()
+	{
+		if (changed)
+		{
+			var doB = confirm('Es wurden Daten veraendert!\nSollen die Aenderungen verworfen werden\nund NICHT gespeichert werden?');
+			if (doB)
+			{
+				self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_overview.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&ADFRAME_MCMS_ID=<!-- #ADFRAME_MCMS_ID# -->&page=<!-- #page# -->";
+			}
+		}
+		else
+		{
+			self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_overview.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&ADFRAME_MCMS_ID=<!-- #ADFRAME_MCMS_ID# -->&page=<!-- #page# -->";
+		}
+	}
+
+	function preview()
+	{
+		var genwin = open('/admin/adframe/components/mcms/wait.html','previewwin','toolbar=0,status=1,menubar=0,resizable=yes,scrollbars=yes,width=1050,height=700');
+		self.document.mcms_edit_form.target='previewwin';
+
+		self.document.mcms_edit_form.nextevent.value='<!-- #CATEGORY# -->/article.html';
+		//self.document.mcms_edit_form.nextevent.value='/admin/adframe/components/mcms/mcms_preview.html';
+		self.document.mcms_edit_form.submit();
+		self.document.mcms_edit_form.target='_self';
+		self.document.mcms_edit_form.nextevent.value='';
+	}
+
+	function deleteImage(imagename,name)
+	{
+		var messagedel = "Soll "+name+" wirklich geloescht werden ?"+'\nACHTUNG: Das Bild kann erst dann entfernt werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			waitScreen();
+			self.document.mcms_edit_form.elements['DELETE_IMAGE'].value=imagename;
+			self.document.mcms_edit_form.submit();
+		}
+	}
+	function changeImage(imagename,name)
+	{
+		waitScreen();
+		self.document.mcms_edit_form.elements['EDIT_IMAGE'].value=imagename;
+		self.document.mcms_edit_form.submit();
+	}
+
+	function changeText(textname,name)
+	{
+		waitScreen();
+		self.document.mcms_edit_form.elements['EDIT_TEXT'].value=textname;
+		self.document.mcms_edit_form.submit();
+	}
+
+	function deleteVideo(videoname,name)
+	{
+		var messagedel = "Soll "+name+" wirklich geloescht werden ?"+'\nACHTUNG: Das Video kann erst dann entfernt werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			waitScreen();
+			self.document.mcms_edit_form.elements['DELETE_VIDEO'].value=videoname;
+			self.document.mcms_edit_form.submit();
+		}
+	}
+	function changeVideo(videoname,name)
+	{
+		waitScreen();
+		self.document.mcms_edit_form.elements['EDIT_VIDEO'].value=videoname;
+		self.document.mcms_edit_form.submit();
+	}
+
+
+	function waitScreen()
+	{
+		document.getElementById('waitoben').style.visibility = 'visible';
+		document.getElementById('waitunten').style.visibility = 'visible';
+	}
+
+	function setOnline(mcms_id,headline)
+	{
+		var onlMess = confirm("Soll dieser Artikel nun online gestellt werden?");
+		if (onlMess)
+		{
+			waitScreen();
+			self.document.mcms_edit_form.elements['adframe_action'].value='_set__online';
+			self.document.mcms_edit_form.nextevent.value = 'admin/adframe/components/mcms/mcms_edit.html';
+			self.document.mcms_edit_form.submit();
+		}
+	}
+	function setOffline(mcms_id,headline)
+	{
+		var onlMess = confirm("Soll dieser Artikel wirklich online DEAKTIVIERT werden?");
+		if (onlMess)
+		{
+			waitScreen();
+			self.document.mcms_edit_form.elements['adframe_action'].value='_set__offline';
+			self.document.mcms_edit_form.nextevent.value = 'admin/adframe/components/mcms/mcms_edit.html';
+			self.document.mcms_edit_form.submit();
+		}
+	}
+
+
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">Editieren: Artikel <!-- #ADFRAME_MCMS_ID# --> / <!-- #COMPONENTTITLE# --> <!-- #SAISON# --></div>
+
+<div id="componentcontent">
+	<form name="mcms_edit_form" action="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_edit.html" method="post" target="_self">
+	<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+	<input type="hidden" name="ADFRAME_MCMS_ID" value="<!-- #ADFRAME_MCMS_ID# -->">
+	<input type="hidden" name="DELETE_IMAGE" value="">
+	<input type="hidden" name="EDIT_IMAGE" value="">
+	<input type="hidden" name="EDIT_TEXT" value="">
+	<input type="hidden" name="DELETE_VIDEO" value="">
+	<input type="hidden" name="EDIT_VIDEO" value="">
+	<input type="hidden" name="page" value="<!-- #page# -->">
+	<input type="hidden" name="nextevent" value="">
+	<input type="hidden" name="adframe_action" value="">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentcontentwhitetd" width="120" valign="bottom" align="center">zur&uuml;ck<br><a noadd href="javascript: void goBack();" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>
+			<td class="componentcontentwhitetd" width="120" valign="bottom" align="center">Onlinestatus<br>
+						<switch name="SWITCH_P_STATUS_OFF">
+						<a noadd href="javascript: void setOnline(<!-- #ADFRAME_MCMS_ID# -->,'<!-- #ADFRAME_MCMS_ID# -->');" class="tdinnernorm"><img src="/admin/adframe/img/icon_red.gif" alt="ONLINE STELLEN" width="18" height="18" border="0"></a></td>
+						</switch name="SWITCH_P_STATUS_OFF">
+						<switch name="SWITCH_P_STATUS_ON">
+						<a noadd href="javascript: void setOffline(<!-- #ADFRAME_MCMS_ID# -->,'<!-- #ADFRAME_MCMS_ID# -->');" class="tdinnernorm"><img src="/admin/adframe/img/icon_green.gif" alt="OFFLINE STELLEN" width="18" height="18" border="0"></a></td>
+						</switch name="SWITCH_P_STATUS_ON">
+
+			<td class="componentcontentwhitetd" width="120" valign="bottom" align="center">Speichern & Vorschau<br><a noadd href="javascript: void preview();" class="tdinnernorm"><img src="/admin/adframe/img/icon_preview.gif" alt="Vorschau" width="18" height="18" border="0"></a></td>
+			<td class="componentcontentwhitetd" width="120" valign="bottom" align="center"><div id="waitoben" style="visibility: hidden;align:right;"><font color="#ff0000"><b>Bitte warten...</b></font></div><input type="submit" value="save" class="tdbuttonred" onclick="javascript: waitScreen()"></td>
+
+		</tr>
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">ERSTELLUNGS-DATUM</td>
+			<td class="componentcontenttd" >
+				<select name="CR_DATE_DAY">
+					<option value="01">01.
+					<option value="02">02.
+					<option value="03">03.
+					<option value="04">04.
+					<option value="05">05.
+					<option value="06">06.
+					<option value="07">07.
+					<option value="08">08.
+					<option value="09">09.
+					<option value="10">10.
+					<option value="11">11.
+					<option value="12">12.
+					<option value="13">13.
+					<option value="14">14.
+					<option value="15">15.
+					<option value="16">16.
+					<option value="17">17.
+					<option value="18">18.
+					<option value="19">19.
+					<option value="20">20.
+					<option value="21">21.
+					<option value="22">22.
+					<option value="23">23.
+					<option value="24">24.
+					<option value="25">25.
+					<option value="26">26.
+					<option value="27">27.
+					<option value="28">28.
+					<option value="29">29.
+					<option value="30">30.
+					<option value="31">31.
+				</select>
+				<select name="CR_DATE_MONTH">
+					<option value="01">Januar
+					<option value="02">Februar
+					<option value="03">M&auml;rz
+					<option value="04">April
+					<option value="05">Mai
+					<option value="06">Juni
+					<option value="07">Juli
+					<option value="08">August
+					<option value="09">September
+					<option value="10">Oktober
+					<option value="11">November
+					<option value="12">Dezember
+				</select>
+				<select name="CR_DATE_YEAR">
+					<option value="1995">1995
+					<option value="1996">1996
+					<option value="1997">1997
+					<option value="1998">1998
+					<option value="1999">1999
+					<option value="2000">2000
+					<option value="2001">2001
+					<option value="2002">2002
+					<option value="2003">2003
+					<option value="2004">2004
+					<option value="2005">2005
+					<option value="2006">2006
+					<option value="2007">2007
+					<option value="2008">2008
+					<option value="2009">2009
+					<option value="2010">2010
+					<option value="2011">2011
+					<option value="2012">2012
+					<option value="2013">2013
+					<option value="2014">2014
+					<option value="2015">2015
+				</select>
+				&nbsp;,&nbsp;
+				<select name="CR_DATE_HOUR">
+					<option value="00">00
+					<option value="01">01
+					<option value="02">02
+					<option value="03">03
+					<option value="04">04
+					<option value="05">05
+					<option value="06">06
+					<option value="07">07
+					<option value="08">08
+					<option value="09">09
+					<option value="10">10
+					<option value="11">11
+					<option value="12">12
+					<option value="13">13
+					<option value="15">15
+					<option value="16">16
+					<option value="17">17
+					<option value="18">18
+					<option value="19">19
+					<option value="20">20
+					<option value="21">21
+					<option value="22">22
+					<option value="23">23
+				</select>&nbsp;Uhr
+				</td>
+		</tr>
+	<tr>
+		<td class="componentheadtd" width="120" valign="top">HEADLINE</td>
+		<td class="componentcontenttd"><input type="text" name="HEADLINE" size="64" maxlength="127" onchange="javascript: void setChangesMade()"></td>
+	</tr>
+	</table>
+
+	<repetition name="LOOP_FIELDS">
+	<switch name="SWITCH_PAGESTATUS_FIRST_!FIELD_NAME!">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="5" class="componentcontentwhitetd" valign="bottom" align="center">!PAGE_TITLE!</td></tr>
+	</table>
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+	</switch name="SWITCH_PAGESTATUS_FIRST_!FIELD_NAME!">
+
+		<switch name="SWITCH_text_!FIELD_NAME!">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top">!FIELD_TITLE!</td>
+			<td class="componentcontenttd"><input type="text" name="!FIELD_NAME!" value="!FIELD_VALUE!" maxlength="127" size="64" onchange="javascript: void setChangesMade()"></td>
+		</tr>
+		</switch name="SWITCH_text_!FIELD_NAME!">
+		<switch name="SWITCH_textarea_!FIELD_NAME!">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top">!FIELD_TITLE!</td>
+			<td class="componentcontenttd" valign="top">
+				<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="99%" align="center">
+					<tr>
+						<switch name="!FIELD_NAME!_RTE_ON">
+							<td class="componentcontenttd" align="left">
+								<textarea name="!FIELD_NAME!" readonly rows="8" cols="55" onchange="javascript: void setChangesMade()">!FIELD_VALUE!</textarea>
+							</td>
+							<td class="componentcontenttd" width="18" valign="top" align="center">
+								<a noadd href="javascript: changeText('!FIELD_NAME!','!FIELD_TITLE!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a>
+							</td>
+						</switch name="!FIELD_NAME!_RTE_ON">
+						<switch name="!FIELD_NAME!_RTE_OFF">
+							<td class="componentcontenttd" align="left">
+								<textarea name="!FIELD_NAME!" rows="10" cols="55" onchange="javascript: void setChangesMade()">!FIELD_VALUE!</textarea>
+							</td>
+						</switch name="!FIELD_NAME!_RTE_OFF">
+					</tr>
+				</table>
+			</td>
+		</tr>
+		</switch name="SWITCH_textarea_!FIELD_NAME!">
+		<switch name="SWITCH_display_!FIELD_NAME!">
+		<tr>
+		<td class="componentheadtd" width="120"  valign="top">!FIELD_TITLE!</td>
+			<td class="componentcontenttd"><b>!FIELD_VALUE!</b></td>
+		</tr>
+		</switch name="SWITCH_display_!FIELD_NAME!">
+		<switch name="SWITCH_image_!FIELD_NAME!">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top">!FIELD_TITLE!</td>
+			<td class="componentheadtd" valign="top">
+				<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="99%" align="center">
+					<tr>
+						<td class="componentcontenttd" align="left"><img src="<!-- #GENIMAGEDIR# -->/!FIELD_VALUE!?random=<!-- #RANDOM# -->" border="0" alt="!FIELD_TITLE!" !FIELD_ATTRIBUTES!></td>
+						<td class="componentcontenttd" width="18" valign="top" align="center"><a noadd href="javascript: deleteImage('!FIELD_NAME!','!FIELD_TITLE!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a><br>&nbsp;<br><a noadd href="javascript: void preview();" class="tdinnernorm"><img src="/admin/adframe/img/icon_preview.gif" alt="Speichern & Vorschau" width="18" height="18" border="0"></a><br>&nbsp;<br><a noadd href="javascript: changeImage('!FIELD_NAME!','!FIELD_TITLE!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		</switch name="SWITCH_image_!FIELD_NAME!">
+		<switch name="SWITCH_selector_!FIELD_NAME!">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top">!FIELD_TITLE!</td>
+			<td class="componentcontenttd"><select name="!FIELD_NAME!" onchange="javascript: void setChangesMade()">
+					<repetition name="LOOP_SELECTOR_!FIELD_NAME!">
+					<option value="!FIELD_VAL!">!FIELD_OPTION!
+					</repetition name="LOOP_SELECTOR_!FIELD_NAME!">
+					</select></td>
+		</tr>
+		</switch name="SWITCH_selector_!FIELD_NAME!">
+		<switch name="SWITCH_video_!FIELD_NAME!">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top">!FIELD_TITLE!</td>
+			<td class="componentheadtd" valign="top">
+				<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="99%" align="center">
+					<tr>
+						<td class="componentcontenttd" align="left">
+						<div style="overflow:hidden;" !FIELD_ATTRIBUTES!>
+							<object type="application/x-shockwave-flash" !FIELD_ATTRIBUTES!
+							wmode="transparent" data="/admin/adframe/img/player.swf?file=<!-- #GENVIDEODIR# -->/!FIELD_VALUE!">
+							<param name="movie" value="/admin/adframe/img/player.swf?file=<!-- #GENVIDEODIR# -->/!FIELD_VALUE!" />
+							<param name="flashvars" value="image=<!-- #GENVIDEOIMAGEDIR# -->/<!-- #THE_VIDEO_IMAGE# -->" />
+
+							<param name="wmode" value="transparent" />
+							<embed src="/admin/adframe/img/player.swf?file=<!-- #GENVIDEODIR# -->/!FIELD_VALUE!"
+							!FIELD_ATTRIBUTES! bgcolor="#000000" flashvars="image=<!-- #GENVIDEOIMAGEDIR# -->/<!-- #THE_VIDEO_IMAGE# -->"
+							type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer"></embed>
+							</object>
+						</div>
+						</td>
+						<td class="componentcontenttd" width="18" valign="top" align="center"><a noadd href="javascript: deleteVideo('!FIELD_NAME!','!FIELD_TITLE!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE VIDEO" width="18" height="18" border="0"></a><br>&nbsp;<br><a noadd href="javascript: void preview();" class="tdinnernorm"><img src="/admin/adframe/img/icon_preview.gif" alt="Speichern & Vorschau" width="18" height="18" border="0"></a><br>&nbsp;<br><a noadd href="javascript: changeVideo('!FIELD_NAME!','!FIELD_TITLE!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		</switch name="SWITCH_video_!FIELD_NAME!">
+	<switch name="SWITCH_PAGESTATUS_LAST_!FIELD_NAME!">
+	</table>
+	</switch name="SWITCH_PAGESTATUS_LAST_!FIELD_NAME!">
+
+	</repetition name="LOOP_FIELDS">
+
+	<switch name="SWITCH_SHOW_EXTENSION_COMPONENT">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_EXTENSION_COMPONENT# --></td>
+			<td class="componentcontenttd"><input type="button" name="addbutton" value="weiter zu <!-- #TITLE_EXTENSION_COMPONENT# -->" class="tdbuttongrey" onclick="javascript: void submitPage('/admin/adframe/components/mcms/mcms_extension.html')"></td>
+		</tr>
+	</table>
+	</switch name="SWITCH_SHOW_EXTENSION_COMPONENT">
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+
+<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">AUTOR</td>
+			<td class="componentcontenttd"><input type="text" name="A_NAME" size="64" maxlength="127" onchange="javascript: void setChangesMade()"></td>
+		</tr>
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">AUTOR-EMAIL</td>
+			<td class="componentcontenttd"><input type="text" name="A_EMAIL" size="64" maxlength="127" onchange="javascript: void setChangesMade()"></td>
+		</tr>
+
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+
+	<table border="2" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentcontentwhitetd" width="120" valign="bottom" align="center">zur&uuml;ck<br><a noadd href="javascript: void goBack();" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>
+			<td class="componentcontentwhitetd" width="120" valign="bottom" align="center">Onlinestatus<br>
+						<switch name="SWITCH_P_STATUS_OFF">
+						<a noadd href="javascript: void setOnline(<!-- #ADFRAME_MCMS_ID# -->,'<!-- #ADFRAME_MCMS_ID# -->');" class="tdinnernorm"><img src="/admin/adframe/img/icon_red.gif" alt="ONLINE STELLEN" width="18" height="18" border="0"></a></td>
+						</switch name="SWITCH_P_STATUS_OFF">
+						<switch name="SWITCH_P_STATUS_ON">
+						<a noadd href="javascript: void setOffline(<!-- #ADFRAME_MCMS_ID# -->,'<!-- #ADFRAME_MCMS_ID# -->');" class="tdinnernorm"><img src="/admin/adframe/img/icon_green.gif" alt="OFFLINE STELLEN" width="18" height="18" border="0"></a></td>
+						</switch name="SWITCH_P_STATUS_ON">
+
+			<td class="componentcontentwhitetd" width="120" valign="bottom" align="center">Speichern & Vorschau<br><a noadd href="javascript: void preview();" class="tdinnernorm"><img src="/admin/adframe/img/icon_preview.gif" alt="Vorschau" width="18" height="18" border="0"></a></td>
+			<td class="componentcontentwhitetd" width="120" valign="bottom" align="center"><div id="waitunten" style="visibility: hidden;align:right;"><font color="#ff0000"><b>Bitte warten...</b></font></div><input type="submit" value="save" class="tdbuttonred" onclick="javascript: waitScreen()"></td>
+
+		</tr>
+	</table>
+	</form>
+</div>
+
+</body>
+</html>

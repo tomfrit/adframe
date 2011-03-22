@@ -1,0 +1,28 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::guestbook::GuestbookDbManager;
+1;
+
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $AREA			= $in{componentname};	
+	
+	configure($xmlfile,$AREA);
+	
+}
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

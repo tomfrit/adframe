@@ -1,0 +1,100 @@
+<html>
+	<head>
+		<title>adframe</title>
+		<meta name="author" content="">
+		<meta name="publisher" content="">
+		<meta name="copyright" content="">
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="/admin/adframe/css/global.css">
+		<script language="JavaScript" src="/admin/adframe/js/tree.js?id=<!-- #id# -->" type="text/javascript"></script>
+		<script language="javascript">
+		<!--	
+			function initContentFrame()
+			{
+				var contentUrl = '<!-- #contentStartTemplate# -->';
+				if ((contentUrl.indexOf("<") == -1) && (contentUrl != ''))
+				{
+					contentUrl = encodeAdframeUrl(contentUrl,'<!-- #id# -->');
+					parent.content_index.content.location.replace(contentUrl);
+				}
+			}
+			
+			var folder0 = null;
+			<!-- #TreeLines# -->
+		//-->
+		</script>
+	</head>
+
+
+<body bgcolor="#ffffff" topmargin="0" marginheight="0" leftmargin="0" marginwidth="0" text="#000000" link="#000000" alink="#000000" vlink="#000000" class="BodyContainerWhite" onload="initContentFrame()">
+	<script language="JavaScript">
+		<!--
+
+		var x, y;
+
+		if (document.all){
+			x = document.offsetWidth;
+			y = document.offsetHeight;
+			x = x - 19;
+			y = y - 12;
+		}
+		else if (navigator.appName == 'Netscape'){
+			x = window.innerWidth;
+			y = window.innerHeight;
+			x = x - 12;
+			y = y - 8;
+		}
+		else{
+			x = 1;
+			y = 1;
+		}
+
+		//-->
+	</script>
+	<table border="0" cellspacing="0" cellpadding="0" >
+		<tr>
+			<td><img src="/admin/adframe/img/clear_dot.gif" width="1" height="1" border="0" alt=""></td>
+			<td><img src="/admin/adframe/img/clear_dot.gif" width="1" height="1" border="0" alt=""></td>
+			<script language="JavaScript">
+				<!--
+
+				document.write('<td><img src="/admin/adframe/img/clear_dot.gif" width="' + x + '" height="1" border="0" alt=""></td>');
+
+				//-->
+			</script>
+			<td><img src="/admin/adframe/img/clear_dot.gif" width="1" height="1" border="0" alt=""></td>
+		</tr>
+
+		<tr>
+			<script language="JavaScript">
+				<!--
+
+				document.write('<td><img src="/admin/adframe/img/clear_dot.gif" width="1" height="' + y + '" border="0" alt=""></td>');
+
+				//-->
+			</script>
+			<td bgcolor="#ffffff"><img src="/admin/adframe/img/clear_dot.gif" width="1" height="1" border="0" alt=""></td>
+
+
+				<td bgcolor="#ffffff" valign="top"><img src="/admin/adframe/img/clear_dot.gif" width="1" height="4" border="0" alt=""><br>
+				<!-- ---------- hier kommt das menue rein ----------- -->
+				<script language="javascript">
+				<!--
+					initializeDocument();
+				//-->
+				</script>
+				</td>
+
+
+			<td bgcolor="#FFFFFF"><img src="/admin/adframe/img/clear_dot.gif" width="1" height="1" border="0" alt=""></td>
+		</tr>
+		<tr>
+			<td><img src="/admin/adframe/img/clear_dot.gif" width="1" height="1" border="0" alt=""></td>
+			<td colspan="3" bgcolor="#FFFFFF"><img src="/admin/adframe/img/clear_dot.gif" width="1" height="1" border="0" alt=""></td>
+		</tr>
+		<tr>
+			<td colspan="4"><img src="/admin/adframe/img/clear_dot.gif" width="1" height="5" border="0" alt=""></td>
+		</tr>
+	</table>
+</body>
+</html>

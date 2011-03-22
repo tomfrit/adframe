@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	
+	<script language="javascript">
+	function deactivateCompany(company_id,componentname,company)
+	{
+		var messagedel = 'Soll die Firma '+company+' wirklich deaktiviert werden ?';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/company/company_overview.html?id=<!-- #id# -->&adframe_event=company_deactivate&ADFRAME_COMPANY_ID="+company_id+"&componentname="+componentname+"&page=<!-- #page# -->&orderby=<!-- #orderby# -->";
+			self.location.replace(stdel);
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">&Uuml;bersicht Firmen - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+	
+	<table border="2" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" width="20">ID</td>
+			<td class="componentheadtd" width="150"><a href="/admin/adframe/components/company/company_overview.html?componentname=<!-- #componentname# -->&page=<!-- #page# -->&orderby=COMPANY" class="tdinnernormunderline">FIRMA</a></td>
+			<td class="componentheadtd" width="150"><a href="/admin/adframe/components/company/company_overview.html?componentname=<!-- #componentname# -->&page=<!-- #page# -->&orderby=CITY" class="tdinnernormunderline">STADT</a></td>
+			<td class="componentheadtd" width="18" valign="middle" align="center">&nbsp;</td>		
+			<td class="componentheadtd" width="18" valign="middle" align="center">&nbsp;</td>
+		</tr>
+		<repetition name="LOOP_COMPANIES">
+		<tr>
+			<td class="componentheadtd" width="20">!ADFRAME_COMPANY_ID!</td>
+			<td class="componentcontenttd" width="150">!COMPANY!</td>
+			<td class="componentcontenttd" width="150">!CITY!</td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deactivateCompany(!ADFRAME_COMPANY_ID!,'<!-- #componentname# -->','!COMPANY!');"><img src="/admin/adframe/img/icon_red.gif" alt="DEACTIVATE !COMPANY!" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/company/company_edit.html?ADFRAME_COMPANY_ID=!ADFRAME_COMPANY_ID!&componentname=<!-- #componentname# -->&page=<!-- #page# -->&orderby=<!-- #orderby# -->" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT !COMPANY!" width="18" height="18" border="0"></a></td>
+		</tr>
+		</repetition name="LOOP_COMPANIES">
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr><td height="2"></td></tr>
+	</table>
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" width="18"><a href="/admin/adframe/components/company/company_overview.html?componentname=<!-- #componentname# -->&nextpage=prev&page=<!-- #page# -->&orderby=<!-- #orderby# -->"><img src="/admin/adframe/img/icon_left.gif" width=18 height=18 alt="" border="0"></a></td>
+			<td class="componentheadtd" align="center"><b>Seite <!-- #page# --> von <!-- #allpages# --></b></td>
+			<td class="componentheadtd"width="18"><a href="/admin/adframe/components/company/company_overview.html?componentname=<!-- #componentname# -->&nextpage=next&page=<!-- #page# -->&orderby=<!-- #orderby# -->"><img src="/admin/adframe/img/icon_right.gif" width=18 height=18 alt="" border="0"></a></td>			
+		</tr>
+	</table>
+</div>
+
+</body>
+</html>

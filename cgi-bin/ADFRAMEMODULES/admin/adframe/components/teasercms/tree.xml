@@ -1,0 +1,7 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframeteasercmsfolder" title="Termine" type="componentstartfolder" url="/admin/adframe/components/teasercms/start.html" parent="start">
+		<item name="adframeteasercmsitem1" title="Übersicht" url="/admin/adframe/components/teasercms/teasercms_overview.html" parent="adframeteasercmsfolder"/>
+		<item name="adframeteasercmsitem2" title="Neuer Eintrag" url="/admin/adframe/components/teasercms/teasercms_new.html" parent="adframeteasercmsfolder"/>
+	</folder>
+</configuration>

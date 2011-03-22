@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+
+	<script language="javascript">
+	function deleteItem(guestbook_id,name)
+	{
+		var messagedel = "Soll der gesamte Eintrag von "+name+" incl. aller Kommentare wirklich entfernt werden ?";
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/guestbook/guestbook_overview.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&adframe_event=deleteitem&ADFRAME_GUESTBOOK_ID="+guestbook_id+"&page=<!-- #page# -->";
+			self.location.replace(stdel);
+		}
+	}
+	function deleteComment(comment_id,name)
+	{
+		var messagedel = "Soll der Kommentar "+name+" wirklich entfernt werden ?";
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/guestbook/guestbook_overview.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&adframe_event=deletecomment&ADFRAME_GUESTBOOKCOMMENT_ID="+comment_id+"&page=<!-- #page# -->";
+			self.location.replace(stdel);
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">&Uuml;bersicht Eintr&auml;ge - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+	<tr><td height="2"></td></tr>
+	</table>
+	<repetition name="LOOP_GUESTBOOK">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" colspan="2">!DAY!.!MONTH!.!YEAR! !HOUR!:!MINUTE! &nbsp;<a noadd href="mailto:!EMAIL!">!FIRSTNAME! !NAME!</a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteItem(!ADFRAME_GUESTBOOK_ID!,'!FIRSTNAME! !NAME!');"><img src="/admin/adframe/img/icon_delete.gif" alt="Gesamten Eintrag !SUBJECT! incl. aller Kommentare l&ouml;schen" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/guestbook/admin_comment.html?componentname=<!-- #componentname# -->&page=<!-- #page# -->&ADFRAME_GUESTBOOK_ID=!ADFRAME_GUESTBOOK_ID!" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="Neuer Redaktions-Kommentar zu !SUBJECT!" width="18" height="18" border="0"></a></td>				
+		</tr>
+		<tr>
+			<td class="componentcontenttd" colspan="2"><b>!SUBJECT!</b><br>!COMMENT!<br><a noadd href="http://!URL!" target="blank" class="nav">!URL!</a></td>
+			<td class="componentcontenttd" width="18">&nbsp;</td>
+			<td class="componentcontenttd"width="18">&nbsp;</td>	
+		</tr>
+		<repetition name="SUBCOMMENT_!ADFRAME_GUESTBOOK_ID!">
+		<tr>
+			<td class="componentcontenttd" colspan="2"><i><b>Comment von <a noadd href="mailto:!COMMENT_EMAIL!">!COMMENT_FIRSTNAME! !COMMENT_NAME!</a></b><br>!COMMENT_COMMENT!</i></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteComment(!COMMENT_ADFRAME_GUESTBOOKCOMMENT_ID!,'!COMMENT_FIRSTNAME! !COMMENT_NAME!');"><img src="/admin/adframe/img/icon_delete.gif" alt="Kommentar von !COMMENT_FIRSTNAME! !COMMENT_NAME! l&ouml;schen" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center">&nbsp;</td>		
+		</tr>
+		</repetition name="SUBCOMMENT_!ADFRAME_GUESTBOOK_ID!">
+		<repetition name="ADMINSUBCOMMENT_!ADFRAME_GUESTBOOK_ID!">
+		<tr>
+			<td class="componentcontenttd" colspan="2"><i><font color="#ff0000"><b>Anmerkung der Redaktion</b></font><br>!ADMIN_COMMENT_COMMENT!</i></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteComment(!ADMIN_COMMENT_ADFRAME_GUESTBOOKCOMMENT_ID!,'der Redaktion zu !SUBJECT!');"><img src="/admin/adframe/img/icon_delete.gif" alt="Redaktionskommentar l&ouml;schen" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center">&nbsp;</td>		
+		</tr>
+		</repetition name="ADMINSUBCOMMENT_!ADFRAME_GUESTBOOK_ID!">			
+	</table>
+	<table border="0">
+		<tr><td height="1">&nbsp;</td></tr>
+	</table>
+	</repetition name="LOOP_GUESTBOOK">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" width="18"><a href="/admin/adframe/components/guestbook/guestbook_overview.html?componentname=<!-- #componentname# -->&nextpage=prev&page=<!-- #page# -->"><img src="/admin/adframe/img/icon_left.gif" width=18 height=18 alt="" border="0"></a></td>
+			<td class="componentheadtd" align="center"><b>Seite <!-- #page# --> von <!-- #allpages# --></b></td>
+			<td class="componentheadtd"width="18"><a href="/admin/adframe/components/guestbook/guestbook_overview.html?componentname=<!-- #componentname# -->&nextpage=next&page=<!-- #page# -->"><img src="/admin/adframe/img/icon_right.gif" width=18 height=18 alt="" border="0"></a></td>			
+		</tr>
+	</table>
+</div>
+
+</body>
+</html>
+

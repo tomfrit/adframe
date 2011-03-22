@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+<mcms channel="dirtmasters" area="mcms_group2_gallery">
+
+	<category>gallery</category>
+
+	<imagedir>/cms/gallery/img</imagedir>
+	<videodir>/cms/gallery/video</videodir>
+
+	<displayimport>&#60;link rel='stylesheet' href='/styles.css'&#62;</displayimport>
+	<hrefstyle>content</hrefstyle>
+
+	<articlelist>
+		<image name="listimage" src="IMG_0_2" attributes="width=80 height=55"/>
+	</articlelist>
+
+	<httpgenerator>
+
+	</httpgenerator>
+
+	<page id="0" title="Teaser" template="/">
+		<field name="ETIKETT" 		title="Bereich" 		values="Slopestyle#Slopestyle,Downhill#Downhill,Rookies#Rookies,4X#4X,Event#Event" />
+		<field name="A_NAME" 		title="Autor" 			chartest="none"/>
+		<field name="A_EMAIL" 		title="Autor-Email" 		chartest="email"/>
+		<field name="HEADLINE" 		title="Headline"  		chartest="alphanum,max:255"/>
+
+		<field name="TEXT_0" 		title="Teaser-Text" 		chartest="none,required," />
+		<field name="IMG_0_2" 		title="TEASER-BILD klein  &#60;br&#62;(80x80 Px)" 		attributes="" default="DEFIMG_0_1.gif" size="80x80" />
+		<field name="IMG_0_3" 		title="TEASER-BILD gross  &#60;br&#62;(200x100 Px)" 		attributes="" default="DEFIMG_0_1.gif" size="200x100" />
+
+
+	</page>
+
+	<extension title="Gallery-Bilder" displayparallel="90">
+
+		<field name="IMG_EXT_1" 	title="GALLERY-BILD&#60;br&#62;(max. 680px breit)" 	attributes="" default="DEFIMG_0_1.gif" thumb="x160" size="680x500"/>
+		<field name="TEXT_EXT" 		title="Bildunterschrift" chartest="alphanum,,max:127"/>
+	</extension>
+
+	<page id="1" title="Story Seite 1" template="/">
+
+
+
+	</page>
+
+
+
+</mcms>
+</configuration>

@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script type="text/javascript" src="/admin/adframe/js/jquery.js"></script>
+	<script language="javascript">
+		var changed = false;
+		function submitPage(nextpage) {
+			self.document.mcms_extention_edit_form.nextevent.value = nextpage;
+			self.document.mcms_extension_edit_form.submit();
+		}
+
+
+		function goBack() {
+			self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_edit.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&ADFRAME_MCMS_ID=<!-- #ADFRAME_MCMS_ID# -->&page=<!-- #page# -->";
+		}
+
+
+
+
+	function waitScreen() {
+		$('#waitoben').show();
+		$('#waitunten').show();
+	}
+
+	function addItem() {
+		$('#images').load('/cgi-bin/adframe/admin/adframe/components/mcms/ext_image_list.snp',{'componentname':'<!-- #componentname# -->','ADFRAME_MCMS_ID':'<!-- #ADFRAME_MCMS_ID# -->','adframe_action':'_addItem'});
+
+	}
+	function deleteItem(adframe_mcms_ext_id) {
+		var doA = confirm('Sollen der gewählte Datensatz wirklich gelöscht werden?');
+		if (doA) {
+				$('#images').load('/cgi-bin/adframe/admin/adframe/components/mcms/ext_image_list.snp',{'componentname':'<!-- #componentname# -->','ADFRAME_MCMS_ID':'<!-- #ADFRAME_MCMS_ID# -->','ADFRAME_MCMS_EXT_ID':adframe_mcms_ext_id,'adframe_action':'_deleteItem'});
+		}
+	}
+
+
+		console.log("jquery setup");
+
+		function upload(form_id) {
+			$('#loader_'+form_id).html('Lädt...<br/><img src="/img/loading.gif" border="0"/>');
+			var submittingForm = $('#'+form_id);
+			var uploadFrame = $('<iframe name="uploadFrame" id="uploadFrame"></iframe>');
+			uploadFrame.css("display", "none");
+			$('body:first').append(uploadFrame);
+			submittingForm.attr('target', 'uploadFrame');
+			//alert(submittingForm.attr('action'));
+			submittingForm.submit();
+			document.getElementById("uploadFrame").onload = function() {
+				$('#loader_'+form_id).hide();
+				$('#images').load('/cgi-bin/adframe/admin/adframe/components/mcms/ext_image_list.snp',{'componentname':'<!-- #componentname# -->','ADFRAME_MCMS_ID':'<!-- #ADFRAME_MCMS_ID# -->','page':'<!-- #page# -->'});
+				$('#uploadFrame').remove();
+			};
+		}
+
+		function saveText(ext_id,field,text) {
+			$('#loader').load('/cgi-bin/adframe/admin/adframe/components/mcms/ajax_ext_saver.snp',{'ADFRAME_MCMS_EXT_ID':ext_id,'FIELD':field,'TEXT':text});
+		}
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+<div id="componentheadline">Editieren: Artikel <!-- #ADFRAME_MCMS_ID# --> / "<!-- #COMPONENTTITLE# -->" - <!-- #TITLE_EXTENSION_COMPONENT# --></div>
+
+<div id="componentcontent">
+
+
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="120" valign="middle" align="center">&nbsp;<div id="waitoben" style="visibility: hidden"><font color="#ffcc00">BITTE WARTEN</font></div></td>
+			<td class="componentcontentwhitetd" width="80" valign="top" align="center">zur&uuml;ck<br><a noadd href="javascript: void goBack();" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>
+			<td class="componentcontentwhitetd" width="300" valign="top" align="center">&nbsp;</td>
+			<td class="componentcontentwhitetd" width="80" valign="middle" align="center"></td>
+		</tr>
+	</table>
+
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">HEADLINE</td>
+			<td class="componentcontenttd"><!-- #HEADLINE# --></td>
+		</tr>
+	</table>
+
+<div id="images">
+	<snippet src="/admin/adframe/components/mcms/ext_image_list.snp">
+</div>
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top">&nbsp;Neuer Eintrag:</td>
+			<td class="componentcontenttd"><input type="button" name="addbutton" class="tdbuttongrey" value="<!-- #TITLE_EXTENSION_COMPONENT# --> hinzuf&uuml;gen" onclick="javascript: waitScreen(); addItem();"></td>
+		</tr>
+	</table>
+
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="120" valign="middle" align="center">&nbsp;<div id="waitunten" style="visibility: hidden"><font color="#ffcc00">BITTE WARTEN</font></div></td>
+			<td class="componentcontentwhitetd" width="80" valign="top" align="center">zur&uuml;ck<br><a noadd href="javascript: void goBack();" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>
+			<td class="componentcontentwhitetd" width="300" valign="top" align="center">&nbsp;</td>
+			<td class="componentcontentwhitetd" width="80" valign="middle" align="center"></td>
+		</tr>
+	</table>
+
+</div>
+<div id="loader"></div>
+</body>
+</html>

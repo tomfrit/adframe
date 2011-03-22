@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframecompanyfolder" title="Verwaltung: Firmen" type="componentstartfolder" url="/admin/adframe/components/company/start.html" parent="start">
+		<item name="adframecompanyitem1" title="Firmen" url="/admin/adframe/components/company/company_overview.html" parent="adframecompanyfolder"/>
+		<item name="adframecompanyitem2" title="Firma anlegen" url="/admin/adframe/components/company/company_new.html" parent="adframecompanyfolder"/>
+		<item name="adframecompanyitem3" title="Marken" url="/admin/adframe/components/company/brand_overview.html" parent="adframecompanyfolder"/>
+	</folder>
+</configuration>

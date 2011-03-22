@@ -1,0 +1,213 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS_EXT;
+use de::adframe::components::mcms::gen::ListADFRAME_MCMS_EXT;
+use de::adframe::lib::TextFormat;
+use de::adframe::lib::DateTime;
+1;
+
+sub common
+{
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname		= $in{componentname};
+	my $conf				= configure($xmlfile,$componentname);
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+	my $mcms				= new ClassADFRAME_MCMS();
+	my $textFormat 			= new TextFormat();
+	my $extfieldsRef 		= undef;
+	my $date				= new DateTime();
+	
+	if ((ref $mcmsconf) && ($mcms->initById($in{ADFRAME_MCMS_ID})))
+	{
+		$adframe->setValue('CR_DATE',$mcms->getCR_DATE());
+		$adframe->setValue('HEADLINE',$mcms->getHEADLINE());
+		$adframe->setValue('GENIMAGEDIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir'));
+		$adframe->setValue('TITLE_EXTENSION_COMPONENT',$mcmsconf->getAttribute('title','configuration:mcms:extension','',''));
+
+		my $list	= new ListADFRAME_MCMS_EXT();
+		
+		if ($in{adframe_event} eq 'extension_edit_form')
+		{
+			if ($in{DELETE_IMAGE} ne '')
+			{	
+				my $imgField = $mcmsconf->getExtensionfieldByName($in{DELETE_IMAGE});
+				if (ref $imgField)
+				{
+					my $ext = new ClassADFRAME_MCMS_EXT();		
+					if ($ext->initById($in{ADFRAME_MCMS_EXT_ID}))
+					{
+						$ext->setValue($in{DELETE_IMAGE},$imgField->getDefault());
+						$ext->save();
+					}
+				}
+			}
+			elsif ($in{adframe_action} eq '_addItem')
+			{
+				my $ext = new ClassADFRAME_MCMS_EXT();
+				$ext->setRANK_NO(0);
+				$ext->setADFRAME_MCMS_ID($in{ADFRAME_MCMS_ID});
+				
+				my @fields	= $mcmsconf->getExtensionfieldsByNames('IMG_EXT_1','IMG_EXT_2'); 
+				foreach my $im (@fields)
+				{
+					$ext->setValue($im->getName(),$im->getDefault());
+				}
+
+				$ext->setIS_ACTIVE(0);		
+				$ext->save();
+			}
+			elsif ($in{adframe_action} eq '_deleteItem')
+			{
+				my $ext = new ClassADFRAME_MCMS_EXT();
+
+				if ($ext->initById($in{ADFRAME_MCMS_EXT_ID}))
+				{
+					$ext->deleteFromDB();
+					#$ext->save();
+				}
+			}
+			
+			# Daten bereitstellen:
+			my $listRef	= $list->getADFRAME_MCMS_EXT("ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}",'ADFRAME_MCMS_EXT_ID, RANK_NO desc','','');
+			
+			# konvertierung href classes
+			my $hrefStyle = $mcmsconf->getValue('configuration:mcms','area',$componentname,'hrefstyle');
+			if ($hrefStyle ne '')
+			{
+				$textFormat->setHrefStyle($hrefStyle);
+			}				
+
+			# save
+			if (! $adframe->alertRequestErrors())
+			{
+				my @help = ();
+				my @extIds	= ();
+				my $error	= '';
+				my $itemname	= '';
+				foreach $k (@{$listRef})
+				{
+				
+					@help = split(/\|/,$k);
+					my $extedit = new ClassADFRAME_MCMS_EXT();
+					if ($extedit->initById($help[0]))
+					{
+						foreach my $l (keys %in)
+						{
+							$itemname = $l;
+							if ($itemname =~ /_EXTID$help[0]/)
+							{
+								$itemname =~ s/_EXTID$help[0]//;
+
+								if ($itemname eq 'TEXT_EXT') 
+								{
+									$textFormat->setText($in{$l});
+									$textFormat->convertToHtml();
+									$textFormat->convertFromCustomTags();
+									$extedit->setValue($itemname,$textFormat->getConvertedText());
+								}
+								else
+								{
+									$extedit->setValue($itemname,$in{$l});
+								}
+							}
+						}
+						if (! $extedit->save())
+						{
+							$error.="Der Datensatz Nr: $help[0] konnte nicht geschrieben werden\n";
+						}
+						
+					}
+					else
+					{
+						$error.="Der Datensatz Nr: $help[0] konnte nicht geöffnet und geschrieben werden\n";
+					}
+				}
+				if ($error eq '')
+				{
+					if (($in{EDIT_IMAGE} ne '') && ($in{ADFRAME_MCMS_EXT_ID} >0))
+					{
+						$adframe->internLocation("/admin/adframe/components/mcms/mcms_editextimage.html?componentname=$componentname&ADFRAME_MCMS_EXT_ID=$in{ADFRAME_MCMS_EXT_ID}&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&EDIT_IMAGE=$in{EDIT_IMAGE}&page=$in{page}");
+					}	
+					elsif (($in{DELETE_IMAGE} ne '') && ($in{ADFRAME_MCMS_EXT_ID} >0))
+					{
+						#
+					}	
+					elsif (($in{adframe_action} eq '_addItem') || ($in{adframe_action} eq '_deleteItem'))
+					{
+						#
+					}
+					elsif ($in{nextevent} ne '')
+					{
+						$adframe->internLocation("$in{nextevent}?componentname=$componentname&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&page=$in{page}");
+					}						
+					else
+					{
+						$adframe->internLocation("/admin/adframe/components/mcms/mcms_edit.html?componentname=$componentname&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&page=$in{page}");
+					}
+				}
+				else
+				{
+					$adframe->showAlert($error);
+				}
+			}
+		}
+
+		# anzeige der Daten:
+		my $listRefShow	= $list->getADFRAME_MCMS_EXT("ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}",'ADFRAME_MCMS_EXT_ID, RANK_NO desc','','');
+		my @listShow	= @{$listRefShow};
+		my @listShowConv = ();
+		my @help		= ();
+		for (my $i=0;$i<=$#listShow;$i++)
+		{
+			@help = split(/\|/,$listShow[$i]);
+			# textfeld:
+			$textFormat->setText($help[7]);
+			$textFormat->convertToAscii();
+			$textFormat->convertToCustomTags();
+			$help[7]	= $textFormat->getConvertedText();	
+			push(@listShowConv,"$help[0]|$help[1]|$help[2]|$help[3]|$help[4]|$help[5]|$help[6]|$help[7]|$help[8]|$help[9]");
+		}
+		$adframe->makeRepetition('LOOP_EXTENSION',$ListADFRAME_MCMS_EXT::QUAL,\@listShowConv);						
+
+		my %switch	= qw(SWITCH_IMG_EXT_1 off SWITCH_IMG_EXT_2 off SWITCH_ITEM_EXT_1 off SWITCH_ITEM_EXT_2 off SWITCH_TEXT_EXT off);
+		
+		my @extfields = $mcmsconf->getExtensionfields();
+		foreach my $k (@extfields)
+		{
+			my $name = $k->getName();
+			$switch{'SWITCH_'.$name} = 'on';		
+			$adframe->setToDict('TITLE_'.$name,'selfdefined','','',$k->getTitle());
+		
+		}
+
+		$adframe->setSwitch(%switch);
+		
+	}
+	else
+	{
+		$adframe->showAlert('Der Artikel kann leider nicht geladen werden!');
+	}
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);	
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

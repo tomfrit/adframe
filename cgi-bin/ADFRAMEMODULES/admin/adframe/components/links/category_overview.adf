@@ -1,0 +1,70 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::links::gen::ListADFRAME_LINKSCATEGORY;
+use de::adframe::components::links::gen::ClassADFRAME_LINKSCATEGORY;
+$STANDARD_ERROR_MESSAGE = 'Der Datensatz konnte nicht gespeichert werden.';
+1;
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $list 		= new ListADFRAME_LINKSCATEGORY();
+	my $man			= new ClassADFRAME_LINKSCATEGORY();
+	configure($xmlfile,$componentname);
+	
+	if ($in{adframe_event} eq 'category_overview_form')
+	{
+		$adframe->setTypeAndDescr('CATEGORY','alphanum,required','Kategorie');
+
+		if (! $adframe->alertRequestErrors('CATEGORY'))
+		{
+			$man->setCATEGORY($in{CATEGORY});
+			$man->setAREA($componentname);
+			$man->setCATEGORY($in{CATEGORY});
+			$man->setIS_ACTIVE(1);
+			$man->setADFRAME_CHANNEL($ENV{ADFRAME_CHANNEL});
+			if ($man->save())
+			{
+				$adframe->setValue('CATEGORY','');
+			}
+			else
+			{
+				$adframe->showAlert($STANDARD_ERROR_MESSAGE);
+			}
+		}
+	}
+	elsif ($in{adframe_event} eq 'category_delete')
+	{
+		if ($in{ADFRAME_LINKSCATEGORY_ID} > 0)
+		{
+			if ($man->initById($in{ADFRAME_LINKSCATEGORY_ID})) {
+				$man->setIS_ACTIVE(0);
+				$man->save();
+				$adframe->setValue('CATEGORY','');
+				}
+			else
+			{
+				$adframe->showAlert('Der Datensatz kann nicht geloescht werden.');
+			}
+		}
+	}
+
+	my ($categoryRef) = $list->getADFRAME_LINKSCATEGORY('IS_ACTIVE=1');
+	$adframe->makeRepetition('LOOP_CATEGORY',$ListADFRAME_LINKSCATEGORY::QUAL,$categoryRef);
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

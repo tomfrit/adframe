@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" encoding="utf-8"?> 
+<configuration>
+	<folder name="adframescmsfolder" title="CMS-Verwaltung" type="componentstartfolder" url="/admin/adframe/components/mcms/mcms_overview.html" parent="start">
+		<item name="adframemcmsitem2" title="Artikel-Übersicht" url="/admin/adframe/components/mcms/mcms_overview.html" parent="adframemcmsfolder"/>
+		<item name="adframemcmsitem3" title="Neuer Artikel" url="/admin/adframe/components/mcms/mcms_new.html" parent="adframemcmsfolder"/>
+		<item name="adframemcmsitem4" title="Gelöschte Objekte" url="/admin/adframe/components/mcms/mcms_archive.html" parent="adframemcmsfolder"/>
+	</folder>
+</configuration>

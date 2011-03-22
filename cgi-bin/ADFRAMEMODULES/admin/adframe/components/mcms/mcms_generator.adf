@@ -1,0 +1,31 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::lib::io::HttpTemplateGenerator;
+1;
+
+sub common
+{
+	my $xmlfile = 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/mcms_pages.xml';
+	my $gen 	= new HttpTemplateGenerator();
+	my @ret=();
+	
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{	
+		if ($in{adframe_event} eq 'generator_form')
+		{
+			$gen->generateFromConfig($xmlfile);	
+			$in{MCMS_GENRATE} = $gen->getErrormessage();
+		}
+		my @tmpl 	= $conf->getAllTagsWith('template','configuration:httpgenerator','','');	
+		foreach my $t (@tmpl)
+		{
+			push(@ret,$t->getAttribute('url').'|'.$t->getAttribute('storefile'));
+		}			
+	}
+	if ($in{MCMS_GENRATE} ne '')
+	{
+		$adframe->showAlert('Das Generieren für '.$in{MCMS_GENRATE}.' ist leider (teilweise) fehlgeschlagen');
+	}
+	
+	$adframe->makeRepetition('MCMS_LOOP','!SRCPAGE!|!TARGETPAGE!',\@ret);
+}
+

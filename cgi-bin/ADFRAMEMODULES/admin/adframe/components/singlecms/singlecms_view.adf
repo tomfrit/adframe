@@ -1,0 +1,147 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::singlecms::SingleCmsDbManager;
+1;
+
+sub common
+{
+	my $IMAGE_EMPTY		= 'clear_dot.gif';
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my @inputFields		= configure($xmlfile,$componentname);
+	my $cmsman	 		= new SingleCmsDbManager();
+	
+	# show Dataset
+	my %cmsData = $cmsman->getCms($componentname,$ENV{ADFRAME_CHANNEL});
+	foreach my $k (keys %cmsData)
+	{
+		$cmsData{"$k"} =~ s/\x0d/<br>/g;
+		$adframe->setValue($k,$cmsData{"$k"}) if ($in{$k} eq '');
+	}
+	
+	logger($cmsData{CONTENTTEXT_1});
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	# default register:
+	my @switches = qw(SWITCH_AUTHOR SWITCH_SELECT_AUTHOR SWITCH_HEADLINE SWITCH_TEASERTEXT SWITCH_CONTENTTEXT_1 SWITCH_CONTENTTEXT_2 SWITCH_CONTENTTEXT_3 SWITCH_IMAGES SWITCH_IMAGE_1 SWITCH_IMAGE_2 SWITCH_IMAGE_3 SWITCH_IMAGE_4 SWITCH_EXT_1 SWITCH_EXT_2 SWITCH_EXT_3 SWITCH_EXT_4 SWITCH_SEL_1 SWITCH_SEL_2 SWITCH_DIALOG);
+	my @inputFields = ();
+	my @sel_1_options = ();
+	my @sel_2_options = ();
+	my $SEL_QUAL = '!OPTION_TITLE!|!OPTION_VALUE!|!OPTION_WIDTH!|!OPTION_HEIGHT!|!OPTION_BGCOLOR!';
+	
+	foreach my $sw (@switches) 
+	{ 
+		$adframe->setSwitch($sw,'off'); 
+	}	
+	# adframe-Bug:
+	$adframe->setToDict('SEL_2','radio','none','','');
+	
+	my %userRols	= ();
+	
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$conf->setCursorAt('configuration:admin:component','name',$componentname);
+		
+		foreach my $c ($conf->enumElements())
+		{
+			my $tag		  	= $c->getTag();
+			my $fieldname 	= $c->getAttribute('name');
+			my $active  	= $c->getAttribute('active');
+			my $required 	= $c->getAttribute('required');
+			my $uploadpath 	= $c->getAttribute('uploadpath');
+			my $width 		= $c->getAttribute('width');
+			my $height 		= $c->getAttribute('height');
+			my $title		= $c->getAttribute('title');
+			my $chartest	= $c->getAttribute('chartest');
+			my $value		= $c->getAttribute('value');
+			my $bgcolor		= $c->getAttribute('bgcolor');
+			my $status 		= $c->getAttribute('status');
+			my $roles		= $c->getAttribute('roles');
+			my $src			= $c->getAttribute('src');
+			
+			if (($tag eq 'field') && ($active eq 'true'))
+			{
+				$adframe->setSwitch('SWITCH_'.$fieldname,'on');
+				$adframe->setValue('TITLE_'.$fieldname,$title);
+				$adframe->setValue('SRC_'.$fieldname,$src);
+				if ($chartest ne '')
+				{
+					$adframe->setTypeAndDescr($fieldname,$chartest,$title);
+				}
+				else
+				{
+					$adframe->setTypeAndDescr($fieldname,'none',$title);
+				}
+				push(@inputFields,$fieldname);
+				$adframe->setRequired($fieldname) if ($required eq 'true');
+				if ($required =~ /^if/)
+				{
+					my $isReq=0;
+					my $condReq = "$required ".'{$isReq=1;}';
+					eval("$condReq");
+					$adframe->setRequired($fieldname) if ($isReq);
+				}
+				$adframe->setValue($fieldname.'_UPLOADPATH',$uploadpath) if ($uploadpath ne '');
+				$adframe->setValue($fieldname.'_WIDTH',$width) if ($width ne '');
+				$adframe->setValue($fieldname.'_HEIGHT',$height) if ($height ne '');
+				$adframe->setSwitch('SWITCH_IMAGES','on') if ($fieldname =~ /IMAGE_/);
+				if ($roles ne '')
+				{
+					$userRols{$fieldname} = $roles;
+				}
+			}
+			if ($tag eq 'fieldoption')
+			{
+				my $val = "$title|$value|$width|$height|$bgcolor";
+				if ($c->getParent()->getAttribute('name') eq 'SEL_1')
+				{
+					push(@sel_1_options,$val);
+				}
+				elsif ($c->getParent()->getAttribute('name') eq 'SEL_2')
+				{
+					push(@sel_2_options,$val);
+				}
+			}
+		}
+
+		# autor:
+		if ($adframe->getFromDict('SWITCH_AUTHOR','replace') > 0)
+		{
+			my $userMan	= new AdframeUserDbManager();
+			my @allowedRoles = split(/,/,$userRols{AUTHOR});
+			my ($authorQual,$authorUserRef) = $userMan->getUserWithRole($ENV{ADFRAME_CHANNEL},@allowedRoles); 
+			$adframe->makeRepetition('LOOP_AUTHOR',$authorQual,$authorUserRef);
+			$adframe->setSwitch('SWITCH_DEFAULT_AUTHOR','off');
+		}
+		else
+		{
+			$adframe->setSwitch('SWITCH_DEFAULT_AUTHOR','on');
+		}
+		
+		# extras
+		if ($adframe->getFromDict('SWITCH_SEL_1','replace') > 0)
+		{
+			$adframe->makeRepetition('LOOP_SEL_1',$SEL_QUAL,\@sel_1_options);
+			$adframe->setValue('SEL_1',$in{SEL_1});
+		}
+		
+		if ($adframe->getFromDict('SWITCH_SEL_2','replace') > 0)
+		{		
+			$adframe->makeRepetition('LOOP_SEL_2',$SEL_QUAL,\@sel_2_options);
+			$adframe->setValue('SEL_2',$in{SEL_2});
+		}		
+		return @inputFields;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

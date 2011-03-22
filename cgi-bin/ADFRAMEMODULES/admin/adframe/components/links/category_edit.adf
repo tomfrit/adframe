@@ -1,0 +1,66 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::links::gen::ListADFRAME_LINKSCATEGORY;
+use de::adframe::components::links::gen::ClassADFRAME_LINKSCATEGORY;
+use de::adframe::lib::TextFormat;
+1;
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $list 		= new ListADFRAME_LINKSCATEGORY();
+	my $man			= new ClassADFRAME_LINKSCATEGORY();
+	my $text 		= new TextFormat;
+	configure($xmlfile,$componentname);
+	
+	if ($in{adframe_event} eq 'category_edit_form')
+	{
+		$adframe->setTypeAndDescr('CATEGORY','required','Kategorie');
+
+		if (! $adframe->alertRequestErrors('CATEGORY'))
+		{
+			if ($man->initById($in{ADFRAME_LINKSCATEGORY_ID})) {
+			
+				$text->setText($in{CATEGORY});
+				$text->convertToHtml();
+				$in{CATEGORY} = $text->getConvertedText();
+				$man->setCATEGORY($in{CATEGORY});
+				
+				$man->save();
+				$adframe->setValue('CATEGORY','');
+				newDoc('admin/adframe/components/links/category_overview');
+				}
+			else
+			{
+				$adframe->showAlert('Der Datensatz konnte nicht geaendert werden.');
+			}
+		}
+	}
+	else
+	{
+		if ($man->initById($in{ADFRAME_LINKSCATEGORY_ID})) {
+			my $category = $man->getCATEGORY();
+			$adframe->setValue('CATEGORY',$category);
+		}
+		
+	}
+
+	my ($categoryRef) = $list->getADFRAME_LINKSCATEGORY('IS_ACTIVE=1');
+	$adframe->makeRepetition('LOOP_CATEGORY',$ListADFRAME_LINKSCATEGORY::QUAL,$categoryRef);
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

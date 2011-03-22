@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframevotingfolder" title="Voting" type="componentstartfolder" url="/admin/adframe/components/voting/start.html" parent="start">
+		<item name="adframevotingitem1" title="Übersicht Umfragen" url="/admin/adframe/components/voting/voting_overview.html" parent="adframevotingfolder"/>
+		<item name="adframevotingitem2" title="Neue Umfrage" url="/admin/adframe/components/voting/voting_new.html" parent="adframevotingfolder"/>
+	
+	</folder>
+</configuration>

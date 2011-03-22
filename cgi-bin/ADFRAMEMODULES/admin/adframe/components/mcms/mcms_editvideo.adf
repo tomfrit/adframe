@@ -1,0 +1,196 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::lib::io::HttpUploader;
+1;
+
+sub common
+{
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname		= $in{componentname};
+	my $conf				= configure($xmlfile,$componentname);
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+	my $mcms				= new ClassADFRAME_MCMS();
+	my $error				= '';
+	
+	if ((ref $mcmsconf) && ($mcms->initById($in{ADFRAME_MCMS_ID})))
+	{
+		my $genvideodir		= $mcmsconf->getValue('configuration:mcms','area',$componentname,'videodir');
+		my $uploadpath 		= "$ENV{ADFRAME_DOC_PATH}"."$genvideodir";
+		my $videofield		= $mcmsconf->getFieldByName($in{EDIT_VIDEO});
+
+		if (ref $videofield)
+		{
+			$adframe->setValue('VIDEOTITLE',$videofield->getTitle());
+			$adframe->setValue('VIDEO_ATTRIBUTES',$videofield->getAttributes());
+		}
+		$adframe->setValue('HEADLINE',$mcms->getHEADLINE());				
+		$adframe->setValue('THE_VIDEO',$mcms->getValue($in{EDIT_VIDEO}));	
+		@fileInfo = split(/\./,$mcms->getValue($in{EDIT_VIDEO}));
+		$adframe->setValue('VIDEO_FORMAT',$fileInfo[1]);
+		$adframe->setValue('THE_VIDEO_IMAGE',$mcms->getValue('PIC_'.$in{EDIT_VIDEO}));
+		
+		$adframe->setValue('GENVIDEODIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'videodir'));
+		$adframe->setValue('GENVIDEOIMAGEDIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'videodir'));
+		
+		$adframe->setSwitch('SWITCH_VIDEO_REMOTE_ACTIVE','off');
+		my $video_remote_active	= $mcmsconf->getValue('configuration:mcms','area',$componentname,'video_remote_active');
+		my $video_remote_dir	= $mcmsconf->getValue('configuration:mcms','area',$componentname,'video_remote_dir');
+		if (($video_remote_active eq 'true') && ($video_remote_dir =~ /http:\/\//i))
+		{
+			$adframe->setSwitch('SWITCH_VIDEO_REMOTE_ACTIVE','on');
+			$adframe->setSwitch('SWITCH_VIDEO_LOCAL_ACTIVE','off');
+			$adframe->setValue('VIDEO_REMOTE_DIR',$video_remote_dir);
+			$adframe->setValue('GENVIDEODIR',$video_remote_dir);
+			my $videofilename 	= 'MCMS_'.$in{EDIT_VIDEO}.'__'.$in{ADFRAME_MCMS_ID}.'.*';
+			if ($mcms->getValue($in{EDIT_VIDEO}) eq '')
+			{
+				$adframe->setValue('THE_VIDEO',$videofilename);
+			}
+			$adframe->setValue('VIDEO_REMOTE_FTPSERVER',$mcmsconf->getValue('configuration:mcms','area',$componentname,'video_remote_ftpserver'));
+			$adframe->setValue('VIDEO_REMOTE_FTPUSER',$mcmsconf->getValue('configuration:mcms','area',$componentname,'video_remote_ftpuser'));
+			$adframe->setValue('VIDEO_REMOTE_FTPPASSWD',$mcmsconf->getValue('configuration:mcms','area',$componentname,'video_remote_ftppasswd'));
+		}
+
+		if (($in{ADFRAME_MCMS_ID} > 0) && ($in{EDIT_VIDEO} =~ /VIDEO_/) && (-e "$uploadpath")) 
+		{		
+			if (($in{adframe_event} eq 'mcms_editvideo_form'))
+			{
+#				if ($in{FILE_VIDEO} ne '')
+#				{
+#					my $uploader 		= new HttpUploader();
+#					my $videofilename 	= 'MCMS_'.$in{EDIT_VIDEO}.'__'.$in{ADFRAME_MCMS_ID};
+#					my $dbFileName 		= $uploader->storeImage($uploadpath,$videofilename,$in{FILE_VIDEO});
+#		
+#					if ($dbFileName ne '')
+#					{
+#						$mcms->setValue($in{EDIT_VIDEO},$dbFileName);
+#
+				#		if ($mcms->save())
+				#		{	
+				#			my $pageCount	= $mcms->getPAGE_COUNT;					
+				#			for (my $i=$pageCount;$i<=5;$i++)
+				#			{
+				#				if ($in{EDIT_VIDEO} =~ /VIDEO_$i/) 
+				#				{
+				#					$pageCount = $i;
+				#				}
+				#			}
+				#			$mcms->setPAGE_COUNT($pageCount);
+				#			$mcms->save();
+				#		}
+				#		else
+				#		{
+				#			$error ='Das Video konnte leider nicht gespeichert werden';
+				#		}
+				#	}
+				#	else
+				#	{
+				#		$error ='Das Video konnte leider nicht erstellt werden';
+				#	}
+				#}
+
+				if (($video_remote_active eq 'true') && ($video_remote_dir =~ /http:\/\//i))
+				{		
+					$dbFileName 	= 'MCMS_'.$in{EDIT_VIDEO}.'__'.$in{ADFRAME_MCMS_ID}.'.'.$in{VIDEO_FORMAT};
+				}
+				elsif ($in{FILE_VIDEO} ne '')
+				{
+					my $uploader 		= new HttpUploader();
+					my $videofilename 	= 'MCMS_'.$in{EDIT_VIDEO}.'__'.$in{ADFRAME_MCMS_ID};
+					$dbFileName 		= $uploader->storeImage($uploadpath,$videofilename,$in{FILE_VIDEO});
+				}
+		
+				if ($dbFileName ne '')
+				{
+					$mcms->setValue($in{EDIT_VIDEO},$dbFileName);
+		
+					if ($mcms->save())
+					{	
+						my $pageCount	= $mcms->getPAGE_COUNT;					
+						for (my $i=$pageCount;$i<=5;$i++)
+						{
+							if ($in{EDIT_VIDEO} =~ /VIDEO_$i/) 
+							{
+								$pageCount = $i;
+							}
+						}
+						$mcms->setPAGE_COUNT($pageCount);
+						$mcms->save();
+					}
+					else
+					{
+						$error ='Das Video konnte leider nicht gespeichert werden';
+					}
+				}
+				
+				if ($in{FILE_IMAGE} ne '')
+				{
+					my $uploader1 		= new HttpUploader();
+					
+					my $size 		= $mcmsconf->getAttribute('size','configuration:mcms:page:field','name','PIC_'.$in{EDIT_VIDEO});
+					
+					my $tmpfilename 	= 'TEMP_MCMS_PIC_'.$in{EDIT_VIDEO}.'__'.$in{ADFRAME_MCMS_ID};
+					my $imgfilename 	= 'MCMS_PIC_'.$in{EDIT_VIDEO}.'__'.$in{ADFRAME_MCMS_ID}.'.jpg';;
+					my $dbTempName1 	= $uploader1->storeImage($uploadpath,$tmpfilename,$in{FILE_IMAGE});
+					my $dbFileName1		= $uploader1->resize($uploadpath,$dbTempName1,$imgfilename,$size,yes);	
+		
+					if ($dbFileName1 ne '')
+					{
+						$mcms->setValue('PIC_'.$in{EDIT_VIDEO},$dbFileName1);
+					
+						if ($mcms->save())
+						{	
+						}
+						else
+						{
+							$error ='Die Video-Startbild konnte leider nicht gespeichert werden';
+						}
+					}
+					else
+					{
+						$error ='Die Video-Startbild konnte leider nicht erstellt werden';
+					}
+				}
+				if ($error eq '')
+				{
+					$adframe->internLocation("admin/adframe/components/mcms/mcms_edit.html?componentname=$in{componentname}&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&EDIT_VIDEO=&page=$in{page}");
+				}
+				else
+				{
+					$adframe->showAlert($error.'\nDer Zugriff auf das Server-Dateisystem ist evtl. nicht freigegeben !');
+				}
+			}
+		}
+		else
+		{
+			$adframe->error('Project Configuration error! Uploadpath '.$uploadpath.' does not exist ?');
+		}		
+	}
+	else
+	{
+		$adframe->error('Project Configuration error!');
+	}	
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);	
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

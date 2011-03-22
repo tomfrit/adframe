@@ -1,0 +1,85 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::forum::ForumDbManager;
+1;
+sub common
+{
+	my $IMAGE_EMPTY		= 'clear_dot.gif';
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $forumman 		= new ForumDbManager();
+	
+	configure($xmlfile,$componentname);
+
+	if ($in{adframe_event} eq 'category_edit_form')
+	{
+		$adframe->setTypeAndDescr('CATEGORY','alphanum,required','Kategorie');
+		$adframe->setTypeAndDescr('TITLE','alphanum,required','Headline');
+		
+		if (! $adframe->alertRequestErrors('CATEGORY','TITLE'))
+		{				
+			if ($forumman->saveCategory($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_FORUMCATEGORY_ID},$in{CATEGORY},$in{TITLE},$in{TEXT_0},$in{TEXT_1},$in{ITEM_1},$in{ITEM_2},$in{ITEM_3},$in{ITEM_4},$ENV{FORUM_OVERVIEWFILE}))
+			{
+				$in{CATEGORY} = '';
+				$in{TITLE} = '';
+				$adframe->setValue('CATEGORY','');
+				$adframe->setValue('TITLE','');
+				if ($in{DELETE_IMAGE} =~ /IMG_/)
+				{
+					if (! $forumman->updateItem($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_FORUMCATEGORY_ID},$in{DELETE_IMAGE},$IMAGE_EMPTY,$ENV{FORUM_OVERVIEWFILE}))
+					{
+						$adframe->showAlert('Das Bild konnte nicht gelöscht werden!');
+					}
+				}
+				elsif ($in{EDIT_IMAGE} =~ /IMG_/)
+				{
+					$adframe->internLocation("admin/adframe/components/forum/category_editimage.html?componentname=$componentname&ADFRAME_FORUMCATEGORY_ID=$in{ADFRAME_FORUMCATEGORY_ID}&EDIT_IMAGE=$in{EDIT_IMAGE}");
+				}
+				else
+				{
+					newDoc('admin/adframe/components/forum/category_overview');
+				}
+			}
+			else
+			{
+				$adframe->showAlert($forumman->getErrorMessage());
+			}
+		}
+	}
+	else
+	{
+		my %category = $forumman->getCategoryById($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_FORUMCATEGORY_ID});
+		
+		$adframe->setValue('CATEGORY',$category{CATEGORY});
+		$adframe->setValue('TITLE',$category{TITLE});
+		$adframe->setValue('TEXT_0',$category{TEXT_0});
+		$adframe->setValue('TEXT_1',$category{TEXT_1});
+		$adframe->setValue('ITEM_1',$category{ITEM_1});
+		$adframe->setValue('ITEM_2',$category{ITEM_2});
+		$adframe->setValue('ITEM_3',$category{ITEM_3});
+		$adframe->setValue('ITEM_4',$category{ITEM_4});	
+		$adframe->setValue('IMG_0',$category{IMG_0});
+		$adframe->setValue('IMG_1',$category{IMG_1});
+	}
+
+	my ($qual,$categoryRef) = $forumman->getCategories($ENV{ADFRAME_CHANNEL},$componentname,-1);
+	$adframe->makeRepetition('LOOP_CATEGORY',$qual,$categoryRef);
+
+}
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		my $uploadPath = $conf->getAttribute('imagepath','configuration:admin:component','name',$componentname);
+		$adframe->setValue('IMAGE_UPLOADPATH',$uploadPath);		
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

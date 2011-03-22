@@ -1,0 +1,392 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::lib::TextFormat;
+use de::adframe::lib::DateTime;
+use de::adframe::components::mcms::rssWriter;
+1;
+
+sub common
+{
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname		= $in{componentname};
+	my $conf			= configure($xmlfile,$componentname);
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+	my $mcms			= new ClassADFRAME_MCMS();
+	my $textFormat 			= new TextFormat();
+	my $fieldsRef 			= undef;
+	my $extendfieldsRef		= undef;
+	my $date			= new DateTime();
+	
+	$adframe->setValue('new',$in{new});
+	$adframe->setSwitch('IS_ADMIN','off') unless ($adframe->getFromSession('ROLES') =~ /ADMINISTRATOR/);
+	
+	if ((ref $mcmsconf) && ($mcms->initById($in{ADFRAME_MCMS_ID})))
+	{
+		$adframe->setValue('CR_DATE',$mcms->getCR_DATE());
+		
+		if ($mcmsconf->extensionActive() >0)
+		{
+			$adframe->setValue('TITLE_EXTENSION_COMPONENT',$mcmsconf->getAttribute('title','configuration:mcms:extension','',''));
+			
+			$adframe->setSwitch('SWITCH_SHOW_EXTENSION_COMPONENT','on');
+		}
+		else
+		{
+			$adframe->setSwitch('SWITCH_SHOW_EXTENSION_COMPONENT','off');
+		}
+		
+		if ($in{adframe_event} eq 'blog_edit_form')
+		{
+			if ($in{adframe_action} eq '_set__online')
+			{
+				if ($mcms->getP_STATUS() <1 )
+				{
+					$mcms->setP_DATE("now()");
+					$mcms->setP_STATUS(1);
+					if ($mcms->save() > 0)
+					{
+						$mcms->setP_DATE("now()");
+						$mcms->save();
+					}
+					else
+					{
+						$error = 'Der Artikel kann nicht online gestellt werden!';
+					}
+				}
+				else
+				{
+					$error = 'Der Artikel kann nicht online gestellt werden!';
+				}
+			}
+			elsif ($in{adframe_action} eq '_set__offline')
+			{
+				if ($mcms->getP_STATUS() >0 )
+				{
+					$mcms->setP_STATUS(0);
+					$mcms->setP_DATE("now()");
+					if (! $mcms->save())
+					{
+						$error = 'Der Artikel kann nicht offline geschaltet werden!';
+					}
+				}
+				else
+				{
+					$error = 'Der Artikel kann nicht offline geschaltet werden!';
+				}
+			}
+			
+			if ($error ne '')
+			{
+				$adframe->showAlert($error);
+			}
+			
+			if ($in{DELETE_IMAGE} ne '')
+			{	
+				my $imgField = $mcmsconf->getFieldByName($in{DELETE_IMAGE});
+				if (ref $imgField)
+				{
+					$mcms->setValue($in{DELETE_IMAGE},$imgField->getDefault());
+				}
+			}
+			
+			if ($in{DELETE_VIDEO} ne '')
+			{	
+				my $videoField = $mcmsconf->getFieldByName($in{DELETE_VIDEO});
+				my $videoPicField = $mcmsconf->getFieldByName('PIC_'.$in{DELETE_VIDEO});
+				if (ref $videoField)
+				{
+					$mcms->setValue($in{DELETE_VIDEO},$videoField->getDefault());
+				
+					if (ref $videoPicField)
+					{			
+						$mcms->setValue('PIC_'.$in{DELETE_VIDEO},$videoPicField->getDefault());
+					}
+				}
+			}
+			
+			my $artDataRef = $mcms->getDataHashRef();
+			my %artDataHash = %{ $artDataRef };
+			foreach my $ad (keys %artDataHash)
+			{
+				if ($ad =~ /IMG_/)
+				{
+					$in{"$ad"} = $artDataHash{"$ad"};
+				}
+			}		
+			$fieldsRef = $mcmsconf->getFieldsSerialized(\%in);	
+
+			my @inputFields	= $mcmsconf->getActiveTextfields();
+			
+			my @fieldNames	= ();
+			my @displayFields	= ();
+			
+			foreach my $m (@inputFields)
+			{
+				$adframe->setTypeAndDescr($m->getName(),$m->getChartest(),$m->getTitle());
+				push(@fieldNames,$m->getName());
+				if ($m->getDisplay() eq 'display')
+				{
+					my $fi = $m->getName(); 
+					push(@displayFields,$fi);
+					$in{$fi} = $artDataHash{"$fi"};
+				}
+			}
+			if (@displayFields!=())
+			{
+				$fieldsRef = $mcmsconf->getFieldsSerialized(\%in);
+			}
+			
+			foreach my $a ('A_NAME','A_EMAIL','HEADLINE')
+			{
+				my $nameField = $mcmsconf->getFieldByName($a);
+				if (ref $nameField)
+				{
+					$adframe->setTypeAndDescr('A_NAME',$nameField->getChartest(),$nameField->getTitle());
+				}
+			}
+
+			if (! $adframe->alertRequestErrors(@fieldNames))
+			{	
+				# save
+				foreach my $fn ('A_NAME','A_EMAIL','HEADLINE',@fieldNames)
+				{
+					my $hrefStyle = $mcmsconf->getValue('configuration:mcms','area',$componentname,'hrefstyle');
+					if ($hrefStyle ne '')
+					{
+						$textFormat->setHrefStyle($hrefStyle);
+					}
+					$textFormat->setText($in{"$fn"});
+					
+					$textFormat->convertToHtml();
+					$textFormat->convertFromCustomTags();
+					$mcms->setValue($fn,$textFormat->getConvertedText());
+				}
+				$mcms->setPAGE_COUNT(1);
+				
+				# erstellungsdatum:
+				$date->setYear($in{CR_DATE_YEAR});
+				$date->setMonth($in{CR_DATE_MONTH});
+				$date->setDay($in{CR_DATE_DAY});
+				$date->setHour($in{CR_DATE_HOUR});
+				$mcms->setCR_DATE($date->getMysqlFormatted);
+				
+				$mcms->setETIKETT($in{ETIKETT}) if ($in{ETIKETT});
+				
+				if ($mcms->save())
+				{
+					
+					$mcms->setPAGE_COUNT(0);
+					$mcms->setPAGE_COUNT(1) if ($in{TEXT_1_1});
+				
+					# bearbeitngs-date
+					$mcms->setP_DATE(new DateTime()->getMysqlFormatted()); 
+					$mcms->save();
+					my $rss = new rssWriter;
+					$rss->writeFeed();
+					if ($in{EDIT_IMAGE} ne '')
+					{
+						$adframe->internLocation("/admin/adframe/components/mcms/mcms_editimage.html?componentname=$componentname&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&EDIT_IMAGE=$in{EDIT_IMAGE}&page=$in{page}");
+					}	
+					elsif ($in{DELETE_IMAGE} ne '')
+					{
+						#
+					}	
+					elsif ($in{EDIT_VIDEO} ne '')
+					{
+						$adframe->internLocation("/admin/adframe/components/mcms/mcms_editvideo.html?componentname=$componentname&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&EDIT_VIDEO=$in{EDIT_VIDEO}&page=$in{page}");
+					}	
+					elsif ($in{DELETE_VIDEO} ne '')
+					{
+						#
+					}					
+					elsif ($in{nextevent} ne '')
+					{
+						$adframe->internLocation("$in{nextevent}?componentname=$componentname&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&page=$in{page}");
+					}						
+					else
+					{
+						$adframe->internLocation("/admin/adframe/components/blog/blog_overview.html?componentname=$componentname&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&page=$in{page}");
+					}
+				}
+				else
+				{
+					$adframe->showAlert('Der Artikel konnte leider nicht gespeichert werden, sorry');
+				}
+			}
+			else
+			{
+				if ($in{nextevent} =~ /blog_preview/)
+				{
+					$mess = $adframe->checkInputs(@fieldNames);
+					$mess =~ s/\\n\s*$//;
+					$mess =~ s/\\n/<li>/g;
+					$in{ADFRAME_ERROR} = $mess;
+					$adframe->setValue('ADFRAME_ERROR',$mess);
+					newDoc('admin/adframe/components/blog/blog_preview_error');
+				}
+			}
+		}
+		else
+		{
+		
+			my $artDataRef = $mcms->getDataHashRef();
+			my %artDataHash = %{ $artDataRef };
+			foreach my $ad (keys %artDataHash)
+			{
+				$textFormat->setText($artDataHash{"$ad"});
+				$textFormat->convertToAscii();
+				$textFormat->convertToCustomTags();
+				$artDataHash{"$ad"}	= $textFormat->getConvertedText();			
+			}
+			$fieldsRef = $mcmsconf->getFieldsSerialized(\%artDataHash);
+		
+			$date->setMysqlFormatted($artDataHash{CR_DATE});
+			$adframe->setValue('CR_DATE_DAY',$date->getDay());
+			$adframe->setValue('CR_DATE_MONTH',$date->getMonth());
+			$adframe->setValue('CR_DATE_YEAR',$date->getYear());
+			$adframe->setValue('CR_DATE_HOUR',$date->getHour());
+			$adframe->setValue('CR_DATE_MINUTE',$date->getMinute());
+			
+			$adframe->setValue('HEADLINE',$mcms->getHEADLINE());
+			$adframe->setValue('A_NAME',$mcms->getA_NAME());
+			$adframe->setValue('A_EMAIL',$mcms->getA_EMAIL());	
+			$adframe->setValue('SAISON',$mcms->getSAISON());	
+			$adframe->setValue('ETIKETT',$mcms->getETIKETT());
+			
+			$textFormat->setText($mcms->getTEXT_0());
+			$textFormat->convertToAscii();
+			$textFormat->convertToCustomTags();
+			$adframe->setValue('TEXT_0',$textFormat->getConvertedText());
+			$textFormat->setText($mcms->getTEXT_1_1());
+			$textFormat->convertToAscii();
+			$textFormat->convertToCustomTags();
+			$adframe->setValue('TEXT_1_1',$textFormat->getConvertedText());
+		}		
+
+		if ($mcms->getP_STATUS() <1 )
+		{
+			$adframe->setSwitch('SWITCH_P_STATUS_ON','off');
+			$adframe->setSwitch('SWITCH_P_STATUS_OFF','on');	
+		}
+		else
+		{
+			$adframe->setSwitch('SWITCH_P_STATUS_ON','on');
+			$adframe->setSwitch('SWITCH_P_STATUS_OFF','off');					
+		}
+			
+		$adframe->makeRepetition('LOOP_FIELDS',$McmsConfiguration::FIELD_ARRAY_QUAL,$fieldsRef);
+		
+		my @help 		= ();
+
+		foreach my $it (@{ $fieldsRef })
+		{
+			@help = split(/\|/,$it);
+
+			$adframe->setSwitch('SWITCH_text_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_textarea_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_image_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_video_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_selector_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_extendfield_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_display_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_PAGESTATUS_FIRST_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_PAGESTATUS_LAST_'.$help[0],'off');
+			
+			$adframe->setSwitch('SWITCH_'.$help[1].'_'.$help[0],'on');
+
+
+			if ($help[1] =~ /text/)
+			{
+				$adframe->setToDict($help[0],$help[1],$help[3],$help[2],'');
+				push(@inputKeys,$help[0]);				
+			}
+			elsif ($help[1] =~ /selector/)
+			{
+				$adframe->setToDict($help[0],'select',$help[3],$help[2],'');
+				push(@inputKeys,$help[0]);	
+				my @sValues = ();
+				if ($help[5] =~ /^db:/)
+				{
+					$help[5] =~ s/\n//g;
+					$help[5] =~ s/\r//g;
+					$help[5] =~ s/^db://;
+					$help[5] =~ s/\#/\|/g;
+					@sValues = $mcms->query($help[5]);
+				}
+				else
+				{
+					$help[5] =~ s/\#/\|/g;
+					$help[5] =~ s/\n//g;
+					@sValues = split(/,/,$help[5]);
+				}
+				$adframe->makeRepetition('LOOP_SELECTOR_'.$help[0],'!FIELD_VAL!|!FIELD_OPTION!',\@sValues);
+				if ($in{adframe_event} ne 'mcms_edit_form')
+				{
+					$adframe->setValue('SEL',$mcms->getSEL());
+				}
+			}
+			elsif ($help[1] =~ /display/)
+			{
+				my $dval = '';
+				if ($help[5] =~ /^db:/)
+				{
+					$help[5] =~ s/\n//g;
+					$help[5] =~ s/\r//g;
+					$help[5] =~ s/^db://;
+					$help[5] =~ s/\#/\|/g;
+					$dval = $mcms->query($help[5]);
+				}
+				else
+				{
+					$dval = $mcms->getValue($help[0])
+				}
+				$adframe->setToDict($help[0],'selfdefined','',$help[2],$dval);			
+			}	
+			elsif ($help[1] =~ /video/)
+			{
+				$adframe->setToDict('PIC_'.$help[0],'selfdefined','','',$mcms->getValue('PIC_'.$help[0]));
+				#debug(@help);
+			}
+			if ($help[8] =~ /first/)
+			{
+				$adframe->setSwitch('SWITCH_PAGESTATUS_FIRST_'.$help[0],'on');
+			}
+			elsif ($help[8] =~ /last/)
+			{
+				$adframe->setSwitch('SWITCH_PAGESTATUS_LAST_'.$help[0],'on');
+			}			
+
+		}
+		$adframe->setValue('GENIMAGEDIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir'));
+		$adframe->setValue('GENVIDEODIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'videodir'));
+		$adframe->setValue('SAISON',$mcmsconf->getValue('configuration:mcms','area',$componentname,'saison'));
+
+	}
+	else
+	{
+		$adframe->showAlert('Der Artikel kann leider nicht geladen werden!');
+	}
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);	
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

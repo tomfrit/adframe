@@ -1,0 +1,100 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::guestbook::GuestbookDbManager;
+1;
+
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $AREA			= $in{componentname};
+	my $ITEMS_PER_PAGE 	= 10;
+	my $guestman 		= new GuestbookDbManager();
+
+	configure($xmlfile,$AREA);
+	
+	# events:
+	if ($in{adframe_event} eq 'deleteitem')
+	{
+		if (! $guestman->deleteItem($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_GUESTBOOK_ID}))
+		{
+			$adframe->showAlert('Der Eintrag konnte leider NICHT gelöscht werden !');
+		}
+	}
+	elsif ($in{adframe_event} eq 'deletecomment')
+	{
+		if (! $guestman->deleteComment($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_GUESTBOOKCOMMENT_ID}))
+		{
+			$adframe->showAlert('Der Kommentar konnte leider NICHT gelöscht werden !');
+		}
+	}
+
+	# pages etc:
+	my $count		= $guestman->getItemCount($ENV{ADFRAME_CHANNEL},$AREA);
+	my $allpages	= int($count/$ITEMS_PER_PAGE);	
+	if ($count % $ITEMS_PER_PAGE > 0)
+	{
+		$allpages+=1;
+	}
+	my $page		= $in{page} || 1;
+
+	if ($in{nextpage} eq 'next')
+	{
+		if (($page*$ITEMS_PER_PAGE) >= $count)
+		{
+			$page = 1;
+		}
+		else
+		{
+			$page++;
+		}
+	}
+	elsif ($in{nextpage} eq 'prev')
+	{
+		$page--;
+		if ($page<1)
+		{
+			$page = $allpages;
+		}
+	}
+	
+	my $start	= ($page-1) * $ITEMS_PER_PAGE;
+			
+	$adframe->setValue('page',$page);
+	$adframe->setValue('allpages',$allpages);
+	$adframe->setValue('count',$count);
+
+	# fill loops:
+	my ($qual,$refValues,$start) = $guestman->getItems($ENV{ADFRAME_CHANNEL},$AREA,$start,$ITEMS_PER_PAGE);
+
+	$adframe->makeRepetition('LOOP_GUESTBOOK',$qual,$refValues);
+
+	my @guestValues	= @{ $refValues };
+	my @data		= ();
+
+	for (my $i=0;$i<=$#guestValues;$i++)
+	{
+		@data = split(/\|/,$guestValues[$i]);
+		my ($comqual,$commentRef) = $guestman->getComments($ENV{ADFRAME_CHANNEL},$AREA,$data[0]);
+		$adframe->makeRepetition("SUBCOMMENT_$data[0]",$comqual,$commentRef);
+
+		my ($redqual,$admincommentRef) = $guestman->getAdminComments($ENV{ADFRAME_CHANNEL},$AREA,$data[0]);
+		$adframe->makeRepetition("ADMINSUBCOMMENT_$data[0]",$redqual,$admincommentRef);
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}
+

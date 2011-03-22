@@ -1,0 +1,59 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::guestbook::GuestbookDbManager;
+1;
+
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $AREA			= $in{componentname};	
+	
+	configure($xmlfile,$AREA);
+	
+	$adframe->setValue('ADFRAME_GUESTBOOK_ID',$in{ADFRAME_GUESTBOOK_ID});
+
+	my $guestman = new GuestbookDbManager();
+	my %data = $guestman->getItemById($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_GUESTBOOK_ID});
+
+
+	foreach my $k (keys %data)
+	{
+		$adframe->setValue('ITEM_'.$k,$data{"$k"});
+	}
+
+	my $ADFRAME_USER_ID = $adframe->getFromSession('ADFRAME_USER_ID');
+
+	if ($in{adframe_event} eq 'admin_comment_form')
+	{
+		$adframe->setTypeAndDescr('COMMENT','none,required','Der Kommentar');
+
+		if (! $adframe->alertRequestErrors('COMMENT'))
+		{
+			$in{COMMENT} =~ s/\x0d/<br>/g;
+			if ($guestman->saveAdminComment($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_GUESTBOOK_ID},$ADFRAME_USER_ID,$in{COMMENT}))
+			{
+				newDoc('admin/adframe/components/guestbook/guestbook_overview');
+			}
+			else
+			{
+				$in{COMMENT} =~ s/<br>/\x0d/g;
+				$adframe->showAlert('Der Kommentar konnte leider nicht gespeichert werden, sorry!');
+			}
+		}
+	}
+}
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

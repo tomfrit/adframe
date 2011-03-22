@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	
+	<script language="javascript">
+	function deleteCategory(category_id,componentname,category)
+	{
+		var messagedel = "Soll die Kategorie "+category+" wirklich geloescht werden ?";
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/links/category_overview.html?id=<!-- #id# -->&adframe_event=category_delete&ADFRAME_LINKSCATEGORY_ID="+category_id+"&componentname="+componentname+"&CATEGORY="+category;
+			self.location.replace(stdel);
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">KATEGORIEN - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+	<form name="category_overview_form" action="/cgi-bin/adframe/admin/adframe/components/links/category_overview.html" method="post">
+	<input type="hidden" name="componentname" value="<!-- #componentname# -->">	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd">KATEGORIEN IM BEREICH: <!-- #COMPONENTTITLE# --></td>
+			<td class="componentheadtd" width="18">&nbsp;</td>
+			<td  class="componentheadtd"width="18">&nbsp;</td>		
+		</tr>
+		<repetition name="LOOP_CATEGORY">
+		<tr>
+			<td class="componentcontenttd" width="512">!CATEGORY!</td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteCategory(!ADFRAME_LINKSCATEGORY_ID!,'!AREA!','!CATEGORY!');"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE !CATEGORY!" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/links/category_edit.html?ADFRAME_LINKSCATEGORY_ID=!ADFRAME_LINKSCATEGORY_ID!&componentname=!AREA!" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT !CATEGORY!" width="18" height="18" border="0"></a></td>
+		</tr>
+		</repetition name="LOOP_CATEGORY">
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr><td height="2"></td></tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" colspan="2">NEUE KATEGORIE im Bereich: <!-- #COMPONENTTITLE# --></td>
+		</tr>		
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">KATEGORIE</td>
+			<td class="componentcontenttd"><input type="text" name="CATEGORY" size="58"></td>
+		</tr>
+		<tr>
+			<td class="componentcontenttd" colspan="2" align="right"><input type="submit" value="NEUE KATEGORIE ANLEGEN" class="inputtype"></td>
+		</tr>
+	</table>
+	</form>
+</div>
+
+</body>
+</html>

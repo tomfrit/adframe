@@ -1,0 +1,63 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::lib::io::HttpUploader;
+
+1;
+
+sub common
+{
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname		= $in{componentname};
+	my $conf			= configure($xmlfile,$componentname);
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+	my $mcms			= new ClassADFRAME_MCMS();
+	$adframe->setValue('GENIMAGEDIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir'));
+	
+	if ((ref $mcmsconf) && ($mcms->initById($in{ADFRAME_MCMS_ID}))) {
+		
+		my $textfield		= $mcmsconf->getFieldByName($in{EDIT_TEXT});
+		
+		if (ref $textfield)
+		{
+			$adframe->setValue('TEXTTITLE',$textfield->getTitle());
+		}
+		$adframe->setValue('HEADLINE',$mcms->getHEADLINE());				
+		$adframe->setValue('THE_TEXT',$mcms->getValue($in{EDIT_TEXT}));	
+		if($in{adframe_event} eq 'mcms_edittext_form') {
+			if ($in{ADFRAME_MCMS_ID} > 0 && $in{EDIT_TEXT} =~ /TEXT_/ && $in{TEXT} ne '') {		
+				$mcms->setValue($in{EDIT_TEXT},$in{TEXT});
+				if ($mcms->save()) {	
+				#debug();
+					$adframe->internLocation("admin/adframe/components/mcms/mcms_edit.html?componentname=$in{componentname}&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&EDIT_IMAGE=&page=$in{page}");
+				}
+				else {
+					$adframe->showAlert('Die Datei konnte leider nicht erstellt werden');
+				}
+			}
+			else	{
+				$adframe->error('Project Configuration error!');
+			}	
+		}		
+	}
+
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script language="javascript">
+	function deleteImage(imagename,name)
+	{
+		var messagedel = "Soll "+name+" wirklich geloescht werden ?"+'\nACHTUNG: Das Bild kann erst dann entfernt werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.links_edit_form.elements['DELETE_IMAGE'].value=imagename;
+			self.document.links_edit_form.submit();
+		}
+	}
+	function changeImage(imagename,name)
+	{
+		var messagedel = '\nACHTUNG: Das Bild kann erst dann bearbeitet werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.links_edit_form.elements['EDIT_IMAGE'].value=imagename;
+			self.document.links_edit_form.submit();
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite">
+
+<div id="componentheadline">Eintrag &auml;ndern - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+<form name="links_edit_form" action="/cgi-bin/adframe/admin/adframe/components/links/links_edit.html" method="post">
+<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+<input type="hidden" name="ADFRAME_LINKS_ID" value="<!-- #ADFRAME_LINKS_ID# -->">
+<input type="hidden" name="DELETE_IMAGE" value="">
+<input type="hidden" name="EDIT_IMAGE" value="">
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" align="center" colspan="4"><!-- #COMPONENTTITLE# --></td>
+		</tr>
+		
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">KATEGORIE</td>
+			<td class="componentcontenttd" colspan="3">
+				<select name="ADFRAME_LINKSCATEGORY_ID" class="inputtype">
+					<repetition name="LOOP_CATEGORY">
+					<option value="!ADFRAME_LINKSCATEGORY_ID!">!CATEGORY!
+					</repetition name="LOOP_CATEGORY">
+				</select></td>
+		</tr>
+			
+		
+		
+
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">TITEL</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="TITLE" size="58"></td>
+		</tr>
+
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">ADRESSE</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="URL" size="58"></td>
+		</tr>
+		
+
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top">BESCHREIBUNG</td>
+			<td class="componentcontenttd" colspan="3"><textarea name="DESCR" rows="18" cols="50"></textarea></td>
+		</tr>
+
+	</table>
+
+
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentcontenttd"  align="left"><a href="/admin/adframe/components/links/links_overview.html?componentname=<!-- #componentname# -->" class="tdinnernorm">[zur&uuml;ck]</a></td>
+			<td class="componentcontenttd"  align="right"><input type="submit" value="WEITER"  class="inputtype"></td>
+		</tr>
+	</table>
+</form>		
+</div>
+
+</body>
+</html>

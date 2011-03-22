@@ -1,0 +1,11 @@
+<repetition name = "IMAGES">
+	<div style="clear:left;margin-bottom:10px;">
+		<div style="float:left;margin:0 5px 5px 0;">
+			<a noadd href="#" onmousedown="$('#TEXT').tinymce().execCommand('mceInsertContent',false,'<img src=<!-- #DIR# -->/!URL!>');return false;">
+				<img src="<!-- #DIR# -->/THUMB_!URL!" />
+			</a>
+		</div>
+		<b>!URL!</b>
+		<a href="#" onclick="deleteImage('<!-- #DIR# -->/!URL!');return false;">x</a>
+	</div>
+</repetition name = "IMAGES">

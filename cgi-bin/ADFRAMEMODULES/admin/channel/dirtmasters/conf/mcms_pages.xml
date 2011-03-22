@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> 
+
+<configuration>
+	<httpgenerator>
+		<template url="index_start.html" storefile="cms/index_start.html"/>
+		<template url="racing/index.html" storefile="cms/race/index.html"/>
+	
+	</httpgenerator>
+</configuration>	

@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script language="javascript">
+	function deleteImage(imagename,name)
+	{
+		var messagedel = "Soll "+name+" wirklich geloescht werden ?"+'\nACHTUNG: Das Bild kann erst dann entfernt werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.teasercms_edit_form.elements['DELETE_IMAGE'].value=imagename;
+			self.document.teasercms_edit_form.submit();
+		}
+	}
+	function changeImage(imagename,name)
+	{
+		//var messagedel = '\nACHTUNG: Das Bild kann erst dann bearbeitet werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		//var okdel = confirm(messagedel);
+		var okdel = true;
+		if (okdel)
+		{
+			self.document.teasercms_edit_form.elements['EDIT_IMAGE'].value=imagename;
+			self.document.teasercms_edit_form.submit();
+		}
+	}
+	
+	function deleteDialog()
+	{
+		var messagedel = '\nACHTUNG: Das diese Aktion kann erst ausgeführt werden, sobald alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.teasercms_edit_form.elements['DIALOG'].value='';
+			self.document.teasercms_edit_form.elements['DIALOG_PARAM'].value='';
+			self.document.teasercms_edit_form.elements['DEL_DIALOG'].value='_DEL_';
+			self.document.teasercms_edit_form.submit();
+		}	
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite">
+
+<div id="componentheadline">Eintrag &auml;ndern - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+<form name="teasercms_edit_form" action="/cgi-bin/adframe/admin/adframe/components/teasercms/teasercms_edit.html" method="post">
+<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+<input type="hidden" name="ADFRAME_TEASERCMS_ID" value="<!-- #ADFRAME_TEASERCMS_ID# -->">
+<input type="hidden" name="page" value="<!-- #page# -->">
+<input type="hidden" name="DIALOG" value="<!-- #DIALOG# -->">
+<input type="hidden" name="DELETE_IMAGE" value="">
+<input type="hidden" name="EDIT_IMAGE" value="">
+<input type="hidden" name="DEL_DIALOG" value="">
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" align="center" colspan="3"><!-- #COMPONENTTITLE# --></td>
+		</tr>
+		
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">AUTOR</td>
+			<switch name="SWITCH_DEFAULT_AUTHOR">
+			<td class="componentcontenttd" align="left" colspan="2"><!-- #AUTHOR_FIRSTNAME# --> <!-- #AUTHOR_NAME# --></td>
+			</switch name="SWITCH_DEFAULT_AUTHOR">
+			<switch name="SWITCH_AUTHOR">
+			<td class="componentcontenttd" align="left" colspan="2">
+				<select name="AUTHOR">
+					<repetition name="LOOP_AUTHOR">
+					<option value="!ADFRAME_USER_ID!">!FIRSTNAME! !NAME!
+					</repetition name="LOOP_AUTHOR">
+				</select></td>
+			</switch name="SWITCH_AUTHOR">
+		</tr>
+		
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">KATEGORIE</td>
+			<td class="componentcontenttd" colspan="2">
+				<select name="ADFRAME_TEASERCMSCATEGORY_ID">
+					<repetition name="LOOP_CATEGORY">
+					<option value="!ADFRAME_TEASERCMSCATEGORY_ID!">!CATEGORY!
+					</repetition name="LOOP_CATEGORY">
+				</select></td>
+		</tr>
+		<switch name="SWITCH_HEADLINE">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top">HEADLINE 2</td>
+			<td class="componentcontenttd" colspan="2"><textarea name="HEADLINE" rows="2" cols="50"></textarea></td>
+		</tr>		
+		<!-- <tr>
+			<td class="componentheadtd" width="100" valign="top">HEADLINE</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="TESTHEADLINE" size="58"></td>
+		</tr> -->
+		</switch name="SWITCH_HEADLINE">
+		<switch name="SWITCH_TEASERTEXT">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top">TEASER-TEXT</td>
+			<td class="componentcontenttd" colspan="2"><textarea name="TEASERTEXT" rows="18" cols="50"></textarea></td>
+		</tr>
+		</switch name="SWITCH_TEASERTEXT">
+		<switch name="SWITCH_CONTENTTEXT_1">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top"><!-- #TITLE_CONTENTTEXT_1# --></td>
+			<td class="componentcontenttd" colspan="2"><textarea name="CONTENTTEXT_1" rows="18" cols="50"></textarea></td>
+		</tr>
+		</switch name="SWITCH_CONTENTTEXT_1">
+		<switch name="SWITCH_CONTENTTEXT_2">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top">CONTENT-TEXT 2</td>
+			<td class="componentcontenttd" colspan="2"><textarea name="CONTENTTEXT_2" rows="18" cols="50"></textarea></td>
+		</tr>
+		</switch name="SWITCH_CONTENTTEXT_2">
+		<switch name="SWITCH_CONTENTTEXT_3">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top">CONTENT-TEXT 3</td>
+			<td class="componentcontenttd" colspan="2"><textarea name="CONTENTTEXT_3" rows="18" cols="50"></textarea></td>
+		</tr>
+		</switch name="SWITCH_CONTENTTEXT_3">
+		<switch name="SWITCH_EXT_1">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top"><!-- #TITLE_EXT_1# --></td>
+			<td class="componentcontenttd" colspan="2"><input type="text" name="EXT_1" size="58"></td>
+		</tr>
+		</switch name="SWITCH_EXT_1">
+		<switch name="SWITCH_EXT_2">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top"><!-- #TITLE_EXT_2# --></td>
+			<td class="componentcontenttd" colspan="2"><input type="text" name="EXT_2" size="58"></td>
+		</tr>
+		</switch name="SWITCH_EXT_2">
+		<switch name="SWITCH_EXT_3">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top"><!-- #TITLE_EXT_3# --></td>
+			<td class="componentcontenttd" colspan="2"><input type="text" name="EXT_3" size="58"></td>
+		</tr>
+		</switch name="SWITCH_EXT_3">
+		<switch name="SWITCH_EXT_4">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top"><!-- #TITLE_EXT_4# --></td>
+			<td class="componentcontenttd" colspan="2"><input type="hidden" name="EXT_4" value="<!-- #EXT_4# -->" size="58"><!-- #EXT_4# -->&nbsp;</td>
+		</tr>
+		</switch name="SWITCH_EXT_4">	
+	</table>	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">	
+		<switch name="SWITCH_SEL_1">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top"><!-- #TITLE_SEL_1# --></td>
+			<td class="componentcontenttd" colspan="3">
+				<select name="SEL_1">
+				<repetition name="LOOP_SEL_1">
+				<option value="!OPTION_VALUE!">!OPTION_TITLE!
+				</repetition name="LOOP_SEL_1">
+				</select></td>
+		</tr>
+		</switch name="SWITCH_SEL_1">
+		<switch name="SWITCH_SEL_2">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top"><!-- #TITLE_SEL_2# --></td>
+			<td class="componentcontenttd" colspan="3">
+				<table class="componenttable" cellpadding="1" cellspacing="2" bgcolor="#ffffff">
+				<tr>
+					<repetition name="LOOP_SEL_2">
+					<td width="!OPTION_WIDTH!" height="!OPTION_HEIGHT!" bgcolor="!OPTION_BGCOLOR!" align="center" valign="middle"><input type="radio" name="SEL_2" value="!OPTION_VALUE!">!OPTION_TITLE!</td>
+					</repetition name="LOOP_SEL_2">
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</switch name="SWITCH_SEL_2">
+		
+		<switch name="SWITCH_DIALOG">
+		<input type="hidden" name="DIALOG_PARAM" value="<!-- #DIALOG_PARAM# -->">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top"><!-- #TITLE_DIALOG# -->&nbsp;</td>
+			<td class="componentcontenttd" width="480" align="left"><!-- #DIALOG# -->&nbsp;<br><a noadd href="javascript:alert('<!-- #DIALOG_PARAM# -->')">[Parameter ansehen]</a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteDialog();" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a></td>			
+			<td class="componentcontenttd" width="18" valign="middle" align="right"><a noadd href="/cgi-bin/adframe/<!-- #SRC_DIALOG# -->?id=<!-- #id# -->&componentname=<!-- #componentname# -->&ADFRAME_TEASERCMS_ID=<!-- #ADFRAME_TEASERCMS_ID# -->&page=<!-- #page# -->&ref=edit&dialogVal=<!-- #DIALOG# -->&<!-- #DIALOG_PARAM# -->" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+		</tr>	
+		</switch name="SWITCH_DIALOG">		
+	</table>
+	
+	<switch name="SWITCH_IMAGES">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" align="center" colspan="2">BILDER</td>
+			<td class="componentheadtd" width="18">&nbsp;</td>
+			<td  class="componentheadtd"width="18">&nbsp;</td>	
+		</tr>
+		<switch name="SWITCH_IMAGE_1">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top"><!-- #TITLE_IMAGE_1# --></td>
+			<td class="componentcontenttd" align="left"><img src="<!-- #IMAGE_1_UPLOADPATH# -->/<!-- #IMAGE_1# -->" border="0" width="<!-- #IMAGE_1_WIDTH# -->"></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteImage('IMAGE_1','Teaser-Bild');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: changeImage('IMAGE_1');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+		</tr>
+		</switch name="SWITCH_IMAGE_1">
+		<switch name="SWITCH_IMAGE_2">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top"><!-- #TITLE_IMAGE_2# --></td>
+			<td class="componentcontenttd" align="left"><img src="<!-- #IMAGE_2_UPLOADPATH# -->/<!-- #IMAGE_2# -->" border="0" width="<!-- #IMAGE_2_WIDTH# -->"></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteImage('IMAGE_2','Content-Bild');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: changeImage('IMAGE_2');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+		</tr>
+		</switch name="SWITCH_IMAGE_2">
+		<switch name="SWITCH_IMAGE_3">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top"><!-- #TITLE_IMAGE_3# --></td>
+			<td class="componentcontenttd" align="left"><img src="<!-- #IMAGE_3_UPLOADPATH# -->/<!-- #IMAGE_3# -->" border="0" width="<!-- #IMAGE_3_WIDTH# -->""></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteImage('IMAGE_3','Content-Bild 2');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: changeImage('IMAGE_3');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+		</tr>
+		</switch name="SWITCH_IMAGE_3">
+		<switch name="SWITCH_IMAGE_4">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top"><!-- #TITLE_IMAGE_4# --></td>
+			<td class="componentcontenttd" align="left"><img src="<!-- #IMAGE_4_UPLOADPATH# -->/<!-- #IMAGE_4# -->" border="0" width="<!-- #IMAGE_4_WIDTH# -->" height="<!-- #IMAGE_4_HEIGHT# -->"></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteImage('IMAGE_4','Content-Bild 2');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: changeImage('IMAGE_4');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+		</tr>
+		</switch name="SWITCH_IMAGE_4">
+	</table>
+	</switch name="SWITCH_IMAGES">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentcontenttd"  align="left"><a href="/admin/adframe/components/teasercms/teasercms_overview.html?componentname=<!-- #componentname# -->&page=<!-- #page# -->" class="tdinnernorm">[zur&uuml;ck]</a></td>
+			<td class="componentcontenttd"  align="right"><input type="submit" value="WEITER" class="inputtype"></td>
+		</tr>
+	</table>
+</form>		
+</div>
+
+</body>
+</html>

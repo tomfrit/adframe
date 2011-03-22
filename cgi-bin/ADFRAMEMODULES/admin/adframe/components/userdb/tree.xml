@@ -1,0 +1,7 @@
+<?xml version="1.0" standalone="yes" encoding="utf-8"?>
+<configuration>
+	<folder name="adframeuserdbfolder" title="User-Datenbank" type="componentstartfolder" url="/admin/adframe/components/userdb/start.html" parent="start">
+		<item name="adframeuserdbitem1" title="Übersicht/Suche" url="/admin/adframe/components/userdb/userdb_overview.html" parent="adframeuserdbfolder"/>
+		<item name="adframeuserdbitem2" title="Neuer User" url="/admin/adframe/components/userdb/userdb_user_new.html" parent="adframeuserdbfolder"/>
+	</folder>
+</configuration>

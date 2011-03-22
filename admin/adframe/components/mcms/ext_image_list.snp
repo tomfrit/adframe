@@ -1,0 +1,66 @@
+	<repetition name="LOOP_EXTENSION">
+
+
+
+		<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center" style="margin-top:10px;">
+			<switch name="SWITCH_IMG_EXT_1">
+				<tr>
+					<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_IMG_EXT_1# -->&nbsp;</td>
+					<td class="componentheadtd" valign="top">
+						<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="99%" align="center">
+							<tr>
+								<td class="componentcontenttd" align="left">
+									<img src="<!-- #GENIMAGEDIR# -->/THUMB_!IMG_EXT_1!?random=<!-- #RANDOM# -->" border="0" alt="<!-- #TITLE_IMG_EXT_1# -->">
+								</td>
+								<td class="componentcontenttd" width="18" valign="top" align="center">
+										<form action="/cgi-bin/adframe/admin/adframe/components/mcms/ajax_ext_upload.html" method="post" enctype="multipart/form-data" id="FORM_!ADFRAME_MCMS_EXT_ID!_IMG_EXT_1" name="ajax_upload_form">
+											<input type="hidden" name="componentname" value="<!-- #componentname# -->" />
+											<input type="hidden" name="adframe_event" value="ajax_upload_form" />
+											<input type="hidden" name="ADFRAME_MCMS_EXT_ID" value="!ADFRAME_MCMS_EXT_ID!" />
+											<input type="hidden" name="ADFRAME_MCMS_ID" value="!ADFRAME_MCMS_ID!" />
+											<input type="hidden" name="EDIT_IMAGE" value="IMG_EXT_1" />
+											<input type="file" name="FILE_IMAGE" id="!ADFRAME_MCMS_EXT_ID!_FILE_IMAGE_IMG_EXT_1" onchange="upload('FORM_!ADFRAME_MCMS_EXT_ID!_IMG_EXT_1')" />
+										</form>
+										<div id="loader_FORM_!ADFRAME_MCMS_EXT_ID!_IMG_EXT_1"></div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</switch name="SWITCH_IMG_EXT_1">
+
+
+		<switch name="SWITCH_ITEM_EXT_1">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_ITEM_EXT_1# -->&nbsp;</td>
+			<td class="componentcontenttd"><input type="text" name="ITEM_EXT_1_EXTID!ADFRAME_MCMS_EXT_ID!" value="!ITEM_EXT_1!" maxlength="127" size="64" onchange="javascript: void setChangesMade()"></td>
+		</tr>
+		</switch name="SWITCH_ITEM_EXT_1">
+
+		<switch name="SWITCH_ITEM_EXT_2">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_ITEM_EXT_2# -->&nbsp;</td>
+			<td class="componentcontenttd"><input type="text" name="ITEM_EXT_2_EXTID!ADFRAME_MCMS_EXT_ID!" value="!ITEM_EXT_2!" maxlength="127" size="64" onchange="javascript: void setChangesMade()"></td>
+		</tr>
+		</switch name="SWITCH_ITEM_EXT_2">
+
+		<switch name="SWITCH_TEXT_EXT">
+		<tr>
+
+				<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_TEXT_EXT# -->&nbsp;</td>
+				<td class="componentcontenttd">
+					<form id="TEXT_FORM_!ADFRAME_MCMS_EXT_ID!_TEXT_EXT">
+						<textarea rows="8" cols="55" onchange="saveText('!ADFRAME_MCMS_EXT_ID!','TEXT_EXT',$(this).val())">!TEXT_EXT!</textarea>
+					</form>
+				</td>
+
+		</tr>
+		</switch name="SWITCH_TEXT_EXT">
+		<tr>
+			<td class="componentheadtd" colspan="2" align="right">
+				<input type="button" name="addbutton" value="diesen Datensatz löschen" style="background: #dddddd; heigth: 20px; font-size: 10;" onclick="javascript: waitScreen(); deleteItem(!ADFRAME_MCMS_EXT_ID!);">
+			</td>
+		</tr>
+	</table>
+	</repetition name="LOOP_EXTENSION">
+

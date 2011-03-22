@@ -1,0 +1,80 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::lib::io::HttpUploader;
+use POSIX qw(strftime);
+use GD;
+$MAX_IMAGE_WIDTH = 480;
+1;
+
+sub common
+{
+
+	my $genimagedir		= '/cms/blog/img';
+	my $uploadpath 		= "$ENV{ADFRAME_DOC_PATH}"."$genimagedir";
+	
+		
+	$timestamp = strftime "%Y%m%d%H%M%S", localtime;
+
+	
+	#debug($genimagedir,$ENV{ADFRAME_DOC_PATH},$ENV{ADFRAME_CHANNEL},$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+
+	if ($in{adframe_event} eq 'blog_addimage_form')
+	{
+		if(($in{FILE_IMAGE} ne '') && (-e $uploadpath))
+		{
+			my $uploader 		= new HttpUploader();
+			($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)	= localtime(time);
+			
+			my $imagefilename 	= 'BLOGIMAGE_'.$timestamp;
+			my $dbFileName 		= $uploader->storeImage($uploadpath,$imagefilename,$in{FILE_IMAGE});
+			if ($dbFileName ne '')
+			{
+				
+				$image = new GD::Image($uploadpath.'/'.$dbFileName);
+	  			($width,$height) = $image->getBounds();	
+	  			$width = $MAX_IMAGE_WIDTH if($width>$MAX_IMAGE_WIDTH);
+				$adframe->setSwitch('FORM','off');
+				$adframe->setValue('IMAGE',$dbFileName);
+				$adframe->setValue('BU',$in{BU});
+				$adframe->setValue('WIDTH',$width);
+			}
+			else
+			{
+				$adframe->showAlert('Die Datei konnte leider nicht erstellt werden');
+			}
+				
+			
+		}
+
+		else
+		{
+			$adframe->error('Project Configuration error!');
+		}
+	}
+	else
+	{
+		$adframe->setSwitch('RESULT','off');
+	}
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);	
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

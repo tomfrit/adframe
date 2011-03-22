@@ -1,0 +1,79 @@
+$MAX_IMAGE_WIDTH = 480;
+$FLOAT_IMAGE_WIDTH = 250;
+1;
+
+sub common
+{
+
+	#debug();
+	my $text 	= $in{text};
+
+	
+	$text2	 	= parseText($text);
+	#$text	 	= parseText($text);
+
+	$adframe->setValue('TEXT',$text);
+
+	
+}
+
+sub parseText
+{
+	my $text	= shift;
+	my @code;
+	@urls = $text =~ /\[\[(([^\[\]])*)$\]\]/gi;
+			
+	for (my $count=0;$count<=$#urls;$count++)
+	{
+		$code[$count] = getLink($urls[$count]);
+		$text =~ s/\[\[$urls[$count]\]\]/$code[$count]/gi;
+	}
+	return $text;	
+}
+
+
+sub getLink
+{
+	my $url	= shift;
+	$url 	=~ s/&#x7c;/\|/g;
+	my ($link,$bu,$width,$float) = split(/\|/,$url);
+	
+	
+	if ($link =~ /.jpg|.png|.gif/)
+	{
+		my $imagepath = '/cms/blog/img';
+		$UPLOADPATH	= "$ENV{ADFRAME_DOC_PATH}".$imagepath;
+		my ($pre,$suf) = split(/\./,$link);
+		my $image_name	= $pre.'_'.$width.'.'.$suf;
+		
+		$width = $MAX_IMAGE_WIDTH if ($width > $MAX_IMAGE_WIDTH);
+		
+		if (-e $UPLOADPATH.'/'.$link) 
+		{
+		
+			if (!-e $UPLOADPATH.'/'.$image_name) {
+		
+				use de::adframe::lib::io::HttpUploader;
+				my $uploader 		= new HttpUploader();
+				my $image_generated	= $uploader->resize($UPLOADPATH,$link,$image_name,$width);
+			}
+		}
+		else { $image_name = 'DEFIMG_0.gif'; }
+		$float = $float || 'left';
+		if($width <= $FLOAT_IMAGE_WIDTH && $float ne 'none')
+		{
+			$linker_start 	= '<div style="float:'.$float.';">';
+			$linker_end	= '</div>';
+		}
+		else
+		{
+			$linker_start 	= '<p>';
+			$linker_end	= '</p>';
+		}
+		return $linker_start.'<img src="'.$imagepath.'/'.$image_name.'"><br><span class="contentsmall">'.$bu.'</span>'.$linker_end;
+	}
+	elsif ($link =~ /http:\/\//) { return '<a href="'.$link.'" target="_blank">'.$bu.'</a>'; }
+	else { return '<a href="/cgi-bin/adframe/'.$link.'">'.$bu.'</a>'; }
+
+
+}

@@ -1,0 +1,28 @@
+1;
+
+sub common
+{
+
+	my $ADFRAME_MCMS_ID	= $in{ADFRAME_MCMS_ID};
+	if($in{action} eq '_delImage') {
+		my $url 		= $in{URL};
+		my $new_url = $url;
+		$new_url 		=~ s/(.*)\/([^\/]+)$/$1\/DELETED\_$2/;
+		#debug($url,$new_url);
+		rename $ENV{ADFRAME_DOC_PATH}.$url,$ENV{ADFRAME_DOC_PATH}.$new_url or die($!);
+	}
+	my $genimagedir		= $in{GENIMAGEDIR} || $adframe->getValue('GENIMAGEDIR');
+	$adframe->setValue('DIR',$genimagedir);
+	my $uploadpath 		= "$ENV{ADFRAME_DOC_PATH}"."$genimagedir";
+
+	my @imgList = glob $uploadpath."/IMAGE_".$ADFRAME_MCMS_ID."*.*";
+	#debug(@imgList);
+	grep(s/..($genimagedir)\///i,@imgList);
+	foreach(@imgList) {
+		push(@ret,"[\"$_\",\"$genimagedir/$_\"]");
+	}
+	$list = join(",\n",@ret);
+#	debug($list);
+	$adframe->setValue('ARRAY',$list);
+	$adframe->makeRepetition(IMAGES,'!URL!',\@imgList);
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">KATEGORIE BEREICH <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent"> 
+	<form name="category_edit_form" action="/cgi-bin/adframe/admin/adframe/components/teasercms/category_edit.html" method="post">
+	<input type="hidden" name="ADFRAME_TEASERCMSCATEGORY_ID" value="<!-- #ADFRAME_TEASERCMSCATEGORY_ID# -->">	
+	<input type="hidden" name="componentname" value="<!-- #componentname# -->">	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr><td height="2"></td></tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" colspan="2">KATEGORIE BEARBEITEN <!-- #COMPONENTTITLE# --></td>
+		</tr>		
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">KATEGORIE</td>
+			<td class="componentcontenttd"><input type="text" name="CATEGORY" size="58"></td>
+		</tr>
+		<tr>
+			<td class="componentcontenttd"  align="left"><a href="/admin/adframe/components/teasercms/category_overview.html?componentname=<!-- #componentname# -->" class="tdinnernorm">[zur&uuml;ck]</a></td>
+			<td class="componentcontenttd"  align="right"><input type="submit" value="OK"></td>
+		</tr>
+	</table>
+	</form>
+</div>
+
+</body>
+</html>

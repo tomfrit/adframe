@@ -1,0 +1,14 @@
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS_EXT;
+1;
+sub common
+{
+	my $ext									= new ClassADFRAME_MCMS_EXT();
+	my $ADFRAME_MCMS_EXT_ID	= $in{ADFRAME_MCMS_EXT_ID};
+	my $text 								= $in{TEXT};
+	my $field								= $in{FIELD};
+
+	if($ext->initById($in{ADFRAME_MCMS_EXT_ID})) {
+		$ext->setValue($field,$text);
+		$ext->save();
+	}
+}

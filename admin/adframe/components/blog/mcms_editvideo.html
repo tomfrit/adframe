@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script>
+	function waitScreen()
+	{
+		//document.all.waitoben.style.visibility = 'visible';
+		document.all.waitunten.style.visibility = 'visible';
+	}	
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">Videoupload: Artikel <!-- #ADFRAME_MCMS_ID# --> / <!-- #VIDEOTITLE# --></div>
+
+<div id="componentcontent"> 	
+<form name="mcms_editvideo_form" action="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_editvideo.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="componentname" value="<!-- #componentname# -->">	
+<input type="hidden" name="ADFRAME_MCMS_ID" value="<!-- #ADFRAME_MCMS_ID# -->">	
+<input type="hidden" name="EDIT_VIDEO" value="<!-- #EDIT_VIDEO# -->">
+<input type="hidden" name="page" value="<!-- #page# -->">
+
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="20"></td></tr>
+	</table>
+
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">		
+		<tr>
+			<td class="componentheadtd" align="center" colspan="2">VIDEOUPLOAD F&Uuml;R <!-- #VIDEOTITLE# --></td>
+		</tr>
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">BISHERIGES FLV-VIDEO</td>
+			<td class="componentcontenttd" align="left">
+							<div style="overflow:hidden;" class="content">					
+					
+							<object type="application/x-shockwave-flash"  <!-- #VIDEO_ATTRIBUTES# -->
+							wmode="transparent" data="/admin/adframe/img/flvplayer.swf?file=<!-- #GENVIDEODIR# -->/<!-- #THE_VIDEO# -->">
+							<param name="movie" value="/admin/adframe/img/flvplayer.swf?file=<!-- #GENVIDEODIR# -->/<!-- #THE_VIDEO# -->" />
+							<param name="flashvars" value="image=<!-- #GENVIDEODIR# -->/<!-- #THE_VIDEO_IMAGE# -->" />
+
+							<param name="wmode" value="transparent" />		
+							<embed src="/admin/adframe/img/flvplayer.swf?file=<!-- #GENVIDEODIR# -->/<!-- #THE_VIDEO# -->" 
+							 <!-- #VIDEO_ATTRIBUTES# --> bgcolor="#000000" flashvars="image=<!-- #GENVIDEODIR# -->/<!-- #THE_VIDEO_IMAGE# -->"
+							type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer"></embed>		
+							</object>									
+						</div></td>
+		</tr>
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">NEUE FLV-DATEI</td>
+			<td class="componentcontenttd" align="left" width="478"><input type="file" name="FILE_VIDEO"></td>
+		</tr>
+		<tr><td height="10">&nbsp;</td></tr>
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">BISHERIGE STARTBILD</td>
+			<td class="componentcontenttd" align="left"><img src="<!-- #GENVIDEODIR# -->/<!-- #THE_VIDEO_IMAGE# -->?random=<!-- #RANDOM# -->" border="0"  alt="<!-- #IMAGE_TITLE# -->"></td>
+		</tr>
+		</tr>
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">NEUES STARTBILD</td>
+			<td class="componentcontenttd" align="left" width="478"><input type="file" name="FILE_IMAGE"></td>
+		</tr>	
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="120" valign="middle" align="center">&nbsp;<div id="waitunten" style="visibility: hidden"><font color="#ffcc00">BITTE WARTEN</font></div></td>
+			<td class="componentcontentwhitetd" width="80" valign="top" align="center">zur&uuml;ck<br><a href="/admin/adframe/components/mcms/mcms_edit.html?componentname=<!-- #componentname# -->&ADFRAME_MCMS_ID=<!-- #ADFRAME_MCMS_ID# -->&page=<!-- #page# -->" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>								
+			<td class="componentcontentwhitetd" width="316" valign="top" align="center">&nbsp;</td>					
+			<td class="componentcontentwhitetd" width="80" valign="middle" align="center"><input type="submit" value="upload" class="tdbuttonred" onclick="javascript: waitScreen()"></td>					
+		</tr>
+	</table>
+	</form>
+</div>
+
+</body>
+</html>

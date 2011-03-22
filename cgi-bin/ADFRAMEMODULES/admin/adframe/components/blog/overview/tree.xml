@@ -1,0 +1,6 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframesblogfolder" title="CMS-Verwaltung" type="componentstartfolder" url="/admin/adframe/components/blog/overview/list.html" parent="start">
+		<item name="adframeblogitem2" title="Artikel-Ranking" url="/admin/adframe/components/blog/overview/list.html" parent="adframeblogfolder"/>
+	</folder>
+</configuration>

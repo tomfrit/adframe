@@ -1,0 +1,256 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script language="javascript">
+	function deleteImage(imagename,name)
+	{
+		var messagedel = "Soll "+name+" wirklich geloescht werden ?"+'\nACHTUNG: Das Bild kann erst dann entfernt werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.voting_new_form.elements['DELETE_IMAGE'].value=imagename;
+			self.document.voting_new_form.submit();
+		}
+	}
+	function changeImage(imagename,name)
+	{
+		var messagedel = '\nACHTUNG: Das Bild kann erst dann bearbeitet werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.voting_edit_form.elements['EDIT_IMAGE'].value=imagename;
+			self.document.voting_edit_form.submit();
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite">
+
+<div id="componentheadline">Eintrag bearbeiten - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+<form name="voting_edit_form" action="/cgi-bin/adframe/admin/adframe/components/voting/voting_edit.html" method="post">
+<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+<input type="hidden" name="ADFRAME_VOTING_CATEGORY_ID" value="<!-- #ADFRAME_VOTING_CATEGORY_ID# -->">
+<input type="hidden" name="DELETE_IMAGE" value="">
+<input type="hidden" name="EDIT_IMAGE" value="">
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" align="center" colspan="4"><!-- #COMPONENTTITLE# --></td>
+		</tr>
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">ZEITRAUM</td>
+			<td class="componentcontenttd" align="left">
+				<select name="CR_DATE_DAY" class="inputtype">
+					<option value="01">1.
+					<option value="02">2.
+					<option value="03">3.
+					<option value="04">4.
+					<option value="05">5.
+					<option value="06">6.
+					<option value="07">7.
+					<option value="08">8.
+					<option value="09">9.
+					<option value="10">10.
+					<option value="11">11.
+					<option value="12">12.
+					<option value="13">13.
+					<option value="14">14.
+					<option value="15">15.
+					<option value="16">16.
+					<option value="17">17.
+					<option value="18">18.
+					<option value="19">19.
+					<option value="20">20.
+					<option value="21">21.
+					<option value="22">22.
+					<option value="23">23.
+					<option value="24">24.
+					<option value="25">25.
+					<option value="26">26.
+					<option value="27">27.
+					<option value="28">28.
+					<option value="29">29.
+					<option value="30">30.
+					<option value="31">31.
+				</select>
+				<select name="CR_DATE_MONTH" class="inputtype">
+					<option value="01">Januar
+					<option value="02">Februar
+					<option value="03">M&auml;rz
+					<option value="04">April
+					<option value="05">Mai
+					<option value="06">Juni
+					<option value="07">Juli
+					<option value="08">August
+					<option value="09">September
+					<option value="10">Oktober
+					<option value="11">November
+					<option value="12">Dezember
+				</select>
+	   			<select name="CR_DATE_YEAR" class="inputtype">
+					<option value="2003">2003
+					<option value="2004">2004
+					<option value="2005">2005
+					<option value="2006">2006
+					<option value="2007">2007
+					<option value="2008">2008
+					<option value="2009">2009
+					<option value="2010">2010
+					<option value="2011">2011
+					<option value="2012">2012
+					<option value="2013">2013
+					<option value="2014">2014
+					<option value="2015">2015
+					<option value="2016">2016
+					<option value="2017">2017
+					<option value="2018">2018
+					<option value="2019">2019
+					<option value="2020">2020
+				</select></td>
+			<td class="componentcontenttd" align="center">BIS</td>
+			<td class="componentcontenttd" align="right">
+				<select name="END_DATE_DAY" class="inputtype">
+					<option value="01">1.
+					<option value="02">2.
+					<option value="03">3.
+					<option value="04">4.
+					<option value="05">5.
+					<option value="06">6.
+					<option value="07">7.
+					<option value="08">8.
+					<option value="09">9.
+					<option value="10">10.
+					<option value="11">11.
+					<option value="12">12.
+					<option value="13">13.
+					<option value="14">14.
+					<option value="15">15.
+					<option value="16">16.
+					<option value="17">17.
+					<option value="18">18.
+					<option value="19">19.
+					<option value="20">20.
+					<option value="21">21.
+					<option value="22">22.
+					<option value="23">23.
+					<option value="24">24.
+					<option value="25">25.
+					<option value="26">26.
+					<option value="27">27.
+					<option value="28">28.
+					<option value="29">29.
+					<option value="30">30.
+					<option value="31">31.
+				</select>
+				<select name="END_DATE_MONTH" class="inputtype">
+					<option value="01">Januar
+					<option value="02">Februar
+					<option value="03">M&auml;rz
+					<option value="04">April
+					<option value="05">Mai
+					<option value="06">Juni
+					<option value="07">Juli
+					<option value="08">August
+					<option value="09">September
+					<option value="10">Oktober
+					<option value="11">November
+					<option value="12">Dezember
+				</select>
+	   			<select name="END_DATE_YEAR" class="inputtype">
+					<option value="2003">2003
+					<option value="2004">2004
+					<option value="2005">2005
+					<option value="2006">2006
+					<option value="2007">2007
+					<option value="2008">2008
+					<option value="2009">2009
+					<option value="2010">2010
+					<option value="2011">2011
+					<option value="2012">2012
+					<option value="2013">2013
+					<option value="2014">2014
+					<option value="2015">2015
+					<option value="2016">2016
+					<option value="2017">2017
+					<option value="2018">2018
+					<option value="2019">2019
+					<option value="2020">2020
+				</select></td>
+
+		</tr>
+
+
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top">FRAGE</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="TITLE" size="66"></td>
+		</tr>
+
+		
+		
+
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">TEXT</td>
+			<td class="componentcontenttd" colspan="3"><textarea cols="50" rows="5" name="TEXT"><!-- #TEXT# --></textarea></td>
+		</tr>
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">GEWINNSPIEL?</td>
+			<td class="componentcontenttd" colspan="3">
+				<select name="IS_RAFFLE">
+					<option value="0">nein
+					<option value="1">ja
+				</select>
+			</td>
+		</tr>
+
+
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+
+		<tr>
+			<td class="componentheadtd" align="center" colspan="2">BILDER</td>
+			<td class="componentheadtd" width="18">&nbsp;</td>
+			<td  class="componentheadtd"width="18">&nbsp;</td>	
+		</tr>
+
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">BILD</td>
+			<td class="componentcontenttd" align="left"><img src="/cms/voting/<!-- #IMG# -->?u=<!-- #RANDOM# -->"></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center">&nbsp;</td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: changeImage('IMAGE');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+		</tr>
+		<tr>
+			<td class="componentheadtd" align="center" colspan="2">OPTIONEN</td>
+			<td class="componentheadtd" width="18">&nbsp;</td>
+			<td  class="componentheadtd"width="18">&nbsp;</td>	
+		</tr>
+
+<repetition name="OPTIONS">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">!ITEM_0!</td>
+			<td class="componentcontenttd" align="left"><input type="text" name="!ITEM_0!" size="56" value="!TITLE!"></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center">&nbsp;</td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center">!VOTES!</td>
+		</tr>
+</repetition name="OPTIONS">
+
+	
+	</table>
+
+	
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentcontenttd"  align="right"><input type="submit" value="WEITER" class="inputtype"></td>
+		</tr>
+	</table>
+</form>		
+</div>
+
+</body>
+</html>

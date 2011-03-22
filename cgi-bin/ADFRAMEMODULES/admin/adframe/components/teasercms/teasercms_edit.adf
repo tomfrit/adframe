@@ -1,0 +1,224 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::user::AdframeUserDbManager;
+use de::adframe::components::user::AdframeUser;
+use de::adframe::components::teasercms::TeaserCmsDbManager;
+1;
+
+sub common
+{
+	my $IMAGE_EMPTY		= 'clear_dot.gif';
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my @inputFields		= configure($xmlfile,$componentname);
+	my $cmsman	 		= new TeaserCmsDbManager();
+	
+	if ($in{ADFRAME_TEASERCMS_ID} eq '')
+	{
+		$adframe->error('No Dataset-Id defined');
+	}
+		
+	# categories
+	my ($qual,$categoryRef) = $cmsman->getCategories($ENV{ADFRAME_CHANNEL},$componentname,-1);
+	$adframe->makeRepetition('LOOP_CATEGORY',$qual,$categoryRef);
+
+	if ($in{adframe_event} eq 'teasercms_edit_form')
+	{
+		if ($in{DEL_DIALOG} eq '_DEL_')
+		{
+			$adframe->setTypeAndDescr('DIALOG','none','');
+		}
+		if (! $adframe->alertRequestErrors(@inputFields))
+		{
+			$in{TEASERTEXT} =~ s/\x0d/<br>/g;
+			$in{CONTENTTEXT_1} =~ s/\x0d/<br>/g;
+			$in{CONTENTTEXT_2} =~ s/\x0d/<br>/g;
+			$in{CONTENTTEXT_3} =~ s/\x0d/<br>/g;
+			$in{EXT_2} =~ s/\xbb/\&raquo;/g;
+			$in{EXT_2} =~ s/\xab/\&laquo;/g;
+			$in{CONTENTTEXT_1} =~ s/\xbb/\&raquo;/g;
+			$in{CONTENTTEXT_1} =~ s/\xab/\&laquo;/g;	
+			
+			
+			my $AUTHOR_ADFRAME_USER_ID 	= 0;
+			my $AUTHOR_NAME				= '';
+			my $AUTHOR_FIRSTNAME		= '';
+			my $AUTHOR_EMAIL			= '';
+			
+			if ($in{AUTHOR} >0)
+			{
+				my $aUser = new AdframeUser($ENV{ADFRAME_CHANNEL});
+				if ($aUser->initById($in{AUTHOR}))
+				{
+					$AUTHOR_ADFRAME_USER_ID = $in{AUTHOR};
+					$AUTHOR_NAME			= $aUser->getNAME();
+					$AUTHOR_FIRSTNAME		= $aUser->getFIRSTNAME();
+					$AUTHOR_EMAIL			= $aUser->getEMAIL();
+				}
+			}
+			
+			my $ADFRAME_TEASERCMS_ID = $cmsman->saveCms($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_TEASERCMS_ID},$in{ADFRAME_TEASERCMSCATEGORY_ID},$AUTHOR_ADFRAME_USER_ID,$AUTHOR_NAME,$AUTHOR_FIRSTNAME,$AUTHOR_EMAIL,$in{HEADLINE},$in{TEASERTEXT},$in{CONTENTTEXT_1},$in{CONTENTTEXT_2},$in{CONTENTTEXT_3},$IMAGE_EMPTY,$IMAGE_EMPTY,$IMAGE_EMPTY,$IMAGE_EMPTY,$in{EXT_1},$in{EXT_2},$in{EXT_3},$in{EXT_4},$in{SEL_1},$in{SEL_2},$in{DIALOG},$in{DIALOG_PARAM});
+			
+			if ($ADFRAME_TEASERCMS_ID >0)
+			{
+				if ($in{DELETE_IMAGE} =~ /IMAGE_/)
+				{
+					if (! $cmsman->updateItem($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_TEASERCMS_ID},$in{DELETE_IMAGE},$IMAGE_EMPTY))
+					{
+							$adframe->showAlert($cmsman->getErrorMessage());
+					}
+				}
+				elsif ($in{EDIT_IMAGE} =~ /IMAGE_/)
+				{
+					$adframe->internLocation("admin/adframe/components/teasercms/teasercms_editimage.html?componentname=$componentname&ADFRAME_TEASERCMS_ID=$ADFRAME_TEASERCMS_ID&EDIT_IMAGE=$in{EDIT_IMAGE}&page=$in{page}");
+				}
+				elsif ($in{DEL_DIALOG} eq '_DEL_')
+				{
+
+				}				
+
+				else
+				{
+					newDoc('admin/adframe/components/teasercms/teasercms_overview');
+				}
+			}
+			else
+			{
+				$adframe->showAlert($cmsman->getErrorMessage());
+			}
+		}
+	}
+	
+	# show Dataset
+	my %cmsData = $cmsman->getCmsById($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_TEASERCMS_ID});
+	foreach my $k (keys %cmsData)
+	{
+		$cmsData{"$k"} =~ s/<br>/\x0d/g;
+		$adframe->setValue($k,$cmsData{"$k"}) if ($in{$k} eq '');
+	}
+	$adframe->setValue('AUTHOR',$cmsData{ADFRAME_USER_ID});
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	# default register:
+	my @switches = qw(SWITCH_AUTHOR SWITCH_SELECT_AUTHOR SWITCH_HEADLINE SWITCH_TEASERTEXT SWITCH_CONTENTTEXT_1 SWITCH_CONTENTTEXT_2 SWITCH_CONTENTTEXT_3 SWITCH_IMAGES SWITCH_IMAGE_1 SWITCH_IMAGE_2 SWITCH_IMAGE_3 SWITCH_IMAGE_4 SWITCH_EXT_1 SWITCH_EXT_2 SWITCH_EXT_3 SWITCH_EXT_4 SWITCH_SEL_1 SWITCH_SEL_2 SWITCH_DIALOG);
+	my @inputFields = ();
+	my @sel_1_options = ();
+	my @sel_2_options = ();
+	my $SEL_QUAL = '!OPTION_TITLE!|!OPTION_VALUE!|!OPTION_WIDTH!|!OPTION_HEIGHT!|!OPTION_BGCOLOR!';
+	
+	foreach my $sw (@switches) 
+	{ 
+		$adframe->setSwitch($sw,'off'); 
+	}	
+	# adframe-Bug:
+	$adframe->setToDict('SEL_2','radio','none','','');
+	
+	my %userRols	= ();
+	
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$conf->setCursorAt('configuration:admin:component','name',$componentname);
+		
+		foreach my $c ($conf->enumElements())
+		{
+			my $tag		  	= $c->getTag();
+			my $fieldname 	= $c->getAttribute('name');
+			my $active  	= $c->getAttribute('active');
+			my $required 	= $c->getAttribute('required');
+			my $uploadpath 	= $c->getAttribute('uploadpath');
+			my $width 		= $c->getAttribute('width');
+			my $height 		= $c->getAttribute('height');
+			my $title		= $c->getAttribute('title');
+			my $chartest	= $c->getAttribute('chartest');
+			my $value		= $c->getAttribute('value');
+			my $bgcolor		= $c->getAttribute('bgcolor');
+			my $status 		= $c->getAttribute('status');
+			my $roles		= $c->getAttribute('roles');
+			my $src			= $c->getAttribute('src');
+			
+			if (($tag eq 'field') && ($active eq 'true'))
+			{
+				$adframe->setSwitch('SWITCH_'.$fieldname,'on');
+				$adframe->setValue('TITLE_'.$fieldname,$title);
+				$adframe->setValue('SRC_'.$fieldname,$src);
+				if ($chartest ne '')
+				{
+					$adframe->setTypeAndDescr($fieldname,$chartest,$title);
+				}
+				else
+				{
+					$adframe->setTypeAndDescr($fieldname,'none',$title);
+				}
+				push(@inputFields,$fieldname);
+				$adframe->setRequired($fieldname) if ($required eq 'true');
+				if ($required =~ /^if/)
+				{
+					my $isReq=0;
+					my $condReq = "$required ".'{$isReq=1;}';
+					eval("$condReq");
+					$adframe->setRequired($fieldname) if ($isReq);
+				}
+				$adframe->setValue($fieldname.'_UPLOADPATH',$uploadpath) if ($uploadpath ne '');
+				$adframe->setValue($fieldname.'_WIDTH',$width) if ($width ne '');
+				$adframe->setValue($fieldname.'_HEIGHT',$height) if ($height ne '');
+				$adframe->setSwitch('SWITCH_IMAGES','on') if ($fieldname =~ /IMAGE_/);
+				if ($roles ne '')
+				{
+					$userRols{$fieldname} = $roles;
+				}
+			}
+			if ($tag eq 'fieldoption')
+			{
+				my $val = "$title|$value|$width|$height|$bgcolor";
+				if ($c->getParent()->getAttribute('name') eq 'SEL_1')
+				{
+					push(@sel_1_options,$val);
+				}
+				elsif ($c->getParent()->getAttribute('name') eq 'SEL_2')
+				{
+					push(@sel_2_options,$val);
+				}
+			}
+		}
+
+		# autor:
+		if ($adframe->getFromDict('SWITCH_AUTHOR','replace') > 0)
+		{
+			my $userMan	= new AdframeUserDbManager();
+			my @allowedRoles = split(/,/,$userRols{AUTHOR});
+			my ($authorQual,$authorUserRef) = $userMan->getUserWithRole($ENV{ADFRAME_CHANNEL},@allowedRoles); 
+			$adframe->makeRepetition('LOOP_AUTHOR',$authorQual,$authorUserRef);
+			$adframe->setSwitch('SWITCH_DEFAULT_AUTHOR','off');
+		}
+		else
+		{
+			$adframe->setSwitch('SWITCH_DEFAULT_AUTHOR','on');
+		}
+		
+		# extras
+		if ($adframe->getFromDict('SWITCH_SEL_1','replace') > 0)
+		{
+			$adframe->makeRepetition('LOOP_SEL_1',$SEL_QUAL,\@sel_1_options);
+			$adframe->setValue('SEL_1',$in{SEL_1});
+		}
+		
+		if ($adframe->getFromDict('SWITCH_SEL_2','replace') > 0)
+		{		
+			$adframe->makeRepetition('LOOP_SEL_2',$SEL_QUAL,\@sel_2_options);
+			$adframe->setValue('SEL_2',$in{SEL_2});
+		}		
+		return @inputFields;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

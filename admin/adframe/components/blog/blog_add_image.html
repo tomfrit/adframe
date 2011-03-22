@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script>
+	function waitScreen()
+	{
+		//document.all.waitoben.style.visibility = 'visible';
+		document.all.waitunten.style.visibility = 'visible';
+	}	
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">Bildupload</div>
+
+<div id="componentcontent"> 	
+<switch name="FORM">
+<form name="blog_addimage_form" action="/cgi-bin/adframe/admin/adframe/components/blog/blog_add_image.html" method="post" enctype="multipart/form-data">
+
+
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="20"></td></tr>
+	</table>
+
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">		
+		<tr>
+			<td class="componentheadtd" align="center" colspan="2">BILDUPLOAD</td>
+		</tr>
+
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">NEUE DATEI</td>
+			<td class="componentcontenttd" align="left" width="478"><input type="file" name="FILE_IMAGE"></td>
+		</tr>
+		<tr>
+			<td colspan="2" class="componentheadtd" valign="top">BILDUNTERSCHRIFT</td>
+		</tr><tr>
+			<td colspan="2" class="componentcontenttd" align="left"><input type="text" name="BU" style="width:600px;"></td>
+		</tr>		
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="120" valign="middle" align="center">&nbsp;<div id="waitunten" style="visibility: hidden"><font color="#ffcc00">BITTE WARTEN</font></div></td>
+			<td class="componentcontentwhitetd" width="80" valign="top" align="center">Fenster schliessen<br><a href="#" onclick="window.close();" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>								
+			<td class="componentcontentwhitetd" width="316" valign="top" align="center">&nbsp;</td>					
+			<td class="componentcontentwhitetd" width="80" valign="middle" align="center"><input type="submit" value="upload" class="tdbuttonred" onclick="javascript: waitScreen()"></td>					
+		</tr>
+	</table>
+	</form>
+</switch name="FORM">
+<switch name="RESULT">
+	<b>Bildupload erfolgreich</b><br>
+	Bitte benutze folgenden Code, um das Bild im Text einzuf&uuml;gen. Die letzte Zahl entspricht dabei der Bildbreite.<br><br>
+	<pre>[[<!-- #IMAGE# -->|<!-- #BU# -->|<!-- #WIDTH# -->]]</pre>
+
+
+</switch name="RESULT">
+</div>
+
+</body>
+</html>

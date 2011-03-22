@@ -1,0 +1,46 @@
+use de::adframe::components::forum::ForumDbManager;
+1;
+
+sub common
+{
+	my $AREA			= $in{componentname};
+	$adframe->setValue('ADFRAME_FORUM_ID',$in{ADFRAME_FORUM_ID});
+
+	$in{ADFRAME_FORUMCATEGORY_ID} = 0 if ($in{ADFRAME_FORUMCATEGORY_ID} eq '');
+
+	my $forum = new ForumDbManager();
+	
+	my %catData = $forum->getCategoryById($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_FORUMCATEGORY_ID});
+	
+	$adframe->setValue('CATEGORY',$catData{CATEGORY});
+	$adframe->setValue('CATEGORY_DESCR',$catData{TITLE});
+	
+	my %itemData = $forum->getItemById($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_FORUM_ID});
+	
+	foreach my $k (keys %itemData)
+	{
+		$itemData{$k} =~ s/\x0d/<br>/g;
+		$adframe->setValue('ITEM_'.$k,$itemData{$k});	
+	}
+
+	my $ADFRAME_USER_ID = $adframe->getFromSession('ADFRAME_USER_ID');
+
+	if ($in{adframe_event} eq 'admin_comment_form')
+	{
+		$adframe->setTypeAndDescr('COMMENT','none,required','Der Kommentar');
+
+		if (! $adframe->alertRequestErrors('COMMENT'))
+		{
+			$in{COMMENT} =~ s/\x0d/<br>/g;
+			if ($forum->saveAdminComment($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_FORUM_ID},0,$adframe->getFromSession('ADFRAME_USER_ID'),'','','','',$in{COMMENT},'RED'))
+			{	
+				newDoc('admin/adframe/components/forum/forum_overview');
+			}
+			else
+			{
+				$in{COMMENT} =~ s/<br>/\x0d/g;
+				$adframe->showAlert('Der Kommentar konnte leider nicht gespeichert werden, sorry!');
+			}
+		}
+	}
+}

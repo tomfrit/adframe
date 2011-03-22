@@ -1,0 +1,170 @@
+#componentheadline			{position:absolute; top:20px;  left:20;  font-weight:bold; font-family:helvetica,arial; font-size:15px; color:#000000; line-height:15pt;	z-index:1; height:60px}
+#componentcontent  			{position:absolute; top:50px;  left:20; 	z-index:1; height:300px}
+#componentcontentsmall  	{position:absolute; top:10px;  left:20; 	z-index:1; height:300px}
+.componenttable
+{
+	border-left-width :0px;
+	border-right-width :0px;
+	border-top-width :0px;
+	border-bottom-width :0px;
+	border-style : outset;
+	border-color : #ffffff;
+	margin-left : 0px;
+	margin-right : 0px;
+	margin-top : 0px;
+	margin-bottom : 0px;
+	margin : 0px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 0px;
+	padding-bottom : 0px;
+	padding : 0px;
+}
+
+td.componentheadtd		
+{
+	background-color: #eeeeee; 
+	font-family:helvetica,arial;
+	font-size:11px; 
+	line-height:14pt; 
+	color: #000000; 
+	font-weight: bold;
+	border-left-width :1px;
+	border-right-width :1px;
+	border-top-width :1px;
+	border-bottom-width :1px;
+	border-style : outset;
+	border-color : #ffffff;
+	margin-left : 0px;
+	margin-right : 0px;
+	margin-top : 0px;
+	margin-bottom : 0px;
+	margin : 0px;
+	padding-left : 2px;
+	padding-right : 0px;
+	padding-top : 0px;
+	padding-bottom : 0px;
+	padding : 2px;
+}
+td.componentheadbigtd		
+{
+	background-color: #eeeeee; 
+	font-family:helvetica,arial;
+	font-size:13px; 
+	line-height:14pt; 
+	color: #000000; 
+	font-weight: bold;
+	border-left-width :1px;
+	border-right-width :1px;
+	border-top-width :1px;
+	border-bottom-width :1px;
+	border-style : outset;
+	border-color : #ffffff;
+	margin-left : 0px;
+	margin-right : 0px;
+	margin-top : 0px;
+	margin-bottom : 0px;
+	margin : 0px;
+	padding-left : 2px;
+	padding-right : 0px;
+	padding-top : 0px;
+	padding-bottom : 0px;
+	padding : 2px;
+}
+
+td.componentheadwhitetd		
+{
+	background-color: #ffffff; 
+	font-family:helvetica,arial;
+	font-size:11px; 
+	line-height:14pt; 
+	color: #000000; 
+	font-weight: bold;
+	border-left-width :1px;
+	border-right-width :1px;
+	border-top-width :1px;
+	border-bottom-width :1px;
+	border-style : outset;
+	border-color : #ffffff;
+	margin-left : 0px;
+	margin-right : 0px;
+	margin-top : 0px;
+	margin-bottom : 0px;
+	margin : 0px;
+	padding-left : 2px;
+	padding-right : 0px;
+	padding-top : 0px;
+	padding-bottom : 0px;
+	padding : 2px;
+}
+td.componentcontenttd	
+{
+	background-color: #eeeeee; 
+	font-family:helvetica,arial;	
+	font-size:11px; 
+	line-height:11pt; 
+	color: #000000;
+	border-left-width :1px;
+	border-right-width :1px;
+	border-top-width :1px;
+	border-bottom-width :1px;
+	border-style : outset;
+	border-color : #ffffff;
+	margin-left : 0px;
+	margin-right : 0px;
+	margin-top : 0px;
+	margin-bottom : 0px;
+	margin : 0px;
+	padding-left : 2px;
+	padding-right : 0px;
+	padding-top : 0px;
+	padding-bottom : 0px;
+	padding : 2px;
+}
+td.componentcontentwhitetd	
+{
+	background-color: #ffffff; 
+	font-family:helvetica,arial;	
+	font-size:11px; 
+	line-height:11pt; 
+	color: #000000;
+	border-left-width :1px;
+	border-right-width :1px;
+	border-top-width :1px;
+	border-bottom-width :1px;
+	border-style : outset;
+	border-color : #ffffff;
+	margin-left : 0px;
+	margin-right : 0px;
+	margin-top : 0px;
+	margin-bottom : 0px;
+	margin : 0px;
+	padding-left : 2px;
+	padding-right : 0px;
+	padding-top : 0px;
+	padding-bottom : 0px;
+	padding : 2px;
+}
+
+.tdinnernorm				{font-family:helvetica,arial;	font-size:11px; line-height:14pt; color: #000000;}
+.tdinnernormunderline		{font-family:helvetica,arial;	font-size:11px; line-height:12pt; color: #000000; text-decoration: underline;}
+.tdinnernormsmall			{font-family:helvetica,arial;	font-size:10px; line-height:8pt; color: #000000;}
+
+.tdbuttonred				{background: #ffcccc; heigth: 20px; font-size: 10px;}			
+.tdbuttongrey				{background: #cac8c0; heigth: 20px; font-size: 10px;}	
+.span 						{font-weight: normal;}
+	span.sieben 			{font-size:7px; line-height:9pt; }
+    span.acht 				{font-family:helvetica,arial;	font-size:8px; 	line-height:10pt; color: #000000;}
+	span.neun 				{font-family:helvetica,arial; font-size:10px; line-height:14px; color: #000000;}
+	span.zehn 				{font-family:helvetica,arial;	font-size:10px; line-height:12pt; color: #000000;}
+	span.elf 				{font-family:helvetica,arial;	font-size:11px; line-height:12pt; color: #000000;}
+	span.zwoelf 			{font-family:helvetica,arial;	font-size:12px; line-height:12pt; color: #000000;}
+	span.dreizehn 			{font-family:helvetica,arial;	font-size:13px; line-height:12pt; color: #000000;}
+	span.vierzehn 			{font-family:helvetica,arial;	font-size:14px; line-height:12pt; color: #000000;}
+	span.fuenfzehn 			{font-family:helvetica,arial;	font-size:15px; line-height:15pt; color: #000000;}
+
+.comonentnavhead   			{font-family:helvetica,arial;	font-size:11px; line-height:13pt; color: #330066; text-decoration: underline; font-weight: bold; border-style:outset;}
+.componentnavhead:hover  	{font-family:helvetica,arial;	font-size:11px; line-height:13pt; color: #330066; text-decoration: underline; font-weight: bold; border-style:outset;}
+.componentnavhead:visited  	{font-family:helvetica,arial;	font-size:11px; line-height:13pt; color: #330066; text-decoration: underline; font-weight: bold; border-style:outset;} 
+
+.inputtype {font-family: helvetica,arial; font-size: 11px; color: #000000; bgcolor:#ffffff; background-color: #ffffff;}

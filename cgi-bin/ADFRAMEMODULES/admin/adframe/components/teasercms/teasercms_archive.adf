@@ -1,0 +1,117 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::teasercms::TeaserCmsDbManager;
+use de::adframe::lib::DateTime;
+1;
+sub common
+{
+	my $ITEMS_PER_PAGE 	= 5;
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $cmsman 			= new TeaserCmsDbManager();
+	
+	configure($xmlfile,$componentname);
+
+	if ($in{adframe_event} eq 'teasercms_delete')
+	{
+		if ($in{ADFRAME_TEASERCMS_ID} > 0)
+		{
+			if ($cmsman->deleteCms($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_TEASERCMS_ID}))
+			{
+				;
+			}
+			else
+			{
+				$adframe->showAlert($cmsman->getErrorMessage());
+			}
+		}
+	}
+
+	# pages etc:
+	my $count		= $cmsman->getItemCount($ENV{ADFRAME_CHANNEL},$componentname);
+
+	my $allpages	= int($count/$ITEMS_PER_PAGE);	
+	if ($count % $ITEMS_PER_PAGE > 0)
+	{
+		$allpages+=1;
+	}
+	my $page		= $in{page} || 1;
+
+	if ($in{nextpage} eq 'next')
+	{
+		if (($page*$ITEMS_PER_PAGE) >= $count)
+		{
+			$page = 1;
+		}
+		else
+		{
+			$page++;
+		}
+	}
+	elsif ($in{nextpage} eq 'prev')
+	{
+		$page--;
+		if ($page<1)
+		{
+			$page = $allpages;
+		}
+	}
+	
+	my $start	= ($page-1) * $ITEMS_PER_PAGE;
+			
+	$adframe->setValue('page',$page);
+	$adframe->setValue('allpages',$allpages);
+	$adframe->setValue('count',$count);
+	
+	# fill loops
+	my ($qual,$dataRef) = $cmsman->getCmsBySort($ENV{ADFRAME_CHANNEL},$componentname,$start,$ITEMS_PER_PAGE,"");
+	$adframe->makeRepetition('LOOP_TEASERCMS',$qual,$dataRef);
+		
+	if (@{ $dataRef } == ())
+	{
+		$adframe->setSwitch('SWITCH_NODATA','on');
+	}
+	else
+	{
+		$adframe->setSwitch('SWITCH_NODATA','off');
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		$conf->setCursorAt('configuration:admin:component','name',$componentname);
+
+		foreach my $c ($conf->enumElements())
+		{
+			my $tag		  	= $c->getTag();
+			my $fieldname 	= $c->getAttribute('name');
+			my $active  	= $c->getAttribute('active');
+			my $required 	= $c->getAttribute('required');
+			my $uploadpath 	= $c->getAttribute('uploadpath');
+			my $width 		= $c->getAttribute('width');
+			my $height 		= $c->getAttribute('height');
+			my $title		= $c->getAttribute('title');
+
+			if (($tag eq 'field') && ($active eq 'true') && ($fieldname eq 'IMAGE_1'))
+			{
+				$adframe->setValue('IMAGE_1_UPLOADPATH',$uploadpath) if ($uploadpath ne '');
+				$adframe->setValue('IMAGE_1_WIDTH',$width) if ($width ne '');
+				$adframe->setValue('IMAGE_1_HEIGHT',$height) if ($height ne '');
+				$adframe->setValue('IMAGE_1_TITLE',$title);
+				last;
+			}
+		}
+		
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

@@ -1,0 +1,77 @@
+package List<!-- #TableName# -->;
+use de::adframe::lib::db::DbAdapter; @ISA=qw(DbAdapter); 
+
+$SQL_COLS = '<!-- #SQL_COLS# -->';
+$SQL_QUERY_COLS = '<!-- #SQL_QUERY_COLS# -->';
+$QUAL = '<!-- #QUAL# -->';
+
+sub get<!-- #TableName# -->
+{
+	my $this			= shift;
+	my $condition		= shift;
+	my $orderBy			= shift;
+	my $start			= shift;
+	my $limit			= shift;
+	my $sqlcondition	= '';
+	<switch name="SWITCH_PK">
+	$sqlcondition = "<!-- #PK_NAME# -->>0";
+	</switch name="SWITCH_PK">
+	if ($condition ne '') 
+	{
+		$sqlcondition = ' '.$condition;
+	}
+	if ($orderBy ne '')
+	{
+		$sqlcondition.= " order by $orderBy";
+	}
+	if ($start>=0 && $limit>0)
+	{
+		$sqlcondition.=" limit $start,$limit"; 
+	}
+	my @data 	= $this->get('<!-- #TableName# -->',$SQL_QUERY_COLS,$sqlcondition); 
+	return \@data;
+}
+
+sub getCount<!-- #TableName# -->
+{
+	my $this			= shift;
+	my $condition		= shift;
+	my $sqlcondition	= '';
+	<switch name="SWITCH_PK">
+	$sqlcondition = "<!-- #PK_NAME# -->>0";
+	</switch name="SWITCH_PK">
+	if ($condition ne '')
+	{
+		$sqlcondition = $condition;
+	}
+	return $this->get('<!-- #TableName# -->','count(*)',$sqlcondition);
+}
+
+sub getErrorMessage
+{
+	my $this	= shift;
+	return $this->{errormessage};
+}
+
+# private:
+sub addErrorMessage
+{
+	my $this	= shift;
+	my $mess	= shift;
+	$this->{errormessage}.='List<!-- #TableName# -->: '.$mess.'\n';   
+}
+
+1;
+__END__
+
+=head1 NAME List<!-- #TableName# -->
+
+=head2 extends DbAdapter
+
+=head1 METHODS
+
+get<!-- #TableName# -->(String: condition, String: orderBy, Int: start, Int: limit)
+
+getCount<!-- #TableName# -->(String: condition)
+
+getErrorMessage()

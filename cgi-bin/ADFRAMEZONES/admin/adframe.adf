@@ -1,0 +1,11 @@
+1;
+sub initAdframeZone
+{
+	my $ADFRAME_USER_ID = $adframe->getFromSession('ADFRAME_USER_ID');
+	#debug($ADFRAME_USER_ID);
+	if ($ADFRAME_USER_ID<1)
+	{
+		%main::in = ();
+		print "Location: Http://$ENV{ADFRAME_SERVER_NAME}/admin/errorpage.html\n\n";
+	}
+}

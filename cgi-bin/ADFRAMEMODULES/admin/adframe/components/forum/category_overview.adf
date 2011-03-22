@@ -1,0 +1,69 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::forum::ForumDbManager;
+1;
+sub common
+{
+	my $forumman 		= new ForumDbManager();
+	my $componentname 	= $in{componentname};
+
+	my $xmlfile = 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $conf 	= configure($xmlfile,$componentname);
+
+	if ($in{adframe_event} eq 'category_overview_form')
+	{
+		$adframe->setTypeAndDescr('CATEGORY','alphanum,required','Kategorie');
+		$adframe->setTypeAndDescr('TITLE','alphanum,required','Headline');
+
+		if (! $adframe->alertRequestErrors('CATEGORY','TITLE'))
+		{
+			my $catid = $forumman->saveCategory($ENV{ADFRAME_CHANNEL},$componentname,-1,$in{CATEGORY},$in{TITLE});
+			if ($catid>0)
+			{
+				
+				$adframe->internLocation("admin/adframe/components/forum/category_edit?componentname=$in{componentname}&ADFRAME_FORUMCATEGORY_ID=$catid");
+			}
+			else
+			{
+				$adframe->showAlert('Der Eintrag konnte nicht gespeichert werden!');
+			}
+		}
+	}
+	elsif ($in{adframe_event} eq 'category_delete')
+	{
+		if ($in{ADFRAME_FORUMCATEGORY_ID} > 0)
+		{
+			if ($forumman->deleteCategory($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_FORUMCATEGORY_ID},$ENV{FORUM_OVERVIEWFILE}))
+			{
+				$adframe->setValue('CATEGORY','');
+				$adframe->setValue('TITLE','');
+			}
+			else
+			{
+				$adframe->showAlert($forumman->getErrorMessage());
+			}
+		}
+	}
+
+
+
+	my ($qual,$categoryRef) = $forumman->getCategories($ENV{ADFRAME_CHANNEL},$componentname,-1);
+	$adframe->makeRepetition('LOOP_CATEGORY',$qual,$categoryRef);
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

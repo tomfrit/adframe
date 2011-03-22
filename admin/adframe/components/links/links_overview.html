@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+
+	<script language="javascript">
+	function deleteLink(link_id,componentname,title)
+	{
+		var messagedel = "Soll der Eintrag "+title+" wirklich geloescht werden ?";
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/links/links_overview.html?id=<!-- #id# -->&adframe_event=link_delete&ADFRAME_LINKS_ID="+link_id+"&componentname="+componentname;
+			self.location.replace(stdel);
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">&Uuml;bersicht - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+<form name="links_overview_form" action="/cgi-bin/adframe/admin/adframe/components/links/links_overview.html" method="post">
+<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+	<tr><td height="2"></td></tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd">TITEL</td>
+			<td class="componentheadtd">ADRESSE</td>
+			<td class="componentheadtd">BESCHREIBUNG</td>
+			<td class="componentheadtd">KATEGORIE</td>
+			<td class="componentheadtd">KLICKS</td>
+			<td class="componentheadtd" width="18">&nbsp;</td>
+			<td class="componentheadtd"width="18">&nbsp;</td>		
+		</tr>
+		<repetition name="LOOP_LINKS">
+		<tr>
+			<td class="componentcontenttd">!TITLE!</td>
+			<td class="componentcontenttd">!URL!&nbsp;</td>
+			<td class="componentcontenttd">!DESCR!&nbsp;</td>
+			<td class="componentcontenttd">!CATEGORY!&nbsp;</td>
+			<td class="componentcontenttd">!ITEM_1!&nbsp;</td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteLink(!ADFRAME_LINKS_ID!,'!AREA!','!TITLE!');"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE !CATEGORY!" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/links/links_edit.html?ADFRAME_LINKS_ID=!ADFRAME_LINKS_ID!&componentname=!AREA!" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT !EVENT!" width="18" height="18" border="0"></a></td>
+		</tr>
+		</repetition name="LOOP_LINKS">
+		<switch name="SWITCH_NODATA">
+		<tr>
+			<td class="componentcontenttd" colspan="6"><font color="#ff0000">Keine Eintr&auml;ge vorhanden</font></td>
+		</tr>
+		</switch name="SWITCH_NODATA">
+	</table>
+</form>
+</div>
+
+</body>
+</html>

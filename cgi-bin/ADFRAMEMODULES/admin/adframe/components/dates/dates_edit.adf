@@ -1,0 +1,141 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::dates::DatesDbManager;
+use de::adframe::lib::DateTime;
+1;
+
+sub common
+{
+	my $IMAGE_EMPTY		= 'clear_dot.gif';
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my @inputFields		= configure($xmlfile,$componentname);
+	my $datesman 		= new DatesDbManager();
+	my $timeman			= new DateTime();
+	
+	$in{URL} =~ s/http:\/\///ig;
+	
+	if ($in{ADFRAME_DATES_ID} eq '')
+	{
+		$adframe->error('No Dataset-Id defined');
+	}
+		
+	my ($qual,$categoryRef) = $datesman->getCategories($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATES_ID});
+	$adframe->makeRepetition('LOOP_CATEGORY',$qual,$categoryRef);
+
+	if ($in{adframe_event} eq 'dates_edit_form')
+	{
+		if (! $adframe->alertRequestErrors(@inputFields))
+		{
+			my $testFrom	= "$in{START_YEAR}"."$in{START_MONTH}"."$in{START_DAY}";
+			my $testTo		= "$in{END_YEAR}"."$in{END_MONTH}"."$in{END_DAY}";
+
+			if ($testFrom<=$testTo)
+			{
+				my $FROM_DATE 	= "$in{START_YEAR}".'-'."$in{START_MONTH}".'-'."$in{START_DAY}";
+				my $TO_DATE 	= "$in{END_YEAR}".'-'."$in{END_MONTH}".'-'."$in{END_DAY}";
+
+				my $ADFRAME_DATES_ID = $datesman->saveDate($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATES_ID},$in{ADFRAME_DATESCATEGORY_ID},$FROM_DATE,$TO_DATE,$in{START_TIME},$in{EVENT},$in{LOCATION},$in{CONTACT_PERSON},$in{STREET},$in{ZIPCODE},$in{CITY},$in{COUNTRY},$in{FON},$in{FAX},$in{URL},$in{EMAIL},$in{PRICE},$in{DESCR},$in{TEASERTEXT},'','');
+				if ($ADFRAME_DATES_ID >0)
+				{
+					if ($in{DELETE_IMAGE} =~ /IMAGE_/)
+					{
+						if (! $datesman->updateItem($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATES_ID},$in{DELETE_IMAGE},$IMAGE_EMPTY))
+						{
+							$adframe->showAlert($datesman->getErrorMessage());
+						}
+					}
+					elsif ($in{EDIT_IMAGE} =~ /IMAGE_/)
+					{
+						$adframe->internLocation("admin/adframe/components/dates/dates_editimage.html?componentname=$componentname&ADFRAME_DATES_ID=$ADFRAME_DATES_ID&EDIT_IMAGE=$in{EDIT_IMAGE}&MONTH=$in{MONTH}&YEAR=$in{YEAR}");
+					}
+					else
+					{
+						newDoc('admin/adframe/components/dates/dates_overview');
+					}
+				}
+				else
+				{
+					$adframe->showAlert($datesman->getErrorMessage());
+				}
+			}
+			else
+			{
+				$adframe->showAlert('Das Anfangsdatum darf nicht nach dem Enddatum liegen');
+			}
+		}
+	}
+	my %dateData = $datesman->getDateById($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATES_ID});
+	foreach my $k (keys %dateData)
+	{
+		$adframe->setValue($k,$dateData{"$k"}) if ($in{$k} eq '');
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	# default register:
+	my @switches = qw(SWITCH_START_TIME SWITCH_LOCATION SWITCH_CONTACT_PERSON SWITCH_STREET SWITCH_ZIPCODE SWITCH_CITY SWITCH_COUNTRY SWITCH_FON SWITCH_FAX SWITCH_URL SWITCH_EMAIL SWITCH_PRICE SWITCH_TEASERTEXT SWITCH_IMAGES SWITCH_IMAGE_1 SWITCH_IMAGE_2);
+	my @inputFields = qw(EVENT LOCATION DESCR);
+
+	$adframe->setTypeAndDescr('START_TIME','alphanum','Uhrzeit');
+	$adframe->setTypeAndDescr('EVENT','alphanum,required','Veranstaltung');
+	$adframe->setTypeAndDescr('LOCATION','alphanum,','Location');
+	$adframe->setTypeAndDescr('CONTACT_PERSON','alphanum','Ansprechpartner');
+	$adframe->setTypeAndDescr('STREET','alphanum','Strasse');
+	$adframe->setTypeAndDescr('ZIPCODE','alphanum','PLZ');
+	$adframe->setTypeAndDescr('CITY','alphanum','Ort');
+	$adframe->setTypeAndDescr('COUNTRY','alphanum','Land');
+	$adframe->setTypeAndDescr('FON','alphanum','Telefon');
+	$adframe->setTypeAndDescr('FAX','alphanum','Fax');
+	$adframe->setTypeAndDescr('URL','alphanum','Homepage');
+	$adframe->setTypeAndDescr('EMAIL','email','eMail');
+	$adframe->setTypeAndDescr('PRICE','','Preis');
+	$adframe->setTypeAndDescr('DESCR','none','Beschreibung');
+	$adframe->setTypeAndDescr('TEASERTEXT','none','Teasertext');
+	foreach my $sw (@switches) 
+	{ 
+		$adframe->setSwitch($sw,'off'); 
+	}	
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$conf->setCursorAt('configuration:admin:component','name',$componentname);
+		
+		foreach my $c ($conf->enumElements())
+		{
+			my $tag		  	= $c->getTag();
+			my $fieldname 	= $c->getAttribute('name');
+			my $active  	= $c->getAttribute('active');
+			my $required 	= $c->getAttribute('required');
+			my $uploadpath 	= $c->getAttribute('uploadpath');
+			my $width 		= $c->getAttribute('width');
+			my $height 		= $c->getAttribute('height');
+			my $title		= $c->getAttribute('title');
+			my $size		= $c->getAttribute('size');
+			
+			if (($tag eq 'field') && ($active eq 'true'))
+			{
+				$adframe->setSwitch('SWITCH_'.$fieldname,'on');
+				push(@inputFields,$fieldname);
+				$adframe->setRequired($fieldname) if ($required eq 'true');
+				$adframe->setValue($fieldname.'_UPLOADPATH',$uploadpath) if ($uploadpath ne '');
+				$adframe->setValue($fieldname.'_WIDTH',$width) if ($width ne '');
+				$adframe->setValue($fieldname.'_SIZE',$size) if ($size ne '');
+				$adframe->setValue($fieldname.'_HEIGHT',$height) if ($height ne '');
+				$adframe->setSwitch('SWITCH_IMAGES','on') if ($fieldname =~ /IMAGE_/);
+			}
+		}
+		
+		return @inputFields;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

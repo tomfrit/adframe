@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframesblogfolder" title="Blog-Verwaltung" type="componentstartfolder" url="/admin/adframe/components/blog/blog_overview.html" parent="start">
+		<item name="adframeblogitem2" title="Artikel-Übersicht" url="/admin/adframe/components/blog/blog_overview.html" parent="adframeblogfolder"/>
+		<item name="adframeblogitem3" title="Neuer Artikel" url="/admin/adframe/components/blog/blog_new.html" parent="adframeblogfolder"/>
+		<item name="adframeblogitem4" title="Gelöschte Objekte" url="/admin/adframe/components/blog/blog_archive.html" parent="adframeblogfolder"/>
+	</folder>
+</configuration>

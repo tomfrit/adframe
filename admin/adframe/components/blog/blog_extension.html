@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script language="javascript">
+	var changed = false;
+	function submitPage(nextpage)
+	{
+		self.document.mcms_extention_edit_form.nextevent.value = nextpage;
+		self.document.mcms_extension_edit_form.submit();
+	}
+	
+	function setChangesMade()
+	{
+		changed = true;
+	}
+	
+	function goBack()
+	{
+	
+		if (changed)
+		{
+			var doB = confirm('Es wurden Daten veraendert!\nSollen die Aenderungen verworfen werden\nund NICHT gespeichert werden?');
+			if (doB)
+			{
+				self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_edit.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&ADFRAME_MCMS_ID=<!-- #ADFRAME_MCMS_ID# -->&page=<!-- #page# -->";
+			}
+		}
+		else
+		{
+			self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_edit.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&ADFRAME_MCMS_ID=<!-- #ADFRAME_MCMS_ID# -->&page=<!-- #page# -->";
+		}
+	}
+	
+	
+	function deleteImage(adframe_mcms_ext_id,imagename,name)
+	{
+		var messagedel = "Soll "+name+" wirklich geloescht werden ?"+'\nACHTUNG: Das Bild kann erst dann entfernt werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.extension_edit_form.elements['DELETE_IMAGE'].value=imagename;
+			self.document.extension_edit_form.elements['ADFRAME_MCMS_EXT_ID'].value = adframe_mcms_ext_id;
+			self.document.extension_edit_form.submit();
+		}
+	}
+	
+	function changeImage(adframe_mcms_ext_id,imagename,name)
+	{
+		self.document.extension_edit_form.elements['EDIT_IMAGE'].value=imagename;
+		self.document.extension_edit_form.elements['ADFRAME_MCMS_EXT_ID'].value = adframe_mcms_ext_id;		
+		self.document.extension_edit_form.submit();
+	}	
+	
+	function waitScreen()
+	{
+		document.all.waitoben.style.visibility = 'visible';
+		document.all.waitunten.style.visibility = 'visible';
+	}	
+	
+	function addItem()
+	{
+		self.document.extension_edit_form.adframe_action.value = '_addItem';
+		self.document.extension_edit_form.submit();
+	}	
+	function deleteItem(adframe_mcms_ext_id)
+	{
+		var doA = confirm('Sollen der gewaehlte Datensatz wirklich geloescht werden?');
+		if (doA)
+		{	
+			self.document.extension_edit_form.adframe_action.value = '_deleteItem';
+			self.document.extension_edit_form.elements['ADFRAME_MCMS_EXT_ID'].value = adframe_mcms_ext_id;					
+			self.document.extension_edit_form.submit();
+		}
+	}	
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">Editieren: Artikel <!-- #ADFRAME_MCMS_ID# --> / "<!-- #COMPONENTTITLE# -->" - <!-- #TITLE_EXTENSION_COMPONENT# --></div>
+
+<div id="componentcontent"> 	
+	<form name="extension_edit_form" action="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_extension.html" method="post">
+	<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+	<input type="hidden" name="ADFRAME_MCMS_ID" value="<!-- #ADFRAME_MCMS_ID# -->">
+	<input type="hidden" name="DELETE_IMAGE" value="">
+	<input type="hidden" name="EDIT_IMAGE" value="">
+	<input type="hidden" name="page" value="<!-- #page# -->">
+	<input type="hidden" name="adframe_action" value="">
+	<input type="hidden" name="ADFRAME_MCMS_EXT_ID" value="">
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="120" valign="middle" align="center">&nbsp;<div id="waitoben" style="visibility: hidden"><font color="#ffcc00">BITTE WARTEN</font></div></td>
+			<td class="componentcontentwhitetd" width="80" valign="top" align="center">zur&uuml;ck<br><a noadd href="javascript: void goBack();" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>								
+			<td class="componentcontentwhitetd" width="300" valign="top" align="center">&nbsp;</td>					
+			<td class="componentcontentwhitetd" width="80" valign="middle" align="center"><input type="submit" value="save" class="tdbuttonred" onclick="javascript: waitScreen()"></td>					
+		</tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">	
+		<tr>
+			<td class="componentheadtd" width="120" valign="top">HEADLINE</td>
+			<td class="componentcontenttd"><!-- #HEADLINE# --></td>
+		</tr>
+	</table>
+
+	<repetition name="LOOP_EXTENSION">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>		
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td class="componentcontentwhitetd" valign="bottom" align="right"><input type="button" name="addbutton" value="diesen Datensatz l&ouml;schen" style="background: #dddddd; heigth: 20px; font-size: 10;" onclick="javascript: waitScreen(); deleteItem(!ADFRAME_MCMS_EXT_ID!);"></td></tr>
+	</table>		
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">	
+		
+		<switch name="SWITCH_IMG_EXT_1">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_IMG_EXT_1# -->&nbsp;</td>
+			<td class="componentheadtd" valign="top">
+				<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="99%" align="center">
+					<tr>
+						<td class="componentcontenttd" align="left"><img src="<!-- #GENIMAGEDIR# -->/!IMG_EXT_1!?random=<!-- #RANDOM# -->" border="0" alt="<!-- #TITLE_IMG_EXT_1# -->" !FIELD_ATTRIBUTES!></td>
+						<td class="componentcontenttd" width="18" valign="top" align="center"><a noadd href="javascript: deleteImage(!ADFRAME_MCMS_EXT_ID!,'IMG_EXT_1','<!-- #TITLE_IMG_EXT_1# -->');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a><br>&nbsp;<br><a noadd href="javascript: changeImage(!ADFRAME_MCMS_EXT_ID!,'IMG_EXT_1','<!-- #TITLE_IMG_EXT_1# -->');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		</switch name="SWITCH_IMG_EXT_1">	
+		<switch name="SWITCH_IMG_EXT_2">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_IMG_EXT_2# -->&nbsp;</td>
+			<td class="componentheadtd" valign="top">
+				<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="99%" align="center">
+					<tr>
+						<td class="componentcontenttd" align="left">&nbsp;</td>
+						<td class="componentcontenttd" width="18" valign="top" align="center"><a noadd href="javascript: deleteImage(!ADFRAME_MCMS_EXT_ID!,'IMG_EXT_2','<!-- #TITLE_IMG_EXT_2# -->');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a><br>&nbsp;<br><a noadd href="javascript: changeImage(!ADFRAME_MCMS_EXT_ID!,'IMG_EXT_2','<!-- #TITLE_IMG_EXT_2# -->');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		</switch name="SWITCH_IMG_EXT_2">		
+			
+		<switch name="SWITCH_ITEM_EXT_1">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_ITEM_EXT_1# -->&nbsp;</td>
+			<td class="componentcontenttd"><input type="text" name="ITEM_EXT_1_EXTID!ADFRAME_MCMS_EXT_ID!" value="!ITEM_EXT_1!" maxlength="127" size="64" onchange="javascript: void setChangesMade()"></td>
+		</tr>
+		</switch name="SWITCH_ITEM_EXT_1">
+		
+		<switch name="SWITCH_ITEM_EXT_2">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_ITEM_EXT_2# -->&nbsp;</td>
+			<td class="componentcontenttd"><input type="text" name="ITEM_EXT_2_EXTID!ADFRAME_MCMS_EXT_ID!" value="!ITEM_EXT_2!" maxlength="127" size="64" onchange="javascript: void setChangesMade()"></td>
+		</tr>
+		</switch name="SWITCH_ITEM_EXT_2">	
+			
+		<switch name="SWITCH_TEXT_EXT">
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top"><!-- #TITLE_TEXT_EXT# -->&nbsp;</td>
+			<td class="componentcontenttd"><textarea name="TEXT_EXT_EXTID!ADFRAME_MCMS_EXT_ID!" rows="8" cols="55" onchange="javascript: void setChangesMade()">!TEXT_EXT!</textarea></td>
+		</tr>
+		</switch name="SWITCH_TEXT_EXT">		
+	</table>
+	</repetition name="LOOP_EXTENSION">
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">		
+		<tr>
+			<td class="componentheadtd" width="120"  valign="top">&nbsp;Neuer Eintrag:</td>
+			<td class="componentcontenttd"><input type="button" name="addbutton" class="tdbuttongrey" value="<!-- #TITLE_EXTENSION_COMPONENT# --> hinzuf&uuml;gen" onclick="javascript: waitScreen(); addItem();"></td>
+		</tr>			
+	</table>
+
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="120" valign="middle" align="center">&nbsp;<div id="waitunten" style="visibility: hidden"><font color="#ffcc00">BITTE WARTEN</font></div></td>
+			<td class="componentcontentwhitetd" width="80" valign="top" align="center">zur&uuml;ck<br><a noadd href="javascript: void goBack();" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>
+			<td class="componentcontentwhitetd" width="300" valign="top" align="center">&nbsp;</td>					
+			<td class="componentcontentwhitetd" width="80" valign="middle" align="center"><input type="submit" value="save" class="tdbuttonred" onclick="javascript: waitScreen()"></td>					
+		</tr>
+	</table>
+	</form>
+</div>
+
+</body>
+</html>

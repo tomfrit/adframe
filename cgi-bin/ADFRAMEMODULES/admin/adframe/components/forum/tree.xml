@@ -1,0 +1,7 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframeforumfolder" title="Forum" type="componentstartfolder" url="/admin/adframe/components/forum/start.html" parent="start">
+		<item name="adframeforumitem1" title="Einträge" url="/admin/adframe/components/forum/forum_overview.html" parent="adframeforumfolder"/>
+		<item name="adframeforumitem2" title="Themen" url="/admin/adframe/components/forum/category_overview.html" parent="adframeforumfolder"/> 
+	</folder>
+</configuration>

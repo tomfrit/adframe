@@ -1,0 +1,331 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script language="javascript">
+	function deleteImage(imagename,name)
+	{
+		var messagedel = "Soll "+name+" wirklich geloescht werden ?"+'\nACHTUNG: Das Bild kann erst dann entfernt werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.dates_edit_form.elements['DELETE_IMAGE'].value=imagename;
+			self.document.dates_edit_form.submit();
+		}
+	}
+	function changeImage(imagename,name)
+	{
+		var messagedel = '\nACHTUNG: Das Bild kann erst dann bearbeitet werden, wenn alle Textfelder korrekt ausgefuellt sind !';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			self.document.dates_edit_form.elements['EDIT_IMAGE'].value=imagename;
+			self.document.dates_edit_form.submit();
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite">
+
+<div id="componentheadline">Eintrag &auml;ndern - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+<form name="dates_edit_form" action="/cgi-bin/adframe/admin/adframe/components/dates/dates_edit.html" method="post">
+<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+<input type="hidden" name="ADFRAME_DATES_ID" value="<!-- #ADFRAME_DATES_ID# -->">
+<input type="hidden" name="DELETE_IMAGE" value="">
+<input type="hidden" name="EDIT_IMAGE" value="">
+<input type="hidden" name="MONTH" value="<!-- #MONTH# -->">
+<input type="hidden" name="YEAR" value="<!-- #YEAR# -->">
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" align="center" colspan="4"><!-- #COMPONENTTITLE# --></td>
+		</tr>
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">Zeitraum</td>
+			<td class="componentcontenttd" align="left">
+				<select name="START_DAY" class="inputtype">
+					<option value="01">1.
+					<option value="02">2.
+					<option value="03">3.
+					<option value="04">4.
+					<option value="05">5.
+					<option value="06">6.
+					<option value="07">7.
+					<option value="08">8.
+					<option value="09">9.
+					<option value="10">10.
+					<option value="11">11.
+					<option value="12">12.
+					<option value="13">13.
+					<option value="14">14.
+					<option value="15">15.
+					<option value="16">16.
+					<option value="17">17.
+					<option value="18">18.
+					<option value="19">19.
+					<option value="20">20.
+					<option value="21">21.
+					<option value="22">22.
+					<option value="23">23.
+					<option value="24">24.
+					<option value="25">25.
+					<option value="26">26.
+					<option value="27">27.
+					<option value="28">28.
+					<option value="29">29.
+					<option value="30">30.
+					<option value="31">31.
+				</select>
+				<select name="START_MONTH" class="inputtype">
+					<option value="01">Januar
+					<option value="02">Februar
+					<option value="03">M&auml;rz
+					<option value="04">April
+					<option value="05">Mai
+					<option value="06">Juni
+					<option value="07">Juli
+					<option value="08">August
+					<option value="09">September
+					<option value="10">Oktober
+					<option value="11">November
+					<option value="12">Dezember
+				</select>
+	   			<select name="START_YEAR" class="inputtype">
+					<option value="2003">2003
+					<option value="2004">2004
+					<option value="2005">2005
+					<option value="2006">2006
+					<option value="2007">2007
+					<option value="2008">2008
+					<option value="2009">2009
+					<option value="2010">2010
+					<option value="2011">2011
+					<option value="2012">2012
+					<option value="2013">2013
+					<option value="2014">2014
+					<option value="2015">2015
+					<option value="2016">2016
+					<option value="2017">2017
+					<option value="2018">2018
+					<option value="2019">2019
+					<option value="2020">2020
+				</select></td>
+			<td class="componentcontenttd" align="center">BIS</td>
+			<td class="componentcontenttd" align="right">
+				<select name="END_DAY" class="inputtype">
+					<option value="01">1.
+					<option value="02">2.
+					<option value="03">3.
+					<option value="04">4.
+					<option value="05">5.
+					<option value="06">6.
+					<option value="07">7.
+					<option value="08">8.
+					<option value="09">9.
+					<option value="10">10.
+					<option value="11">11.
+					<option value="12">12.
+					<option value="13">13.
+					<option value="14">14.
+					<option value="15">15.
+					<option value="16">16.
+					<option value="17">17.
+					<option value="18">18.
+					<option value="19">19.
+					<option value="20">20.
+					<option value="21">21.
+					<option value="22">22.
+					<option value="23">23.
+					<option value="24">24.
+					<option value="25">25.
+					<option value="26">26.
+					<option value="27">27.
+					<option value="28">28.
+					<option value="29">29.
+					<option value="30">30.
+					<option value="31">31.
+				</select>
+				<select name="END_MONTH" class="inputtype">
+					<option value="01">Januar
+					<option value="02">Februar
+					<option value="03">M&auml;rz
+					<option value="04">April
+					<option value="05">Mai
+					<option value="06">Juni
+					<option value="07">Juli
+					<option value="08">August
+					<option value="09">September
+					<option value="10">Oktober
+					<option value="11">November
+					<option value="12">Dezember
+				</select>
+	   			<select name="END_YEAR" class="inputtype">
+					<option value="2003">2003
+					<option value="2004">2004
+					<option value="2005">2005
+					<option value="2006">2006
+					<option value="2007">2007
+					<option value="2008">2008
+					<option value="2009">2009
+					<option value="2010">2010
+					<option value="2011">2011
+					<option value="2012">2012
+					<option value="2013">2013
+					<option value="2014">2014
+					<option value="2015">2015
+					<option value="2016">2016
+					<option value="2017">2017
+					<option value="2018">2018
+					<option value="2019">2019
+					<option value="2020">2020
+				</select></td>
+
+		</tr>
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">KATEGORIE</td>
+			<td class="componentcontenttd" colspan="3">
+				<select name="ADFRAME_DATESCATEGORY_ID" class="inputtype">
+					<repetition name="LOOP_CATEGORY">
+					<option value="!ADFRAME_DATESCATEGORY_ID!">!CATEGORY!
+					</repetition name="LOOP_CATEGORY">
+				</select></td>
+		</tr>
+			<switch name="SWITCH_START_TIME">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">UHRZEIT</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="START_TIME" size="58"></td>
+		</tr>
+		</switch name="SWITCH_START_TIME">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">VERANSTALTUNG</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="EVENT" size="58"></td>
+		</tr>
+		
+		<switch name="SWITCH_TEASERTEXT">
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top">TEASERTEXT</td>
+			<td class="componentcontenttd" colspan="3"><textarea name="TEASERTEXT" rows="18" cols="50"></textarea></td>
+		</tr>
+		</switch name="SWITCH_TEASERTEXT">	
+		
+		
+		<switch name="SWITCH_LOCATION">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">LOCATION</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="LOCATION" size="58"></td>
+		</tr>
+		</switch name="SWITCH_LOCATION">
+				
+		<switch name="SWITCH_PRICE">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">LOCATION-LINK</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="PRICE" size="58"></td>
+		</tr>
+		</switch name="SWITCH_PRICE">
+		
+		<switch name="SWITCH_COUNTRY">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">LAND/BUNDESLAND</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="COUNTRY" size="58"></td>
+		</tr>
+		</switch name="SWITCH_COUNTRY">
+		
+		<switch name="SWITCH_CONTACT_PERSON">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">ANSPRECHPARTNER</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="CONTACT_PERSON" size="58"></td>
+		</tr>
+		</switch name="SWITCH_CONTACT_PERSON">
+		<switch name="SWITCH_STREET">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">STRASSE</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="STREET" size="58"></td>
+		</tr>
+		</switch name="SWITCH_STREET">
+		<switch name="SWITCH_ZIPCODE">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">PLZ</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="ZIPCODE" size="58"></td>
+		</tr>
+		</switch name="SWITCH_ZIPCODE">
+		<switch name="SWITCH_CITY">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">ORT</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="CITY" size="58"></td>
+		</tr>
+		</switch name="SWITCH_CITY">
+
+		<switch name="SWITCH_FON">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">TELEFON</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="FON" size="58"></td>
+		</tr>
+		</switch name="SWITCH_FON">
+
+		<switch name="SWITCH_URL">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">HOMEPAGE</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="URL" size="58"></td>
+		</tr>
+		</switch name="SWITCH_URL">
+		<switch name="SWITCH_EMAIL">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">EMAIL</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="EMAIL" size="58"></td>
+		</tr>
+		</switch name="SWITCH_EMAIL">
+
+	
+		<tr>
+			<td class="componentheadtd" width="100"  valign="top">BESCHREIBUNG</td>
+			<td class="componentcontenttd" colspan="3"><textarea name="DESCR" rows="18" cols="50"></textarea></td>
+		</tr>
+
+	</table>
+	<switch name="SWITCH_IMAGES">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" align="center" colspan="2">BILDER</td>
+			<td class="componentheadtd" width="18">&nbsp;</td>
+			<td  class="componentheadtd"width="18">&nbsp;</td>	
+		</tr>
+	<switch name="SWITCH_IMAGE_1">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">BILD 1</td>
+			<td class="componentcontenttd" align="left"><img src="<!-- #IMAGE_1_UPLOADPATH# -->/<!-- #IMAGE_1# -->" border="0" width="<!-- #IMAGE_1_WIDTH# -->" height="<!-- #IMAGE_1_HEIGHT# -->"></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteImage('IMAGE_1','Bild 1');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: changeImage('IMAGE_1');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+		</tr>
+		</switch name="SWITCH_IMAGE_1">
+		<switch name="SWITCH_IMAGE_2">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">BILD 2</td>
+			<td class="componentcontenttd" align="left"><img src="<!-- #IMAGE_2_UPLOADPATH# -->/<!-- #IMAGE_2# -->" border="0" width="<!-- #IMAGE_2_WIDTH# -->" height="<!-- #IMAGE_2_HEIGHT# -->"></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteImage('IMAGE_2','Bild 2');" class="tdinnernorm"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: changeImage('IMAGE_2');" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT" width="18" height="18" border="0"></a></td>
+		</tr>
+		</switch name="SWITCH_IMAGE_2">
+		
+		<switch name="SWITCH_FAX">
+		<tr>
+			<td class="componentheadtd" width="100" valign="top">CREDIT FOTOGRAF</td>
+			<td class="componentcontenttd" colspan="3"><input type="text" name="FAX" size="58"></td>
+		</tr>
+		</switch name="SWITCH_FAX">
+	</table>
+	</switch name="SWITCH_IMAGES">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentcontenttd"  align="left"><a href="/admin/adframe/components/dates/dates_overview.html?componentname=<!-- #componentname# -->&MONTH=<!-- #MONTH# -->&YEAR=<!-- #YEAR# -->" class="tdinnernorm">[zur&uuml;ck]</a></td>
+			<td class="componentcontenttd"  align="right"><input type="submit" value="WEITER"  class="inputtype"></td>
+		</tr>
+	</table>
+</form>		
+</div>
+
+</body>
+</html>

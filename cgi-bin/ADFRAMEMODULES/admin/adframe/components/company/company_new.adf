@@ -1,0 +1,104 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::company::gen::ClassADFRAME_COMPANY;
+use de::adframe::components::company::gen::ListADFRAME_COMPANY;
+1;
+$EXISTS_MESSAGE = 'Eine Firma mit diesem Namen existiert bereits!';
+
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my @inputFields		= configure($xmlfile,$in{componentname});
+	my $company			= new ClassADFRAME_COMPANY();
+	my $area			= $adframe->getValue('area');
+	
+	if ($in{adframe_event} eq 'company_new_form')
+	{
+		if (! $adframe->alertRequestErrors(@inputFields))
+		{
+	
+			my $error = '';
+			my $listCompany = new ListADFRAME_COMPANY();
+			my $existnum	= $listCompany->getCountADFRAME_COMPANY("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and AREA='$area' and COMPANY='$in{COMPANY}' and COMPANY <>'' and IS_ACTIVE>0");
+			
+			if ($existnum>0)
+			{
+				$error = $EXISTS_MESSAGE;	
+			}
+		
+			if ($error eq '')
+			{
+				$company->setADFRAME_CHANNEL($ENV{ADFRAME_CHANNEL});
+				$company->setAREA($area);
+				$company->setACCOUNT_NO($in{ACCOUNT_NO});
+				$company->setCOMPANY($in{COMPANY});
+				$company->setBRANCH($in{BRANCH});
+				$company->setSTREET($in{STREET});
+				$company->setZIPCODE($in{ZIPCODE});
+				$company->setCITY($in{CITY});
+				$company->setCOUNTRY($in{COUNTRY});
+				$company->setEMAIL($in{EMAIL});
+				$company->setFON($in{FON});
+				$company->setFAX($in{FAX});
+				$company->setBANK_ACCOUNTNAME($in{BANK_ACCOUNTNAME});
+				$company->setBANK_ACCOUNTNUMBER($in{BANK_ACCOUNTNUMBER});
+				$company->setBANK_INSTITUTE($in{BANK_INSTITUTE});
+				$company->setBANK_CODE($in{BANK_CODE});
+				$company->setSALES_TAX_ID($in{SALES_TAX_ID});
+				$company->setCOMMENT($in{COMMENT});
+				$company->setIS_ACTIVE(1);
+		
+				if ($company->save())
+				{
+					newDoc('admin/adframe/components/company/company_overview');
+				}
+				else
+				{
+					$adframe->showAlert($company->getErrorMessage());
+				}
+			}
+			else
+			{
+				$adframe->showAlert($error);
+			}
+		}
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	# default register:
+	my @inputFields = qw(ACCOUNT_NO COMPANY BRANCH STREET ZIPCODE CITY COUNTRY EMAIL FON FAX BANK_ACCOUNTNAME BANK_ACCOUNTNUMBER BANK_INSTITUTE BANK_CODE SALES_TAX_ID COMMENT);
+	$adframe->setTypeAndDescr('ACCOUNT_NO','alphanum','Kundennummer');
+	$adframe->setTypeAndDescr('COMPANY','alphanum,required,max:127','Firmenname');
+	$adframe->setTypeAndDescr('BRANCH','alphanum,required,max:127','Branche');
+	$adframe->setTypeAndDescr('STREET','alphanum,,max:127','Strasse');
+	$adframe->setTypeAndDescr('ZIPCODE','alphanum,,max:127','PLZ');
+	$adframe->setTypeAndDescr('CITY','alphanum,required,max:127','Stadt');
+	$adframe->setTypeAndDescr('COUNTRY','alphanum,,max:127','Land');
+	$adframe->setTypeAndDescr('EMAIL','email,,max:127','eMail');
+	$adframe->setTypeAndDescr('FON','alphanum,,max:127','Telefon');
+	$adframe->setTypeAndDescr('FAX','alphanum,,max:127','Fax');
+	$adframe->setTypeAndDescr('BANK_ACCOUNTNAME','alphanum,,max:127','Konto-Inhaber');
+	$adframe->setTypeAndDescr('BANK_ACCOUNTNUMBER','alphanum,,max:127','Konto-Nummer');
+	$adframe->setTypeAndDescr('BANK_INSTITUTE','alphanum,,max:127','Bank');
+	$adframe->setTypeAndDescr('BANK_CODE','alphanum,,max:127','Bankleitzahl');
+	$adframe->setTypeAndDescr('SALES_TAX_ID','alphanum,,max:127','Umsatzsteuer-Id');
+	$adframe->setTypeAndDescr('COMMENT','none','Bemerkungen');
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('area',$conf->getAttribute('area','configuration:admin:component','name',$componentname));		
+		$adframe->setValue('componentname',$componentname);
+		return @inputFields;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

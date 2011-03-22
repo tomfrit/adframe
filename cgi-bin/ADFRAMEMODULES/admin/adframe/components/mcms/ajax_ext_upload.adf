@@ -1,0 +1,81 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS_EXT;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::lib::io::HttpUploader;
+use de::adframe::lib::io::Resizer;
+1;
+
+sub common
+{
+	my $mcms						= new ClassADFRAME_MCMS();
+	my $ext							= new ClassADFRAME_MCMS_EXT();
+	my $ADFRAME_MCMS_ID	= $in{ADFRAME_MCMS_ID};
+	my $ADFRAME_MCMS_EXT_ID	= $in{ADFRAME_MCMS_EXT_ID};
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $conf					= configure($xmlfile,$componentname);
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+
+
+
+
+	if ((ref $mcmsconf) && ($mcms->initById($in{ADFRAME_MCMS_ID})) && ($ext->initById($in{ADFRAME_MCMS_EXT_ID}))) {
+		my $genimagedir		=	$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir');
+		my $uploadpath 		= "$ENV{ADFRAME_DOC_PATH}"."$genimagedir";
+		my $imgfield			= $mcmsconf->getExtensionfieldByName($in{EDIT_IMAGE});
+		my $size = $mcmsconf->getAttribute('size','configuration:mcms:extension:field','name',$in{EDIT_IMAGE});
+		my $thumb	= $mcmsconf->getAttribute('thumb','configuration:mcms:extension:field','name',$in{EDIT_IMAGE});
+
+		if ($in{adframe_event} eq 'ajax_upload_form') {
+
+			if(($in{FILE_IMAGE} ne '') && (-e $uploadpath))	{
+				my $uploader 	= new HttpUploader();
+				my $resizer		= new Resizer;
+
+				my $imagefilename 	= $in{EDIT_IMAGE}.'__'.$ADFRAME_MCMS_EXT_ID;
+				my $tempName		= 'TEMP_'.$imagefilename;
+				my $tempFileName 	= $uploader->storeImage($uploadpath,$tempName,$in{FILE_IMAGE});
+
+				$resizer->setSourceDirectory($uploadpath);
+				$resizer->setSourceImage($tempFileName);
+
+				$resizer->setSize($size);
+				$resizer->setDestImage($imagefilename);
+				$image	= $resizer->resize();
+				$resizer->setSize($thumb);
+				$resizer->setDestImage('THUMB_'.$imagefilename);
+				$thumb	= $resizer->resize();
+
+				if ($image ne '') {
+					$ext->setValue($in{EDIT_IMAGE},$image);
+					$ext->setIS_ACTIVE(1);
+					$ext->save();
+				}
+			}
+		}
+		else {
+			$adframe->error('Project Configuration error!');
+		}
+	}
+
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

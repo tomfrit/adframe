@@ -1,0 +1,201 @@
+package Class<!-- #TableName# -->;
+use de::adframe::lib::db::DbAdapter; @ISA=qw(DbAdapter); 
+
+$SQL_COLS = '<!-- #SQL_COLS# -->';
+
+sub get<!-- #PK_NAME# -->
+{
+	my $this	= shift;
+	return $this->{col}->{'<!-- #PK_NAME# -->'};
+}
+
+<repetition name="LOOP_COLS">
+sub set!ColName!
+{
+	my $this	= shift;
+	$this->{col}->{'!ColName!'} = shift;
+}
+sub get!ColName!
+{
+	my $this	= shift;
+	return $this->{col}->{'!ColName!'};
+}
+</repetition name="LOOP_COLS">
+
+sub save
+{
+	my $this	= shift;
+	if ($this->{col}->{'<!-- #PK_NAME# -->'}<1)
+	{
+		my @values = ();
+		<repetition name="LOOP_INSERT_COLS">
+		my $value!ColName! = !ColValue!;
+		$value!ColName! =~ s/\'/\\\'/g;
+		if ($value!ColName! eq "")
+		{
+			push(@values,"!ColDefault!");
+		}
+		else
+		{
+			push(@values,"!ColQuote!$value!ColName!!ColQuote!");
+		}
+		</repetition name="LOOP_INSERT_COLS">
+		$this->{col}->{'<!-- #PK_NAME# -->'} = $this->insert('<!-- #TableName# -->','<!-- #SQL_COLS# -->',@values);
+		return $this->{col}->{'<!-- #PK_NAME# -->'};
+	}
+	elsif ($this->{col}->{'<!-- #PK_NAME# -->'}>0)
+	{
+		<repetition name="LOOP_UPDATE_COLS">
+		if (defined $this->{col}->{'!ColName!'})
+		{
+			my $value = $this->{col}->{'!ColName!'};
+			$value =~ s/\'/\\\'/g;
+			if ($this->update('<!-- #TableName# -->',"!ColName!=!ColQuote!$value!ColQuote!","<!-- #PK_NAME# -->=$this->{col}->{'<!-- #PK_NAME# -->'}")<1)
+			{
+				$this->addErrorMessage("Cannot update !ColName!=!ColQuote!$value!ColQuote! with <!-- #PK_NAME# -->=$this->{col}->{'<!-- #PK_NAME# -->'}");
+			}
+		}
+		</repetition name="LOOP_UPDATE_COLS">
+		
+		return $this->{col}->{'<!-- #PK_NAME# -->'};
+	}
+	return 0;
+}
+
+sub initById
+{
+	my $this	= shift;
+	my $id		= shift;
+	if (($id>0) && ($id !~/\D/))
+	{
+		my @data = split(/\|/, $this->get('<!-- #TableName# -->',"$SQL_COLS","<!-- #PK_NAME# -->=$id"));
+		if ($data[0] ne '')
+		{
+			my @colKeys = split(/,/, $SQL_COLS);
+			for (my $i=0;$i<=$#colKeys;$i++)
+			{
+				$this->{col}->{"$colKeys[$i]"} = $data[$i];
+				#eval($this.'->set'.$colKeys[$i].'('..');');
+			}
+			return 1;
+		}
+		else
+		{
+			$this->addErrorMessage('Cannot create Object, data empty!');
+		}
+	}
+	else
+	{
+		$this->addErrorMessage('Cannot create Object at initById() - <!-- #PK_NAME# --> < 1 !');
+	}
+	return 0;
+}
+
+sub initByCondition
+{
+	my $this		= shift;
+	my $condition	= shift;
+	my @ids = $this->get('<!-- #TableName# -->','<!-- #PK_NAME# -->',"$condition");
+	if ($ids[1]>0)
+	{
+		$this->addErrorMessage("Multiple datasets found with Condition $condition at initByCondition()");
+	}
+	else
+	{
+		if ($this->initById($ids[0]))
+		{
+			return $ids[0];
+		}
+	}
+	return 0;
+}
+
+sub getDataHash
+{
+	my $this		= shift;
+	return %{ $this->{col} };
+}
+sub getDataHashRef
+{
+	my $this		= shift;
+	return $this->{col};
+}
+
+sub setValue
+{
+	my $this		= shift;
+	my $key			= shift;
+	my $value		= shift;
+	$this->{col}->{"$key"} = $value;
+}
+sub getValue
+{
+	my $this		= shift;
+	my $key			= shift;
+	return $this->{col}->{"$key"};
+}
+
+sub deleteFromDB
+{
+	my $this		= shift;
+	if ($this->{col}->{'<!-- #PK_NAME# -->'}>0)
+	{
+		$this->delete('<!-- #TableName# -->',"<!-- #PK_NAME# -->=$this->{col}->{'<!-- #PK_NAME# -->'}");
+		return 1;
+	}
+	else
+	{
+		$this->addErrorMessage('PK-Value not set, cannot delete Dataset!');
+	}
+	return 0;
+}
+
+sub getErrorMessage
+{
+	my $this	= shift;
+	return $this->{errormessage};
+}
+
+# private:
+sub addErrorMessage
+{
+	my $this	= shift;
+	my $mess	= shift;
+	$this->{errormessage}.='Class<!-- #TableName# -->: '.$mess.'\n';   
+}
+sub set<!-- #PK_NAME# -->
+{
+	my $this	= shift;
+	my $<!-- #PK_NAME# --> = shift;
+	if ($this->{col}->{'<!-- #PK_NAME# -->'} < 1)
+	{
+		$this->{col}->{'<!-- #PK_NAME# -->'} = $<!-- #PK_NAME# -->;
+	}
+}
+
+1;
+__END__
+
+=head1 NAME Class<!-- #TableName# -->
+
+=head2 extends DbAdapter
+
+=head1 METHODS
+<switch name="SWITCH_PK">
+ get<!-- #PK_NAME# -->
+</switch name="SWITCH_PK">
+<repetition name="LOOP_DESCR_METHODS">
+ set!ColName!(String: value)
+ get!ColName!()
+</repetition name="LOOP_DESCR_METHODS">
+
+ initById(PK)
+ 
+ initByCondition(CONDITION)
+ 
+ getDataHash()
+ 
+ deleteFromDB()
+ 
+ getErrorMessage()
+ 

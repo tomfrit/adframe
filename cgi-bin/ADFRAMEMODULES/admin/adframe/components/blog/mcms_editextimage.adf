@@ -1,0 +1,90 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS_EXT;
+use de::adframe::lib::io::HttpUploader;
+1;
+
+sub common
+{
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname		= $in{componentname};
+	my $conf				= configure($xmlfile,$componentname);
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+	my $mcms				= new ClassADFRAME_MCMS();
+	my $ext					= new ClassADFRAME_MCMS_EXT();
+	
+	if ((ref $mcmsconf) && ($mcms->initById($in{ADFRAME_MCMS_ID})) && ($ext->initById($in{ADFRAME_MCMS_EXT_ID})))
+	{
+		my $genimagedir		= $mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir');
+		my $uploadpath 		= "$ENV{ADFRAME_DOC_PATH}"."$genimagedir";
+		my $imgfield		= $mcmsconf->getExtensionfieldByName($in{EDIT_IMAGE});
+		
+		if (ref $imgfield)
+		{
+			$adframe->setValue('IMAGETITLE',$imgfield->getTitle());
+		}
+		$adframe->setValue('HEADLINE',$mcms->getHEADLINE());				
+		$adframe->setValue('THE_IMAGE',$ext->getValue($in{EDIT_IMAGE}));	
+			
+		$adframe->setValue('GENIMAGEDIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir'));
+
+		if (($in{ADFRAME_MCMS_EXT_ID} > 0) && ($in{EDIT_IMAGE} =~ /IMG_/) && (-e "$uploadpath")) 
+		{		
+			if (($in{adframe_event} eq 'mcms_editextimage_form') && ($in{FILE_IMAGE} ne ''))
+			{
+				my $uploader 		= new HttpUploader();
+				my $imagefilename 	= 'MCMS_'.$in{EDIT_IMAGE}.'__'.$in{ADFRAME_MCMS_EXT_ID};
+				my $dbFileName 		= $uploader->storeImage($uploadpath,$imagefilename,$in{FILE_IMAGE});
+		
+				if ($dbFileName ne '')
+				{
+					$ext->setValue($in{EDIT_IMAGE},$dbFileName);
+					$ext->setIS_ACTIVE(1);
+					if ($ext->save())
+					{	
+						$adframe->internLocation("admin/adframe/components/mcms/mcms_extension.html?componentname=$in{componentname}&ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}&EDIT_IMAGE=&page=$in{page}");
+					}
+					else
+					{
+						$adframe->showAlert('Die Datei konnte leider nicht erstellt werden');
+					}
+				}
+				else
+				{
+					$adframe->showAlert('Die Datei konnte leider nicht erstellt werden.\nDer Zugriff auf das Server-Dateisystem ist nicht freigegeben !');
+				}
+			}
+		}
+		else
+		{
+			$adframe->error('Project Configuration error! Uploadpath '.$uploadpath.' does not exist ?');
+		}		
+	}
+	else
+	{
+		$adframe->error('Project Configuration error!');
+	}	
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);	
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

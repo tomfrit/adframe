@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<admin title="dirtmasters" userrole="ADMINISTRATOR,REDAKTEUR,BLOG">
+
+		<!-- CONFIGURE TOPNAV -->
+		<topnav>
+
+
+
+			<menu name="menu2" title="News">
+				<menuitem menu="menu2" navtree="mcms_news_tree"  title="News" userrole="BLOG,ADMINISTRATOR,REDAKTEUR"/>
+			</menu>
+
+			<menu name="menu3" title="Gallery">
+				<menuitem menu="menu3" navtree="mcms_gallery_tree"  title="Gallery" userrole="ADMINISTRATOR,REDAKTEUR"/>
+			</menu>
+
+			<menu name="menu4" title="Festival 2011">
+				<menuitem menu="menu4" navtree="mcms_festival_tree"  title="Festival 2011" userrole="ADMINISTRATOR,REDAKTEUR"/>
+			</menu>
+
+			<menu name="menu5" title="Find us">
+				<menuitem menu="menu5" navtree="mcms_findus_tree"  title="Find Us" userrole="ADMINISTRATOR,REDAKTEUR"/>
+			</menu>
+
+			<menu name="menu11" title="System-DB">
+				<menuitem menu="menu11" navtree="userdbtree" title="User-Datenbank" userrole="ADMINISTRATOR"/>
+
+
+			</menu>
+		</topnav>
+
+
+		<!-- CONFIGURE TREE -->
+
+
+		<navtree name="mcms_news_tree" startpage="/admin/adframe/components/mcms/start.html">
+			<import component="mcms" name="mcms_group1_news" title="News"/>
+		</navtree>
+
+		<navtree name="mcms_gallery_tree" startpage="/admin/adframe/components/mcms/start.html">
+			<import component="mcms" name="mcms_group2_gallery" title="Gallery"/>
+		</navtree>
+
+		<navtree name="mcms_festival_tree" startpage="/admin/adframe/components/mcms/start.html">
+			<import component="mcms" name="mcms_group3_festival" title="Festival 2011"/>
+		</navtree>
+
+		<navtree name="mcms_findus_tree" startpage="/admin/adframe/components/mcms/start.html">
+			<import component="mcms" name="mcms_group4_findus" title="Find Us"/>
+		</navtree>
+
+		<navtree name="userdbtree" startpage="/admin/adframe/components/userdb/start.html">
+			<import component="userdb" name="userdb" title="Verwaltung: User"/>
+		</navtree>
+
+
+
+
+
+		<!-- CONFIGURE COMPONENTS -->
+
+		<component name="mcms_group1_news" type="mcms" import="mcms_group1_news.xml" title="Blog"/>
+		<component name="mcms_group2_gallery" type="mcms" import="mcms_group2_gallery.xml" title="Gallery"/>
+		<component name="mcms_group3_festival" type="mcms" import="mcms_group3_festival.xml" title="Festival"/>
+		<component name="mcms_group4_findus" type="mcms" import="mcms_group4_findus.xml" title="Find Us"/>
+
+		<component name="userdb" type="userdb" title="User-Datenbank"/>
+		<component name="company" type="company" area="all" title="Firmen"/>
+
+	</admin>
+</configuration>

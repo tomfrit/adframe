@@ -1,0 +1,95 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::user::AdframeUser;
+1;
+sub common
+{
+	my $generalconffile = 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $user	= new AdframeUser($ENV{ADFRAME_CHANNEL});
+	
+	if ($user->initById($adframe->getFromSession('ADFRAME_USER_ID')) )
+	{
+		my @roles = split(/,/, $user->getROLES());
+	
+		if (-f $generalconffile)
+		{
+			my $generalconf 	= new XMLConfiguration($generalconffile);
+			#$generalconf->initFromFile();
+			displayTopnav($generalconf,@roles);
+		}
+	}
+	else
+	{
+		$adframe->showAlert('Ihr Profile kann leider nicht geladen werden!');
+	}
+}
+
+sub displayTopnav
+{
+	my $conf 			= shift;
+	my @userRoles		= @_;
+	my %menuHash		= ();
+	my $menu			= '';
+	my $title			= '';
+	my $component		= '';
+	my $userrole		= '';
+
+	my @navElements			= $conf->getAllTagsWith('menuitem','configuration:admin:topnav','','');
+	$adframe->setValue('TITLE_MENU_1',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu1'));
+	$adframe->setValue('TITLE_MENU_2',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu2'));
+	$adframe->setValue('TITLE_MENU_3',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu3'));
+	$adframe->setValue('TITLE_MENU_4',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu4'));
+	$adframe->setValue('TITLE_MENU_5',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu5'));
+	$adframe->setValue('TITLE_MENU_6',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu6'));
+	$adframe->setValue('TITLE_MENU_7',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu7'));
+	$adframe->setValue('TITLE_MENU_8',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu8'));
+	$adframe->setValue('TITLE_MENU_9',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu9'));
+	$adframe->setValue('TITLE_MENU_10',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu10'));
+	$adframe->setValue('TITLE_MENU_11',$conf->getAttribute('title','configuration:admin:topnav:menu','name','menu11'));
+
+	
+	for (my $i=0;$i<=$#navElements;$i++)
+	{
+		$menu		= $navElements[$i]->getAttribute('menu');
+		$title		= $navElements[$i]->getAttribute('title');
+		$navtree	= $navElements[$i]->getAttribute('navtree');
+		$userrole	= $navElements[$i]->getAttribute('userrole');
+		
+		if (hasRole($userrole,@userRoles) )
+		{
+			if (! defined $menuHash->{"$menu"})
+			{
+				$menuHash->{"$menu"} = ();
+			}
+			$title =~ s/(\w)(.*?)/<u>$1<\/u>$2/;
+			push (@{ $menuHash->{"$menu"} }, "$title|$navtree");
+		}
+	}
+
+	$adframe->makeRepetition('LOOP_menu1','!title!|!navtree!',$menuHash->{menu1});
+	$adframe->makeRepetition('LOOP_menu2','!title!|!navtree!',$menuHash->{menu2});
+	$adframe->makeRepetition('LOOP_menu3','!title!|!navtree!',$menuHash->{menu3});
+	$adframe->makeRepetition('LOOP_menu4','!title!|!navtree!',$menuHash->{menu4});
+	$adframe->makeRepetition('LOOP_menu5','!title!|!navtree!',$menuHash->{menu5});
+	$adframe->makeRepetition('LOOP_menu6','!title!|!navtree!',$menuHash->{menu6});
+	$adframe->makeRepetition('LOOP_menu7','!title!|!navtree!',$menuHash->{menu7});
+	$adframe->makeRepetition('LOOP_menu8','!title!|!navtree!',$menuHash->{menu8});
+	$adframe->makeRepetition('LOOP_menu9','!title!|!navtree!',$menuHash->{menu9});
+	$adframe->makeRepetition('LOOP_menu10','!title!|!navtree!',$menuHash->{menu10});
+	$adframe->makeRepetition('LOOP_menu11','!title!|!navtree!',$menuHash->{menu11});
+}
+
+sub hasRole
+{
+	my $confroleString		= shift;
+	my @userroles			= @_;
+	my $hasRole				= 0;
+	foreach my $k (@userroles)
+	{
+		if ($confroleString =~ /$k/i)
+		{
+			$hasRole = 1;
+			last;
+		}
+	}
+	return $hasRole;
+}

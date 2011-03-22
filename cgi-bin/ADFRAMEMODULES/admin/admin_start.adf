@@ -1,0 +1,56 @@
+﻿use de::adframe::components::user::AdframeUser;
+use de::adframe::lib::xml::XMLParser;
+1;
+$ERRORMESSAGE	= 'Leider ist Ihr Zugang nicht möglich';
+
+sub common
+{
+#debug();
+	$adframe->setTypeAndDescr('LOGIN','required','Das Login');
+	$adframe->setTypeAndDescr('PASSWD','required','Das Password');
+
+	my $generalconffile = 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	
+	
+	
+	
+	
+	if (-f $generalconffile)
+	{
+		my $generalconf = new XMLParser();
+		$generalconf->initFromFile($generalconffile);
+
+		$adframe->setValue('CHANNEL_TITLE',$generalconf->getAttribute('title','configuration:admin'));
+		
+		if ($in{adframe_event} eq 'admin_validate_form')
+		{
+		#debug();
+			if (! $adframe->alertRequestErrors('LOGIN','PASSWD'))
+			{
+			
+				my $userrole	= $generalconf->getAttribute('userrole','configuration:admin');
+				my @roles		= split(/,/,$userrole);
+				my $user		= new AdframeUser($ENV{ADFRAME_CHANNEL});
+				my $ADFRAME_USER_ID	= $user->initByLogin($in{LOGIN},$in{PASSWD},@roles);
+
+				if ($ADFRAME_USER_ID>0)
+				{
+					#debug();
+					$adframe->setToSession('ROLES',$user->getROLES());	
+					$adframe->setToSession('ADFRAME_USER_ID',$ADFRAME_USER_ID);
+					$adframe->internLocation('admin/adframe/secure_index.html');
+				}
+				else
+				{
+					$adframe->showAlert($ERRORMESSAGE);
+				}
+			}
+			else
+			{
+				
+				$adframe->showAlert('Knödel');
+			}
+		}
+	}
+	
+}

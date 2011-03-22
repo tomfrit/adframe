@@ -1,0 +1,261 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::lib::io::MiniTemplate;
+use de::adframe::lib::DateTime;
+use de::adframe::lib::db::DbAdapter;
+1;
+
+
+sub common
+{
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname		= $in{componentname};
+	my $conf				= configure($xmlfile,$componentname);
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+	my $mcms				= new ClassADFRAME_MCMS();
+	my $fieldsRef 			= undef;
+	my $error				= '';
+
+	
+	if ((ref $mcmsconf) && ($mcms->initById($in{ADFRAME_MCMS_ID})))
+	{
+		# extension darstellen
+		if ($mcmsconf->extensionActive() >0)
+		{
+			$adframe->setValue('TITLE_EXTENSION_COMPONENT',$mcmsconf->getAttribute('title','configuration:mcms:extension','',''));
+
+			$adframe->setSwitch('SWITCH_SHOW_EXTENSION_COMPONENT','on');
+		}
+		else
+		{
+			$adframe->setSwitch('SWITCH_SHOW_EXTENSION_COMPONENT','off');
+		}		
+
+		$adframe->setValue('HEADLINE',$mcms->getHEADLINE());
+		$adframe->setValue('A_NAME',$mcms->getA_NAME());
+		$adframe->setValue('A_EMAIL',$mcms->getA_EMAIL());
+		$adframe->setValue('CR_DATE',$mcms->getCR_DATE());
+		$adframe->setValue('P_DATE',$mcms->getP_DATE());
+		my $dateT 	= new DateTime();
+
+		
+		$adframe->setValue('GENIMAGEDIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir'));
+		$adframe->setValue('displayimport',$mcmsconf->getValue('configuration:mcms','area',$componentname,'displayimport'));
+
+		$adframe->setSwitch('SWITCH_SHOW_PAGE_0','off');
+		$adframe->setSwitch('SWITCH_SHOW_PAGE_1','off');
+		$adframe->setSwitch('SWITCH_SHOW_PAGE_2','off');
+		$adframe->setSwitch('SWITCH_SHOW_PAGE_3','off');
+		
+		$adframe->setSwitch('SWITCH_SHOW_TEXT_0','off');
+		$adframe->setSwitch('SWITCH_SHOW_IMG_0_1','off');
+		$adframe->setSwitch('SWITCH_SHOW_IMG_0_2','off');
+		$adframe->setSwitch('SWITCH_SHOW_IMG_0_3','off');
+		$adframe->setSwitch('SWITCH_SHOW_IMG_0_4','off');
+		
+		my $genimagedir	= $mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir');
+
+
+		# page titel
+		my @pageItems 	= $mcmsconf->getPages();
+		foreach my $p (@pageItems)
+		{
+			$adframe->setValue('TITLE_PAGE_'.$p->getAttribute('id'),$p->getAttribute('title'));
+		}
+		
+
+		# pages / Daten / templates:
+		my @pageFields 	= $mcmsconf->getFields();
+		my $pageCount	= $mcms->getPAGE_COUNT();
+		my $fieldName 	= '';
+	
+
+		
+		
+		for (my $p=0;$p<=$pageCount;$p++)
+		{
+			$adframe->setSwitch('SWITCH_SHOW_PAGE_'.$p,'on');
+			
+			my $template			= new MiniTemplate();
+			my $actPage				= $mcmsconf->getPageById($p);
+			
+			if ($p>0)
+			{
+				if ((ref $actPage) && ($template->loadSourceFile("$ENV{ADFRAME_DOC_PATH}".$actPage->getAttribute('template'))))
+				{
+				}
+				else
+				{
+				#	$error.='Das Template NR '.$p.' Kann nicht geladen werden\n';
+				}
+			}
+
+			$template->setSwitch('SWITCH_TEMPLATE_MCMS_IMG_1_1','off');
+			$template->setSwitch('SWITCH_TEMPLATE_MCMS_IMG_1_2','on');
+		
+			if (($mcms->getValue('IMG_1_1') ne '') && ($mcms->getValue('IMG_1_1') !~ /DEFIMG/))
+			{
+
+				$template->setSwitch('SWITCH_TEMPLATE_MCMS_IMG_1_1','on');
+				$template->setSwitch('SWITCH_TEMPLATE_MCMS_IMG_1_2','off');
+			}
+		
+			for (my $i=0;$i<=$#pageFields;$i++)
+			{
+				$fieldName 	= $pageFields[$i]->getName();
+				$adframe->setValue($fieldName,$mcms->getValue($fieldName));
+				$adframe->setValue('TITLE_'.$fieldName,$pageFields[$i]->getTitle());
+				$adframe->setValue('ATTRIBUTES_'.$fieldName,$pageFields[$i]->getAttributes());	
+				$adframe->setSwitch('SWITCH_SHOW_'.$fieldName,'on');
+				
+				
+				
+				if ($p>0)
+				{
+					$template->setToDict('MCMS_'.$fieldName,'selfdefined',$mcms->getValue($fieldName));
+					if (($fieldName =~ /IMG_/) && ($mcms->getValue($fieldName) eq $pageFields[$i]->getDefault()))
+					{
+						$template->setSwitch('SWITCH_MCMS_'.$fieldName,'off');
+					}
+				}
+			}	
+			
+			if ($p>0)
+			{
+				$template->setToDict('MCMS_GENIMAGEDIR','selfdefined',$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir'));
+				# pager:
+				if ($pageCount<2)
+				{
+					$template->setSwitch('SWITCH_MCMSINTERN_PAGER','off');
+				}
+				else
+				{
+					my @pages	= ();
+					my $style	= 'off';
+					for (my $i=1;$i<=$pageCount;$i++)
+					{
+						if ($i==$p)
+						{
+							$style = 'on';
+						}
+						else
+						{
+							$style	= 'off';
+						}
+						push(@pages,$i.'|'.$style.'|&#124;');
+					}
+					if (@pages != ())
+					{
+						chop($pages[$#pages]);
+						chop($pages[$#pages]);
+						chop($pages[$#pages]);
+						chop($pages[$#pages]);
+						chop($pages[$#pages]);
+						chop($pages[$#pages]);
+					}
+					$template->makeRepetition('LOOP_MCMSINTERN_PAGER','!PAGE!|!PAGE_STYLE!|!MCMS_PAGE_DELIMITER!',@pages);
+				}
+				$dateT->setMysqlFormatted($mcms->getCR_DATE());
+				$template->setToDict('MCMS_CR_DATE_YEAR','selfdefined',$dateT->getYear()); 
+				$template->setToDict('MCMS_CR_DATE_MONTH','selfdefined',$dateT->getMonth()); 
+				$template->setToDict('MCMS_CR_DATE_DAY','selfdefined',$dateT->getDay());
+				$template->setToDict('MCMS_CR_DATE_HOUR','selfdefined',$dateT->getHour()); 	
+				$template->setToDict('ADFRAME_MCMS_ID','selfdefined',$in{ADFRAME_MCMS_ID});
+				# extension darstellen
+				if ($mcmsconf->extensionActive() >0)
+				{
+					require de::adframe::components::mcms::gen::ListADFRAME_MCMS_EXT;
+					my $extlist = ListADFRAME_MCMS_EXT->new();
+					my $extListDataRef	= $extlist->getADFRAME_MCMS_EXT("ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}",'ADFRAME_MCMS_EXT_ID, RANK_NO desc','','');
+					my @extListData		= @{$extListDataRef};
+					$template->makeRepetition('LOOP_MCMS_EXT',$ListADFRAME_MCMS_EXT::QUAL,@extListData);
+					
+					my $extCount =  $extlist->getCountADFRAME_MCMS_EXT("ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}");
+					my $mod = $mcmsconf->getAttribute('displayparallel','configuration:mcms:extension','','');
+					my @help	= ();
+					
+					$template->setSwitch('SWITCH_NEWS_GALLERY','off');
+					if (@extListData !=())
+					{
+						$template->setSwitch('SWITCH_NEWS_GALLERY','on');
+						require de::adframe::components::mcms::gen::ListADFRAME_MCMS_EXT;+
+						my $extlist = ListADFRAME_MCMS_EXT->new();
+						my $count   =  $extlist->getCountADFRAME_MCMS_EXT("ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}",'ADFRAME_MCMS_EXT_ID, RANK_NO desc','','');
+						$template->setToDict('GALLERY_COUNT','selfdefined',$count);
+					
+					}		
+					
+					for (my $c=0;$c<$extCount;$c++)
+					{
+						my $toponoff 	= '0';
+						my $bottomonoff = '0';
+						my $mo 			= 0;
+						@help = split(/\|/,$extListData[$c]);
+						if ($mod>0)
+						{
+							$mo = $c%$mod;
+							if ($mo ==0)
+							{
+								$toponoff = '1';
+								
+							}
+							if (($mo == $mod-1) || ($c==$extCount-1))
+							{
+								$bottomonoff = '1';
+							}
+						}
+						$template->setToDict('SWITCH_MCMS_EXT_TOP_'.$help[0],'switch',$toponoff);
+						$template->setToDict('SWITCH_MCMS_EXT_BOTTOM_'.$help[0],'switch',$bottomonoff);
+						#push(@t,"$c, $mo,  top:$toponoff bottom:$bottomonoff $extCount");
+					}
+				}
+
+
+		
+				$template->modify();
+				$template->eleminateActiveHtmlTags();
+				$adframe->setValue('MCMS_ARTICLE_DATA_'.$p,$template->getDoc());
+			#	debug(@t);
+			}
+		}
+	
+		
+		if ($error ne '')
+		{
+			$adframe->showAlert($error);
+		}
+
+		my $db = new DbAdapter();
+		my $extId =  $db->get('ADFRAME_MCMS_EXT','ADFRAME_MCMS_EXT_ID',"ADFRAME_MCMS_ID=$in{ADFRAME_MCMS_ID}");
+
+
+	
+	}
+	else
+	{
+		$adframe->showAlert('Der Artikel kann leider nicht geladen werden!');
+	}
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);	
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

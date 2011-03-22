@@ -1,0 +1,69 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::dates::DatesDbManager;
+use de::adframe::lib::DateTime;
+1;
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $datesman 		= new DatesDbManager();
+	my $timeman			= new DateTime();	
+	
+	configure($xmlfile,$componentname);
+
+	if ($in{YEAR} eq '')
+	{
+		$in{YEAR}		= $timeman->getYear();
+		$in{MONTH}		= '';
+		$adframe->setValue('YEAR',$in{YEAR});
+		$adframe->setValue('MONTH',$in{MONTH});
+	}
+
+	if ($in{adframe_event} eq 'date_delete')
+	{
+		if ($in{ADFRAME_DATES_ID} > 0)
+		{
+			if ($datesman->deleteDate($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATES_ID}))
+			{
+				;
+			}
+			else
+			{
+				$adframe->showAlert($datesman->getErrorMessage());
+			}
+		}
+	}
+
+	my ($qual,$categoryRef) = $datesman->getActiveDatesWithYearMonth($ENV{ADFRAME_CHANNEL},$componentname,$in{YEAR},$in{MONTH});
+
+	$adframe->makeRepetition('LOOP_DATES',$qual,$categoryRef);
+		
+	if (@{ $categoryRef } == ())
+	{
+		$adframe->setSwitch('SWITCH_NODATA','on');
+	}
+	else
+	{
+		$adframe->setSwitch('SWITCH_NODATA','off');
+	}
+	
+	$adframe->setValue('YEAR_VALUE',$in{YEAR});
+	$adframe->setValue('MONTH_VALUE',$in{MONTH});
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

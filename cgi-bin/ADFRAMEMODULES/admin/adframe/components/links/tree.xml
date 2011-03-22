@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframedatesfolder" title="Links" type="componentstartfolder" url="/admin/adframe/components/links/start.html" parent="start">
+		<item name="adframelinksitem1" title="Übersicht Links" url="/admin/adframe/components/links/links_overview.html" parent="adframelinksfolder"/>
+		<item name="adframelinksitem2" title="Neuer Eintrag" url="/admin/adframe/components/links/links_new.html" parent="adframelinksfolder"/>
+		<item name="adframelinksitem3" title="Kategorien" url="/admin/adframe/components/links/category_overview.html" parent="adframelinksfolder"/>
+	</folder>
+</configuration>

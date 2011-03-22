@@ -1,0 +1,36 @@
+use de::adframe::components::user::AdframeUser;
+use de::adframe::lib::xml::XMLConfiguration;
+1;
+
+sub common
+{
+	my $xmlfile = 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $conf 	= configure($xmlfile);
+	my $user	= new AdframeUser($ENV{ADFRAME_CHANNEL});
+	if ($user->initById($adframe->getFromSession('ADFRAME_USER_ID')) )
+	{
+		$adframe->setValue('FIRSTNAME',$user->getFIRSTNAME());
+		$adframe->setValue('NAME',$user->getNAME());
+		my @roles = split(/,/, $user->getROLES());
+		$adframe->makeRepetition('LOOP_ROLES','!ROLE!',\@roles);
+	}
+	else
+	{
+		$adframe->showAlert('Ihr Profile kann leider nicht geladen werden!');
+	}	
+}
+
+sub configure
+{
+	my $xmlfile	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('channeltitle',$conf->getAttribute('title','configuration:admin'));
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

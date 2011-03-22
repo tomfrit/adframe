@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	
+	<script language="javascript">
+	function deactivatebrand(brand_id,componentname,brand)
+	{
+		var messagedel = 'Soll die Marke '+brand+' wirklich deaktiviert werden ?';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/brand/brand_overview.html?id=<!-- #id# -->&adframe_event=brand_deactivate&ADFRAME_BRAND_ID="+brand_id+"&componentname="+componentname+"&page=<!-- #page# -->&orderby=<!-- #orderby# -->";
+			self.location.replace(stdel);
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite" text="#333333" link="#0037c0" alink="#0037c0" vlink="#0037c0">
+
+<table border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+	<tr>
+		<td><font class="contentblue"><b>Sie sind hier:</b> > <u>System Management</u> > <a href="/admin/adframe/components/brand/brand_overview.html?componentname=<!-- #componentname# -->" class="contentblue"><u>&Uuml;bersicht <!-- #COMPONENTTITLE# --></u></a></font><br><br></td>
+	</tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" width="599">
+	<tr>
+		<td>
+		<font class="contentbig">&Uuml;bersicht Marken</font><br>
+		<font class="content">In der <!-- #COMPONENTTITLE# -->-Datenbank wurden insgesamt <b><!-- #count# --></b> Eintr&auml;ge gefunden.<br>(Suchoption: <!-- #brand_SEARCH_OPTION# -->  sortiert nach <!-- #brand_SORT_OPTION# -->. Um die angezeigte Liste neu zu sortieren, klicken Sie bitte auf die jeweiligen &Uuml;berschriften.)</font><br><br></td>
+	</tr>
+	<tr>
+		<td width="599">
+			<table border="0" cellpadding="2" cellspacing="2" width="599">
+				<tr>
+					<td bgcolor="#829bcf" class="contentwhite"><b>ID</b></td>
+					<td bgcolor="#829bcf"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td align="left" width="50%"><a href="/admin/adframe/components/brand/brand_overview.html?componentname=<!-- #componentname# -->&page=<!-- #page# -->&orderby=brand" class="contentwhite"><b>Marke</b></a></td><td align="right" width="50%"><a href="/admin/adframe/components/brand/brand_overview.html?componentname=<!-- #componentname# -->&page=<!-- #page# -->&orderby=BRAND"><img src="/admin/adframe/img/icon_sort.gif" width=10 height=12 alt="sortieren" border="0"></a></td></tr></table></td>
+
+					<td width="30"><img src="/admin/adframe/img/clear_dot.gif" width=30 height=1 alt="" border="0"></td>
+				</tr>
+				<repetition name="LOOP_BRANDS">
+				<tr>
+					<td valign="top" bgcolor="#f5f7fa" align="right"><font class="content">!ADFRAME_BRAND_ID!</font></td>
+					<td valign="top"><font class="content">!BRAND!</font></td>
+
+					<td valign="top" bgcolor="#f5f7fa"><a noadd href="javascript: deactivatebrand(!ADFRAME_BRAND_ID!,'<!-- #componentname# -->','!brand!');"><img src="/admin/adframe/img/icon_red.gif" alt="DEACTIVATE !brand!" width="15" height="15" border="0"></a><a href="/admin/adframe/components/brand/brand_edit.html?ADFRAME_BRAND_ID=!ADFRAME_BRAND_ID!&componentname=<!-- #componentname# -->&page=<!-- #page# -->&orderby=<!-- #orderby# -->"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT !brand!" width="15" height="15" border="0"></a></td>
+				</tr>
+				</repetition name="LOOP_BRANDS">
+				<tr>
+					<td colspan="2">
+						<table border="0" cellpadding="2" cellspacing="2" width="25%" align="center">
+							<tr>
+								<td width="15"><a href="/admin/adframe/components/brand/brand_overview.html?componentname=<!-- #componentname# -->&nextpage=prev&page=<!-- #page# -->&orderby=<!-- #orderby# -->"><img src="/admin/adframe/img/icon_left.gif" width=15 height=15 alt="" border="0"></a></td>
+								<td align="center"><font class="content">Seite <b><!-- #page# --></b> von <!-- #allpages# --></font></td>
+								<td width="15"><a href="/admin/adframe/components/brand/brand_overview.html?componentname=<!-- #componentname# -->&nextpage=next&page=<!-- #page# -->&orderby=<!-- #orderby# -->"><img src="/admin/adframe/img/icon_right.gif" width=15 height=15 alt="" border="0"></a></td>
+							</tr>
+						</table></td>
+					<td><img src="/admin/adframe/img/clear_dot.gif" width=30 height=1 alt="" border="0"></td>
+				</tr>
+			</table></td>
+	</tr>
+</table>
+
+
+</body>
+</html>

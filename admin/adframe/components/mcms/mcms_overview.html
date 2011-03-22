@@ -1,0 +1,186 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+
+	<script language="javascript">
+	function setOnline(mcms_id,headline)
+	{
+		var onlMess = confirm("Soll der Artikel '"+headline+"' nun online gestellt werden?");
+		if (onlMess)
+		{
+			self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_overview.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&adframe_event=_set__online&ADFRAME_MCMS_ID="+mcms_id+"&page=<!-- #page# -->"; 		
+		}
+	}
+	function setOffline(mcms_id,headline)
+	{
+		var onlMess = confirm("Soll der Artikel '"+headline+"' wirklich online DEAKTIVIERT werden?");
+		if (onlMess)
+		{
+			self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_overview.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&adframe_event=_set__offline&ADFRAME_MCMS_ID="+mcms_id+"&page=<!-- #page# -->"; 		
+		}
+	}
+
+	function setTopmeldung(mcms_id,headline)
+	{
+		var onlMess = confirm("Soll der Artikel '"+headline+"' als Topmeldung erscheinen?");
+		if (onlMess)
+		{
+			self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_overview.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&adframe_event=_set__top&ADFRAME_MCMS_ID="+mcms_id+"&page=<!-- #page# -->"; 		
+		}
+	}
+	function unsetTopmeldung(mcms_id,headline)
+	{
+		self.location.href="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_overview.html?id=<!-- #id# -->&componentname=<!-- #componentname# -->&adframe_event=_unset__top&ADFRAME_MCMS_ID="+mcms_id+"&page=<!-- #page# -->"; 		
+	}		
+
+		
+	function archivateItem(mcms_id,componentname,name)
+	{
+		var messagedel = "Soll der Eintrag mit der Nr: "+name+' wirklich archiviert werden ?\n';
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/mcms/mcms_overview.html?id=<!-- #id# -->&adframe_event=__mcms_delete&page=<!-- #page# -->&ADFRAME_MCMS_ID="+mcms_id+"&componentname="+componentname;
+			self.location.replace(stdel);
+		}
+	}	
+	
+	
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">&Uuml;bersicht - <!-- #COMPONENTTITLE# --> <!-- #SAISON# --></div>
+
+<div id="componentcontent">
+
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="18"><a href="/admin/adframe/components/mcms/mcms_overview.html?componentname=<!-- #componentname# -->&nextpage=prev&page=<!-- #page# -->"><img src="/admin/adframe/img/icon_left.gif" width=18 height=18 alt="" border="0"></a></td>
+			<td class="componentheadwhitetd" width="80" align="center"><b>SEITE <font color="#ff6600"><!-- #page# --></font> VON <!-- #allpages# --></b></td>
+			<td class="componentheadwhitetd" width="80" align="center"><b><!-- #count# --> EINTR&Auml;GE</b></td>			
+			<td class="componentcontentwhitetd" width="300" valign="middle" align="center">&nbsp;</td>					
+			<td class="componentheadwhitetd" width="18"><a href="/admin/adframe/components/mcms/mcms_overview.html?componentname=<!-- #componentname# -->&nextpage=next&page=<!-- #page# -->"><img src="/admin/adframe/img/icon_right.gif" width=18 height=18 alt="" border="0"></a></td>			
+		</tr>
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+	
+	<!-- #displayimport# -->
+	
+	<repetition name="LOOP_MCMS">		
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">	
+		<tr>
+			<td class="componentheadtd" width="10"><font color="#ff6600">!ADFRAME_MCMS_ID!</font></td>
+			<td class="componentheadbigtd" width="565">&nbsp;!HEADLINE!	&nbsp;&nbsp;&nbsp;&nbsp;Autor: <font color="#ff6600">!A_NAME!</font>&nbsp;&nbsp;&nbsp;&nbsp;Bereich: <font color="#ff6600">!ETIKETT!</font></td>
+			<td class="componentcontentwhitetd" width="20" align="center" valign="middle">
+				<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="20" align="center">
+					<switch name="SWITCH_TOPARTICLE">
+					<tr>
+						<switch name="SWITCH_TOP_OFF_!ADFRAME_MCMS_ID!">
+						<td class="componentcontenttd" width="18" height="18" valign="middle" align="center"><a noadd href="javascript: void setTopmeldung(!ADFRAME_MCMS_ID!,'!ADFRAME_MCMS_ID!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_home.gif" alt="TOP MELDUNG EINSCHALTEN" width="18" height="18" border="0"></a></td>
+						</switch name="SWITCH_TOP_OFF_!ADFRAME_MCMS_ID!">
+						<switch name="SWITCH_TOP_ON_!ADFRAME_MCMS_ID!">
+						<td class="componentcontenttd" width="18" height="18" valign="middle" align="center"><a noadd href="javascript: void unsetTopmeldung(!ADFRAME_MCMS_ID!,'!ADFRAME_MCMS_ID!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_home_1.gif" alt="TOP MELDUNG AUSSCHALTEN" width="18" height="18" border="0"></a></td>
+						</switch name="SWITCH_TOP_ON_!ADFRAME_MCMS_ID!">					
+					</tr>						
+					</switch name="SWITCH_TOPARTICLE">
+					
+					<tr>
+						<switch name="SWITCH_P_STATUS_OFF_!ADFRAME_MCMS_ID!">
+						<td class="componentcontenttd" width="18" height="18" valign="middle" align="center"><a noadd href="javascript: void setOnline(!ADFRAME_MCMS_ID!,'!ADFRAME_MCMS_ID!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_red.gif" alt="ONLINE STELLEN" width="18" height="18" border="0"></a></td>
+						</switch name="SWITCH_P_STATUS_OFF_!ADFRAME_MCMS_ID!">
+						<switch name="SWITCH_P_STATUS_ON_!ADFRAME_MCMS_ID!">
+						<td class="componentcontenttd" width="18" height="18" valign="middle" align="center"><a noadd href="javascript: void setOffline(!ADFRAME_MCMS_ID!,'!ADFRAME_MCMS_ID!');" class="tdinnernorm"><img src="/admin/adframe/img/icon_green.gif" alt="OFFLINE STELLEN" width="18" height="18" border="0"></a></td>
+						</switch name="SWITCH_P_STATUS_ON_!ADFRAME_MCMS_ID!">					
+					</tr>	
+					
+					
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td class="componentcontenttd" align="left" valign="top" colspan="2">
+				<table cellpadding="0" cellspacing="0" border="0" width="363">
+					<tr>
+						<td width="363">
+						<switch name="SWITCH_IMG_TEASER_!ADFRAME_MCMS_ID!">
+						<table border="0" cellpadding="0" cellspacing="0" align="left">
+						<tr>
+							<td><img src="<!-- #GENIMAGEDIR# -->/!TEASERIMAGE!?random=<!-- #RANDOM# -->" alt="!HEADLINE!" title="!HEADLINE!" width="90" height="67" vspace="2" border="0"></td>
+							<td><img src="/img/clear_dot.gif" width=8 height=1 alt="" border="0"></td>
+						</tr>
+						</table>
+						</switch name="SWITCH_IMG_TEASER_!ADFRAME_MCMS_ID!">					
+						<font class="small">!CR_DATE_DAY!.!CR_DATE_MONTH!.!CR_DATE_YEAR!</font><br>
+						<font class="head1"><b>!HEADLINE!</b></font><br>
+						<font class="standard">
+						<div id="blocksatz">!TEXT_0!</div>
+						</font>
+						</td>
+					</tr>
+					<tr>
+						<td id="spacer">&nbsp;</td>
+					</tr>
+				</table>			
+			</td>
+			<td class="componentcontentwhitetd" width="20" align="center" valign="top">
+				<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="20" align="center">
+					<tr>
+						<td class="componentcontenttd" width="18" height="18" valign="middle" align="center"><a href="/admin/adframe/components/mcms/mcms_overview.html?ADFRAME_MCMS_ID=!ADFRAME_MCMS_ID!&page=<!-- #page# -->&componentname=!AREA!&adframe_event=__mcms_rank_up" class="tdinnernorm"><img src="/admin/adframe/img/icon_up.gif" alt="AUFW&Auml;RTS" width="18" height="18" border="0"></a></td>
+					</tr>						
+					<tr>
+						<td class="componentcontenttd" width="18" height="18" valign="middle" align="center"><a href="/admin/adframe/components/mcms/mcms_overview.html?ADFRAME_MCMS_ID=!ADFRAME_MCMS_ID!&page=<!-- #page# -->&componentname=!AREA!&adframe_event=__mcms_rank_down" class="tdinnernorm"><img src="/admin/adframe/img/icon_down.gif" alt="ABW&Auml;RTS" width="18" height="18" border="0"></a></td>
+					</tr>		
+					<tr><td></td></tr>
+					<tr>
+						<td class="componentcontenttd" width="18" height="18" valign="middle" align="center"><a noadd href="javascript: archivateItem(!ADFRAME_MCMS_ID!,'!AREA!','!ADFRAME_MCMS_ID!');"><img src="/admin/adframe/img/icon_delete.gif" alt="ARCHIVATE !HEADLINE!" width="18" height="18" border="0"></a></td>
+					</tr>	
+					<tr><td></td></tr>												
+					<tr>
+						<td class="componentcontenttd" width="18" height="18" valign="middle" align="center"><a href="/admin/adframe/components/mcms/mcms_edit.html?ADFRAME_MCMS_ID=!ADFRAME_MCMS_ID!&componentname=!AREA!&page=<!-- #page# -->" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT !HEADLINE!" width="18" height="18" border="0"></a></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="3"></td></tr>
+	</table>	
+	</repetition name="LOOP_MCMS">
+	
+	<switch name="SWITCH_NODATA">
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">	
+		<tr>
+			<td class="componentcontenttd" colspan="8"><font color="#ff0000">Es sind keine Eintr&auml;ge vorhanden</font></td>
+		</tr>
+	</table>
+	</switch name="SWITCH_NODATA">
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>	
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="18"><a href="/admin/adframe/components/mcms/mcms_overview.html?componentname=<!-- #componentname# -->&nextpage=prev&page=<!-- #page# -->"><img src="/admin/adframe/img/icon_left.gif" width=18 height=18 alt="" border="0"></a></td>
+			<td class="componentheadwhitetd" align="center"><b>SEITE <!-- #page# --> VON <!-- #allpages# --></b></td>
+			<td class="componentheadwhitetd" width="18"><a href="/admin/adframe/components/mcms/mcms_overview.html?componentname=<!-- #componentname# -->&nextpage=next&page=<!-- #page# -->"><img src="/admin/adframe/img/icon_right.gif" width=18 height=18 alt="" border="0"></a></td>			
+		</tr>
+	</table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>		
+
+</div>
+
+</body>
+</html>

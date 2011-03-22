@@ -1,0 +1,39 @@
+<html>
+<head>
+	<title>adframe generator</title>
+	<meta name="author" content="">
+	<meta name="publisher" content="">
+	<meta name="copyright" content="">
+	<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script>
+		function waitScreen()
+		{
+			document.all.waitunten.style.visibility = 'visible';
+		}
+	
+	</script>	
+</head>
+
+
+
+<body bgcolor="#ffffff" class="BodyContainerWhite" onload="focus()">
+
+<table border="0" class="componenttable" cellpadding="0" cellspacing="1" align="center">
+		<form name="generator_form" action="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_generator_popup">
+		<tr>	
+			<td class="componentcontentwhitetd"  valign="middle" align="center">
+			<font face="helvetica,arial" color="#3366cc">
+					<p><b>adframe CMS-Pregenerator</b></p>
+					</font>
+			<input type="submit" value="generate!" onclick="javascript: waitScreen()">&nbsp;<div id="waitunten" style="visibility: hidden; position:relative; top:-22px"><input type="button" class="tdbuttonred" value="  BITTE WARTEN!  " class="tdbutton"></div>	</td>	
+
+		</tr>
+		</form>
+</table>
+
+</body>
+
+</html>
+

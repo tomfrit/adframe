@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+
+	<script language="javascript">
+	function deleteItem(teasercms_id,componentname,name)
+	{
+		var messagedel = "Soll der Eintrag "+name+" wirklich geloescht werden ?";
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/teasercms/teasercms_overview.html?id=<!-- #id# -->&adframe_event=teasercms_delete&page=<!-- #page# -->&ADFRAME_TEASERCMS_ID="+teasercms_id+"&componentname="+componentname;
+			self.location.replace(stdel);
+		}
+	}
+	function archivateItem(teasercms_id,componentname,name)
+	{
+		var messagearchive = "Diese Funktion ist z.z. nicht aktiv";
+		var okdel = alert(messagearchive);
+		
+	}	
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">&Uuml;bersicht - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+<form name="dates_overview_form" action="/cgi-bin/adframe/admin/adframe/components/teasercms/teasercms_overview.html" method="post">
+<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<switch name="SWITCH_TEMPLATE_1">
+		<repetition name="LOOP_TEASERCMS">
+		<tr>
+			<td class="componentheadtd">!HEADLINE!</td>
+			<td class="componentheadtd">!DAY!.!MONTH!.!YEAR!, !HOUR!:!MINUTE! Uhr</td>
+			<td class="componentheadtd"><font color="#ff6600">!CATEGORY!</font>&nbsp;<br><font color="#999999" size="-2">!SEL_2!</font>&nbsp;</td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteItem(!ADFRAME_TEASERCMS_ID!,'!AREA!','!HEADLINE!');"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE !HEADLINE!" width="18" height="18" border="0"></a></td>
+
+			<switch name="SWITCH_UP_DOWN">
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/teasercms/teasercms_overview.html?ADFRAME_TEASERCMS_ID=!ADFRAME_TEASERCMS_ID!&page=<!-- #page# -->&componentname=!AREA!&adframe_event=teasercms_rank_down" class="tdinnernorm"><img src="/admin/adframe/img/icon_down.gif" alt="ABW&Auml;RTS" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/teasercms/teasercms_overview.html?ADFRAME_TEASERCMS_ID=!ADFRAME_TEASERCMS_ID!&page=<!-- #page# -->&componentname=!AREA!&adframe_event=teasercms_rank_up" class="tdinnernorm"><img src="/admin/adframe/img/icon_up.gif" alt="AUFW&Auml;RTS" width="18" height="18" border="0"></a></td>
+			</switch name="SWITCH_UP_DOWN">
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/teasercms/teasercms_edit.html?ADFRAME_TEASERCMS_ID=!ADFRAME_TEASERCMS_ID!&componentname=!AREA!&page=<!-- #page# -->" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT !HEADLINE!" width="18" height="18" border="0"></a></td>			
+		</tr>
+		<tr>
+			<td class="componentcontenttd" colspan="2">!TEASERTEXT!<br><br>AUTOR: !AUTHOR_FIRSTNAME! !AUTHOR_NAME!</td>
+			<td class="componentcontenttd" align="center" valign="middle" colspan="6"><img src="<!-- #IMAGE_1_UPLOADPATH# -->/!IMAGE_1!" border="0" width="<!-- #IMAGE_1_WIDTH# -->" height="<!-- #IMAGE_1_HEIGHT# -->" alt="<!-- #IMAGE_1_TITLE# -->"></td>
+		</tr>
+		<tr><td height="2">&nbsp;</td></tr>
+		</repetition name="LOOP_TEASERCMS">
+		</switch name="SWITCH_TEMPLATE_1">
+		
+		<switch name="SWITCH_TEMPLATE_2">
+		<repetition name="LOOP_TEASERCMS_2">
+		<tr>
+			<td class="componentcontenttd" width="70%">!CONTENTTEXT_1!</td>
+			<td class="componentcontenttd" width="20%">!EXT_2!</td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteItem(!ADFRAME_TEASERCMS_ID!,'!AREA!','!HEADLINE!');"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE !HEADLINE!" width="18" height="18" border="0"></a></td>
+
+			<switch name="SWITCH_UP_DOWN">
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/teasercms/teasercms_overview.html?ADFRAME_TEASERCMS_ID=!ADFRAME_TEASERCMS_ID!&page=<!-- #page# -->&componentname=!AREA!&adframe_event=teasercms_rank_down" class="tdinnernorm"><img src="/admin/adframe/img/icon_down.gif" alt="ABW&Auml;RTS" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/teasercms/teasercms_overview.html?ADFRAME_TEASERCMS_ID=!ADFRAME_TEASERCMS_ID!&page=<!-- #page# -->&componentname=!AREA!&adframe_event=teasercms_rank_up" class="tdinnernorm"><img src="/admin/adframe/img/icon_up.gif" alt="AUFW&Auml;RTS" width="18" height="18" border="0"></a></td>
+			</switch name="SWITCH_UP_DOWN">
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/teasercms/teasercms_edit.html?ADFRAME_TEASERCMS_ID=!ADFRAME_TEASERCMS_ID!&componentname=!AREA!&page=<!-- #page# -->" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT !EXT_1!" width="18" height="18" border="0"></a></td>			
+		</tr>
+		</repetition name="LOOP_TEASERCMS_2">
+		</switch name="SWITCH_TEMPLATE_2">
+				
+		<switch name="SWITCH_NODATA">
+		<tr>
+			<td class="componentcontenttd" colspan="5"><font color="#ff0000">Es sind keine Eintr&auml;ge vorhanden</font></td>
+		</tr>
+		</switch name="SWITCH_NODATA">
+	</table>
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="550" align="center">
+		<tr>
+			<td class="componentheadtd" width="18"><a href="/admin/adframe/components/teasercms/teasercms_overview.html?componentname=<!-- #componentname# -->&nextpage=prev&page=<!-- #page# -->"><img src="/admin/adframe/img/icon_left.gif" width=18 height=18 alt="" border="0"></a></td>
+			<td class="componentheadtd" align="center"><b>Seite <!-- #page# --> von <!-- #allpages# --></b></td>
+			<td class="componentheadtd" width="18"><a href="/admin/adframe/components/teasercms/teasercms_overview.html?componentname=<!-- #componentname# -->&nextpage=next&page=<!-- #page# -->"><img src="/admin/adframe/img/icon_right.gif" width=18 height=18 alt="" border="0"></a></td>			
+		</tr>
+	</table>
+</form>
+</div>
+
+</body>
+</html>

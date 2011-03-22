@@ -1,0 +1,77 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::links::gen::ListADFRAME_LINKS;
+use de::adframe::components::links::gen::ClassADFRAME_LINKS;
+use de::adframe::lib::db::DbAdapter;
+1;
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $list 		= new ListADFRAME_LINKS();
+	my $man			= new ClassADFRAME_LINKS();
+	my $db			= new DbAdapter();
+	
+	configure($xmlfile,$componentname);
+
+
+	if ($in{adframe_event} eq 'link_delete')
+	{
+		if ($in{ADFRAME_LINKS_ID} > 0)
+		{
+			if ($man->initById($in{ADFRAME_LINKS_ID})) {
+				$man->setIS_ACTIVE(0);
+				$man->save();
+				
+				}
+			else
+			{
+				$adframe->showAlert('Der Datensatz kann nicht geloescht werden.');
+			}
+		}
+	}
+
+	my ($categoryRef) = $list->getADFRAME_LINKS('IS_ACTIVE=1');
+	my @linkArr 	= @{$categoryRef};
+	my @h		= ();
+	my @linkRet	= ();	
+	for (my $i=0;$i<=$#linkArr;$i++)
+		{
+		@h=split(/\|/,$linkArr[$i]);
+		
+		$category = $db->get('ADFRAME_LINKSCATEGORY','CATEGORY',"ADFRAME_LINKSCATEGORY_ID='$h[2]'");
+		push(@linkRet,$linkArr[$i].'|'.$category);
+		}
+		
+	$adframe->makeRepetition('LOOP_LINKS',$ListADFRAME_LINKS::QUAL.'|!CATEGORY!',\@linkRet);
+	
+	
+
+		
+	if (@{ $categoryRef } == ())
+	{
+		$adframe->setSwitch('SWITCH_NODATA','on');
+	}
+	else
+	{
+		$adframe->setSwitch('SWITCH_NODATA','off');
+	}
+	
+
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

@@ -1,0 +1,156 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::links::gen::ListADFRAME_LINKSCATEGORY;
+use de::adframe::components::links::gen::ListADFRAME_LINKS;
+use de::adframe::components::links::gen::ClassADFRAME_LINKS;
+use de::adframe::lib::TextFormat;
+1;
+
+sub common
+{
+	my $IMAGE_EMPTY		= 'clear_dot.gif';
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my @inputFields 	= qw(TITLE URL DESCR);
+	my $list 		= new ListADFRAME_LINKSCATEGORY();
+	my $link 		= new ListADFRAME_LINKS();
+	my $class 		= new ClassADFRAME_LINKS();
+	my $text 		= new TextFormat;
+	$in{URL} =~ s/http:\/\///ig;
+	
+	if ($in{ADFRAME_LINKS_ID} eq '')
+	{
+		$adframe->error('No Dataset-Id defined');
+	}
+		
+	my ($categoryRef) = $list->getADFRAME_LINKSCATEGORY('IS_ACTIVE=1');
+	$adframe->makeRepetition('LOOP_CATEGORY',$ListADFRAME_LINKSCATEGORY::QUAL,$categoryRef);
+
+	if ($in{adframe_event} eq 'links_edit_form')
+	{
+		$adframe->setTypeAndDescr('URL','alphanum,required','Adresse');
+		$adframe->setTypeAndDescr('TITLE','required','Titel');
+		
+		if (! $adframe->alertRequestErrors(@inputFields))
+		{
+	
+
+			if ($class->initById($in{ADFRAME_LINKS_ID})) {
+			
+				$text->setText($in{TITLE});
+				$text->convertToHtml();
+				$in{TITLE} = $text->getConvertedText();
+				$class->setTITLE($in{TITLE});
+				$class->setURL($in{URL});
+				$text->setText($in{DESCR});
+				$text->convertToHtml();
+				$in{DESCR} = $text->getConvertedText();
+				$class->setDESCR($in{DESCR});
+				$class->setADFRAME_LINKSCATEGORY_ID($in{ADFRAME_LINKSCATEGORY_ID});
+				$class->save();
+
+				}
+			else
+				{
+				$adframe->showAlert('Konnte nicht aendern.');
+				}			
+			
+			
+				if ($in{DELETE_IMAGE} =~ /IMAGE_/)
+					{
+						if (! $datesman->updateItem($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATES_ID},$in{DELETE_IMAGE},$IMAGE_EMPTY))
+						{
+							$adframe->showAlert($datesman->getErrorMessage());
+						}
+					}
+					elsif ($in{EDIT_IMAGE} =~ /IMAGE_/)
+					{
+						$adframe->internLocation("admin/adframe/components/links/links_editimage.html?componentname=$componentname&ADFRAME_LINKS_ID=$ADFRAME_DATES_ID&EDIT_IMAGE=$in{EDIT_IMAGE}");
+					}
+					else
+					{
+						newDoc('admin/adframe/components/links/links_overview');
+					}
+
+	
+		
+		}
+	}
+	
+	$linkRef	= $link->getADFRAME_LINKS('ADFRAME_LINKS_ID = '.$in{ADFRAME_LINKS_ID});
+	my @linkArr	= @{$linkRef};
+	my @h 		= split(/\|/,$linkArr[0]);
+	$adframe->setValue('TITLE',$h[3]);
+	$adframe->setValue('URL',$h[4]);
+	$adframe->setValue('DESCR',$h[5]);
+	$adframe->setValue('ADFRAME_LINKSCATEGORY_ID',$h[2]);
+	#debug(@{$linkRef});
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	# default register:
+	my @switches = qw(SWITCH_START_TIME SWITCH_LOCATION SWITCH_CONTACT_PERSON SWITCH_STREET SWITCH_ZIPCODE SWITCH_CITY SWITCH_COUNTRY SWITCH_FON SWITCH_FAX SWITCH_URL SWITCH_EMAIL SWITCH_PRICE SWITCH_TEASERTEXT SWITCH_IMAGES SWITCH_IMAGE_1 SWITCH_IMAGE_2);
+	my @inputFields = qw(TITLE URL DESCR);
+
+	$adframe->setTypeAndDescr('START_TIME','alphanum','Uhrzeit');
+	$adframe->setTypeAndDescr('EVENT','alphanum,required','Veranstaltung');
+	$adframe->setTypeAndDescr('LOCATION','alphanum,','Location');
+	$adframe->setTypeAndDescr('CONTACT_PERSON','alphanum','Ansprechpartner');
+	$adframe->setTypeAndDescr('STREET','alphanum','Strasse');
+	$adframe->setTypeAndDescr('ZIPCODE','alphanum','PLZ');
+	$adframe->setTypeAndDescr('CITY','alphanum','Ort');
+	$adframe->setTypeAndDescr('COUNTRY','alphanum','Land');
+	$adframe->setTypeAndDescr('FON','alphanum','Telefon');
+	$adframe->setTypeAndDescr('FAX','alphanum','Fax');
+	$adframe->setTypeAndDescr('URL','alphanum','Homepage');
+	$adframe->setTypeAndDescr('EMAIL','email','eMail');
+	$adframe->setTypeAndDescr('PRICE','','Preis');
+	$adframe->setTypeAndDescr('DESCR','none','Beschreibung');
+	$adframe->setTypeAndDescr('TEASERTEXT','none','Teasertext');
+	foreach my $sw (@switches) 
+	{ 
+		$adframe->setSwitch($sw,'off'); 
+	}	
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$conf->setCursorAt('configuration:admin:component','name',$componentname);
+		
+		foreach my $c ($conf->enumElements())
+		{
+			my $tag		  	= $c->getTag();
+			my $fieldname 	= $c->getAttribute('name');
+			my $active  	= $c->getAttribute('active');
+			my $required 	= $c->getAttribute('required');
+			my $uploadpath 	= $c->getAttribute('uploadpath');
+			my $width 		= $c->getAttribute('width');
+			my $height 		= $c->getAttribute('height');
+			my $title		= $c->getAttribute('title');
+			my $size		= $c->getAttribute('size');
+			
+			if (($tag eq 'field') && ($active eq 'true'))
+			{
+				$adframe->setSwitch('SWITCH_'.$fieldname,'on');
+				push(@inputFields,$fieldname);
+				$adframe->setRequired($fieldname) if ($required eq 'true');
+				$adframe->setValue($fieldname.'_UPLOADPATH',$uploadpath) if ($uploadpath ne '');
+				$adframe->setValue($fieldname.'_WIDTH',$width) if ($width ne '');
+				$adframe->setValue($fieldname.'_SIZE',$size) if ($size ne '');
+				$adframe->setValue($fieldname.'_HEIGHT',$height) if ($height ne '');
+				$adframe->setSwitch('SWITCH_IMAGES','on') if ($fieldname =~ /IMAGE_/);
+			}
+		}
+		
+		return @inputFields;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

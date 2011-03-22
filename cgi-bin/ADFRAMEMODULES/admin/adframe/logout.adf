@@ -1,0 +1,9 @@
+1;
+sub common
+{
+	#$adframe->deleteFromSession();
+	$adframe->deleteFromSession('ADFRAME_USER_ID');
+	$adframe->deleteFromSession('LOGIN');
+	$adframe->deleteFromSession('ROLES');
+	$adframe->internLocation('admin/admin_start');
+}

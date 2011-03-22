@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframedatesfolder" title="Termine" type="componentstartfolder" url="/admin/adframe/components/dates/start.html" parent="start">
+		<item name="adframedatesitem1" title="Übersicht Termine" url="/admin/adframe/components/dates/dates_overview.html" parent="adframedatesfolder"/>
+		<item name="adframedatesitem2" title="Neuer Eintrag" url="/admin/adframe/components/dates/dates_new.html" parent="adframedatesfolder"/>
+		<item name="adframedatesitem3" title="Kategorien" url="/admin/adframe/components/dates/category_overview.html" parent="adframedatesfolder"/>
+	</folder>
+</configuration>

@@ -1,0 +1,6 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<folder name="adframeguestbookfolder" title="Gästebuch" type="componentstartfolder" url="/admin/adframe/components/guestbook/start.html" parent="start">
+		<item name="adframeguestbookitem1" title="Übersicht Einträge" url="/admin/adframe/components/guestbook/guestbook_overview.html" parent="adframeguestbookfolder"/>
+	</folder>
+</configuration>

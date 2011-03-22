@@ -1,0 +1,5 @@
+<?xml version="1.0" standalone="yes" ?> 
+<configuration>
+	<item name="adframesinglecmsfolder" title="CMS" type="componentstartfolder" url="/admin/adframe/components/singlecms/singlecms_view.html" parent="start">
+	</item>
+</configuration>

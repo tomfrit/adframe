@@ -1,0 +1,121 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::links::gen::ListADFRAME_LINKSCATEGORY;
+use de::adframe::components::links::gen::ClassADFRAME_LINKS;
+1;
+sub common
+{
+	my $IMAGE_EMPTY		= 'clear_dot.gif';
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $list 		= new ListADFRAME_LINKSCATEGORY();
+	my $man			= new ClassADFRAME_LINKS();
+
+
+	my @inputFields = qw(TITLE URL DESCR);
+	
+		
+	$adframe->setTypeAndDescr('TITLE','required','Titel');
+	$adframe->setTypeAndDescr('URL','alphanum,required','Adresse');
+	$adframe->setTypeAndDescr('DESCR','','Beschreibung');
+
+	$in{URL} =~ s/http:\/\///ig;
+	
+	my ($categoryRef) = $list->getADFRAME_LINKSCATEGORY('IS_ACTIVE=1');
+	$adframe->makeRepetition('LOOP_CATEGORY',$ListADFRAME_LINKSCATEGORY::QUAL,$categoryRef);
+
+	if ($in{adframe_event} eq 'links_new_form')
+	{
+		if (! $adframe->alertRequestErrors(@inputFields))
+		{
+				$man->setADFRAME_CHANNEL($ENV{ADFRAME_CHANNEL});
+				$man->setADFRAME_LINKSCATEGORY_ID($in{ADFRAME_LINKSCATEGORY_ID});
+				$man->setTITLE($in{TITLE});
+				$man->setURL($in{URL});
+				$man->setDESCR($in{DESCR});
+				$man->setIS_ACTIVE(1);
+				my $ADFRAME_LINKS_ID = $man->save();
+				
+				
+				
+				if ($ADFRAME_LINKS_ID >0)
+				{
+					if ($in{EDIT_IMAGE} =~ /IMAGE_/)
+					{
+						$adframe->internLocation("admin/adframe/components/links/links_editimage.html?componentname=$componentname&ADFRAME_LINKS_ID=$ADFRAME_LINKS_ID&EDIT_IMAGE=$in{EDIT_IMAGE}");
+					}
+					else
+					{
+						newDoc('admin/adframe/components/links/links_overview');
+					}
+				}
+				else
+				{
+					$adframe->showAlert('Das ist ja Stuhl');
+				}
+						
+		}
+
+
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	# default register:
+	my @switches = qw(SWITCH_TITLE SWITCH_URL SWITCH_DESCR SWITCH_ITEM_0);
+	my @inputFields = qw(TITLE URL DESCR);
+
+	
+	$adframe->setTypeAndDescr('TITLE','alphanum,required','Titel');
+	$adframe->setTypeAndDescr('URL','alphanum,required','Adresse');
+	$adframe->setTypeAndDescr('DESCR','alphanum','Beschreibung');
+
+	foreach my $sw (@switches) 
+	{ 
+		$adframe->setSwitch($sw,'off'); 
+	}	
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$conf->setCursorAt('configuration:admin:component','name',$componentname);
+		
+		foreach my $c ($conf->enumElements())
+		{
+			my $tag		  	= $c->getTag();
+			my $fieldname 	= $c->getAttribute('name');
+			my $active  	= $c->getAttribute('active');
+			my $required 	= $c->getAttribute('required');
+			my $uploadpath 	= $c->getAttribute('uploadpath');
+			my $width 		= $c->getAttribute('width');
+			my $height 		= $c->getAttribute('height');
+			my $title		= $c->getAttribute('title');
+			my $size		= $c->getAttribute('size');
+			
+			if (($tag eq 'field') && ($active eq 'true'))
+			{
+				$adframe->setSwitch('SWITCH_'.$fieldname,'on');
+				push(@inputFields,$fieldname);
+				$adframe->setRequired($fieldname) if ($required eq 'true');
+				$adframe->setValue($fieldname.'_UPLOADPATH',$uploadpath) if ($uploadpath ne '');
+				$adframe->setValue($fieldname.'_WIDTH',$width) if ($width ne '');
+				$adframe->setValue($fieldname.'_SIZE',$size) if ($size ne '');
+				$adframe->setValue($fieldname.'_HEIGHT',$height) if ($height ne '');
+				$adframe->setSwitch('SWITCH_IMAGES','on') if ($fieldname =~ /IMAGE_/);
+			}
+		}
+		#debug(@inputFields);
+		return @inputFields;
+		
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

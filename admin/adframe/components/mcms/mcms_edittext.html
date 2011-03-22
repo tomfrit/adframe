@@ -1,0 +1,144 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+	<script type="text/javascript" src="/admin/adframe/js/jquery.js"></script>
+	<script type="text/javascript" src="/admin/adframe/js/tiny_mce/jquery.tinymce.js"></script>
+<script type="text/javascript">
+	console.log("jquery setup");
+	$(function() {
+		$('#ajax_upload_form').submit(function(data) {
+			$('#loader').html('L&auml;dt...<br/><img src="/img/loading.gif" border="0"/>');
+			var submittingForm = $('#ajax_upload_form');
+			var uploadFrame = $('<iframe name="uploadFrame" id="uploadFrame"></iframe>');
+			uploadFrame.css("display", "none");
+			$('body:first').append(uploadFrame);
+			submittingForm.attr('target', 'uploadFrame');
+		});
+
+		$('#FILE_IMAGE').change(function() {
+			$('#ajax_upload_form').submit();
+			document.getElementById("uploadFrame").onload = function() {
+				$('#loader').hide();
+				$('#images').load('/cgi-bin/adframe/admin/adframe/components/mcms/image_list.snp?GENIMAGEDIR=<!-- #GENIMAGEDIR# -->&ADFRAME_MCMS_ID=<!-- #ADFRAME_MCMS_ID# -->');
+				$('#uploadFrame').remove();
+			};
+		});
+	});
+
+	$().ready(function() {
+		$('textarea.tinymce').tinymce({
+			// Location of TinyMCE script
+			script_url : '/admin/adframe/js/tiny_mce/tiny_mce.js',
+			document_base_url : "/",
+			relative_urls : false,
+			remove_linebreaks : false,
+			forced_root_block : false,
+			force_br_newlines : true,
+			force_p_newlines : false,
+			// General options
+			theme : "advanced",
+			plugins : "pagebreak,style,table,save,advhr,advimage,advlink,emotions,inlinepopups,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,advlist",
+
+			// Theme options
+			theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,styleselect,formatselect,fontselect,fontsizeselect",
+			theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,preview,|,forecolor,backcolor",
+			theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,media,advhr,|,ltr,rtl,|,fullscreen",
+			theme_advanced_buttons4 : "styleprops,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,pagebreak",
+			theme_advanced_toolbar_location : "top",
+			theme_advanced_toolbar_align : "left",
+			theme_advanced_statusbar_location : "bottom",
+			theme_advanced_resizing : true,
+
+			// Example content CSS (should be your site CSS)
+			//content_css : "/css/style.css",
+
+			// Drop lists for link/image/media/template dialogs
+			external_link_list_url : "lists/link_list.js",
+			external_image_list_url : "/cgi-bin/adframe/admin/adframe/components/mcms/image_list.js?ID=<!-- #ADFRAME_MCMS_ID# -->&GENIMAGEDIR=<!-- #GENIMAGEDIR# -->",
+			media_external_list_url : "lists/media_list.js",
+
+
+		});
+	});
+
+	function waitScreen()
+	{
+		//document.all.waitoben.style.visibility = 'visible';
+		document.all.waitunten.style.visibility = 'visible';
+	}
+
+	function deleteImage(url) {
+		if(confirm('Möchtest du das Bild wirklich löschen?')) {
+			$('#images').load('/cgi-bin/adframe/admin/adframe/components/mcms/image_list.snp',{action:'_delImage',URL:url,id:'<!-- #id# -->',ADFRAME_MCMS_ID:'<!-- #ADFRAME_MCMS_ID# -->',GENIMAGEDIR:'<!-- #GENIMAGEDIR# -->'});
+		}
+
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">Bildupload: Artikel <!-- #ADFRAME_MCMS_ID# --> / <!-- #TEXTTITLE# --></div>
+<div class="Text" style="position:absolute;left:700px;top:100px;padding-right:15px;z-index:2000">
+
+	<form action="/cgi-bin/adframe/admin/adframe/components/mcms/ajax_upload.html" method="post" enctype="multipart/form-data" id="ajax_upload_form" name="ajax_upload_form">
+		<input type="hidden" name="adframe_event" value="ajax_upload_form" />
+		<input type="hidden" name="ADFRAME_MCMS_ID" value="<!-- #ADFRAME_MCMS_ID# -->" />
+		<input type="hidden" name="GENIMAGEDIR" value="<!-- #GENIMAGEDIR# -->" />
+		<input type="hidden" name="componentname" value="<!-- #componentname# -->" />
+		<input type="file" name="FILE_IMAGE" id="FILE_IMAGE" />
+	</form>
+	<div id="loader"></div>
+	<div id="images">
+		<snippet src="/admin/adframe/components/mcms/image_list.snp">
+	</div>
+</div>
+<div id="componentcontent">
+<form name="mcms_edittext_form" action="/cgi-bin/adframe/admin/adframe/components/mcms/mcms_edittext.html" method="post">
+<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+<input type="hidden" name="ADFRAME_MCMS_ID" value="<!-- #ADFRAME_MCMS_ID# -->">
+<input type="hidden" name="EDIT_TEXT" value="<!-- #EDIT_TEXT# -->">
+<input type="hidden" name="page" value="<!-- #page# -->">
+
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="660" align="center">
+		<tr><td height="20"></td></tr>
+	</table>
+
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="660" align="center">
+		<tr>
+			<td class="componentheadtd" align="center" colspan="2">TEXTEINGABE <!-- #TEXTTITLE# --></td>
+		</tr>
+
+		<tr>
+			<td>
+				<textarea id="TEXT" name="TEXT" rows="75" cols="80" style="width: 660px;" class="tinymce">
+					<!-- #THE_TEXT# -->
+				</textarea>
+			</td>
+
+		</tr>
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="6600" align="center">
+		<tr><td height="10"></td></tr>
+	</table>
+
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="660" align="center">
+		<tr>
+			<td class="componentheadwhitetd" width="120" valign="middle" align="center">&nbsp;<div id="waitunten" style="visibility: hidden"><font color="#ffcc00">BITTE WARTEN</font></div></td>
+			<td class="componentcontentwhitetd" width="80" valign="top" align="center">zur&uuml;ck<br><a href="/admin/adframe/components/mcms/mcms_edit.html?componentname=<!-- #componentname# -->&ADFRAME_MCMS_ID=<!-- #ADFRAME_MCMS_ID# -->&page=<!-- #page# -->" class="tdinnernorm"><img src="/admin/adframe/img/icon_left.gif" alt="zur&uuml;ck ohne speichern" width="18" height="18" border="0"></a></td>
+			<td class="componentcontentwhitetd" width="316" valign="top" align="center">&nbsp;</td>
+			<td class="componentcontentwhitetd" width="80" valign="middle" align="center"><input type="submit" value="upload" class="tdbuttonred" onclick="javascript: waitScreen()"></td>
+		</tr>
+	</table>
+	</form>
+
+</div>
+
+</body>
+</html>

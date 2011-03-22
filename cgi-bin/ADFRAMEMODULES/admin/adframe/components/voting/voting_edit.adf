@@ -1,0 +1,191 @@
+use de::adframe::lib::DateTime;
+use de::adframe::lib::TextFormat;
+use de::adframe::components::voting::gen::ListADFRAME_VOTING_CATEGORY;
+use de::adframe::components::voting::gen::ClassADFRAME_VOTING_CATEGORY;
+use de::adframe::components::voting::gen::ListADFRAME_VOTING_OPTION;
+use de::adframe::components::voting::gen::ClassADFRAME_VOTING_OPTION;
+use de::adframe::lib::db::DbAdapter;
+1;
+
+sub common
+{
+	my $IMAGE_EMPTY		= 'clear_dot.gif';
+	my $db			= new DbAdapter;
+	my $componentname	= $in{componentname};
+	my $voting		= new ClassADFRAME_VOTING_CATEGORY();
+	my $list 		= new ListADFRAME_VOTING_CATEGORY();
+	my $option_class	= new ClassADFRAME_VOTING_OPTION();
+	my $option_list		= new ListADFRAME_VOTING_OPTION();
+	my $timeman		= new DateTime();
+	my $textFormat 		= new TextFormat();
+	
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);
+	
+	if ($in{ADFRAME_VOTING_CATEGORY_ID} eq '')
+	{
+		$adframe->error('No Dataset-Id defined');
+	}
+		
+
+
+	if ($in{adframe_event} eq 'voting_edit_form')
+	{
+	#debug();
+		$adframe->setTypeAndDescr('TITLE','none,required','Frage');
+		if (! $adframe->alertRequestErrors(TITLE))
+		{
+			
+			my $testFrom	= "$in{CR_DATE_YEAR}"."$in{CR_DATE_MONTH}"."$in{CR_DATE_DAY}";
+			my $testTo	= "$in{END_DATE_YEAR}"."$in{END_DATE_MONTH}"."$in{END_DATE_DAY}";
+
+			if ($testFrom<=$testTo)
+			{
+				my $FROM_DATE 	= "$in{CR_DATE_YEAR}".'-'."$in{CR_DATE_MONTH}".'-'."$in{CR_DATE_DAY}".' 00:00:00';
+				my $TO_DATE 	= "$in{END_DATE_YEAR}".'-'."$in{END_DATE_MONTH}".'-'."$in{END_DATE_DAY}".' 23:59:59';
+
+				if ($db->get('ADFRAME_VOTING_CATEGORY','count(ADFRAME_VOTING_CATEGORY_ID)',"((CR_DATE > '$FROM_DATE') AND (CR_DATE < '$TO_DATE')) OR ((END_DATE > '$FROM_DATE') AND (END_DATE < '$TO_DATE')) AND ADFRAME_VOTING_CATEGORY_ID != $in{ADFRAME_VOTING_CATEGORY_ID} IS_ACTIVE=1") eq 0)
+				{
+					
+					$voting->initById($in{ADFRAME_VOTING_CATEGORY_ID});
+					
+					$textFormat->setText($in{TITLE});
+					$textFormat->convertToHtml();
+					$textFormat->convertFromCustomTags();
+					$voting->setTITLE($textFormat->getConvertedText());
+					
+					$textFormat->setText($in{TEXT});
+					$textFormat->convertToHtml();
+					$textFormat->convertFromCustomTags();
+					$voting->setTEXT($textFormat->getConvertedText());
+					
+					$textFormat->setText($in{ITEM_0});
+					$textFormat->convertToHtml();
+					$textFormat->convertFromCustomTags();
+					$voting->setITEM_0($textFormat->getConvertedText());
+					
+					$voting->setIS_RAFFLE($in{IS_RAFFLE});
+					$voting->setCR_DATE($FROM_DATE);
+					$voting->setEND_DATE($TO_DATE);
+					$voting->setIS_ACTIVE(1);
+					$voting->save();
+					
+					
+					#my @option_fields = qw (OPTION0 OPTION1 OPTION2 OPTION3 OPTION4 OPTION5 OPTION6 OPTION7 OPTION8);
+					
+					#foreach (@option_fields) {
+					for (my $i=0;$i<9;$i++) {
+					
+						$textFormat->setText($in{"OPTION".$i});
+						$textFormat->convertToHtml();
+						$textFormat->convertFromCustomTags();
+						$in{"OPTION".$i} = $textFormat->getConvertedText();
+						
+						my $optionCount = $db->query("SELECT count(ADFRAME_VOTING_OPTION_ID) FROM ADFRAME_VOTING_OPTION WHERE ADFRAME_VOTING_CATEGORY_ID = ".$in{ADFRAME_VOTING_CATEGORY_ID}." AND ITEM_0 = 'OPTION".$i."'");
+						$adframe->logger("SCHEISSE! ".$optionCount);
+						if ($optionCount > 0) {
+							
+							my $optionId = $db->get('ADFRAME_VOTING_OPTION','ADFRAME_VOTING_OPTION_ID',"ADFRAME_VOTING_CATEGORY_ID=$in{ADFRAME_VOTING_CATEGORY_ID} AND ITEM_0 = 'OPTION".$i."'");
+							
+						
+							
+							$db->query("UPDATE ADFRAME_VOTING_OPTION set TITLE = '".$in{"OPTION".$i}."' WHERE ADFRAME_VOTING_OPTION_ID = $optionId");
+		
+						}	
+						else {
+							$db->query("INSERT INTO ADFRAME_VOTING_OPTION(ADFRAME_VOTING_CATEGORY_ID,TITLE,ITEM_0,VOTES,CR_DATE,IS_ACTIVE) VALUES(".$in{ADFRAME_VOTING_CATEGORY_ID}.",'".$in{"OPTION".$i}."','OPTION".$i."',0,now(),1)");
+							#$option_class->initById();
+							#$adframe->logger("NEU??!!");
+							#$option_class->setITEM_0("OPTION".$i);
+							#$option_class->setIS_ACTIVE(1);
+							#$option_class->setADFRAME_VOTING_CATEGORY_ID($in{ADFRAME_VOTING_CATEGORY_ID});
+						}
+						
+		
+						
+						
+					
+						
+					
+					}
+					
+					if ($in{EDIT_IMAGE} =~ /IMAGE/)
+					{
+						
+						$adframe->internLocation("admin/adframe/components/voting/voting_editimage.html?componentname=$componentname&ADFRAME_VOTING_CATEGORY_ID=$in{ADFRAME_VOTING_CATEGORY_ID}&EDIT_IMAGE=$in{EDIT_IMAGE}");
+					}
+					else
+					{
+						newDoc('admin/adframe/components/voting/voting_overview');
+					}
+
+				}
+				else
+				{
+					$adframe->showAlert('In dem Zeitraum liegt bereits eine Umfrage');	
+				}
+			}
+			else
+			{
+				$adframe->showAlert('Das Anfangsdatum darf nicht nach dem Enddatum liegen');
+			}
+		}
+	}
+	
+	
+	my $voting 	= $list->getADFRAME_VOTING_CATEGORY("ADFRAME_VOTING_CATEGORY_ID = $in{ADFRAME_VOTING_CATEGORY_ID}");
+	my @voteArr 	= @{$voting};
+	my @values 	= split(/\|/,$voteArr[0]);
+	my $qual	= $ListADFRAME_VOTING_CATEGORY::QUAL;
+	$qual 		=~ s/!//g;
+	
+	my @fields = split(/\|/,$qual);
+	my $i=0;
+
+	$values[8] = extendNum2($values[8]);
+	$values[9] = extendNum2($values[9]);
+	$values[13] = extendNum2($values[13]);
+	$values[14] = extendNum2($values[14]);
+		
+	foreach (@fields)
+	{
+
+		$adframe->setValue($_,$values[$i]);
+		$i++;
+	}
+	#debug($adframe->getFromDict());
+
+	my @optionRet	= ();
+	for (my $i=0;$i<9;$i++) {
+		my $option = $db->get('ADFRAME_VOTING_OPTION','VOTES,TITLE',"ADFRAME_VOTING_CATEGORY_ID = $in{ADFRAME_VOTING_CATEGORY_ID} AND ITEM_0 = 'OPTION".$i."'");
+		
+
+		
+		push(@optionRet,"OPTION$i|$option");
+	}
+	$adframe->makeRepetition('OPTIONS','!ITEM_0!|!VOTES!|!TITLE!',\@optionRet);
+
+
+
+}
+
+sub extendNum2
+{
+	my $num 	= shift;
+	my $ret 	= '';
+	#debug($num);
+	if (length($num) < 1)
+	{
+		$ret = '00';
+	}
+	elsif (length ($num) <2)
+	{
+		$ret = '0'."$num";
+	}
+	else
+	{
+		$ret = "$num";
+	}
+	return $ret;
+}

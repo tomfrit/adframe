@@ -1,0 +1,205 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::user::AdframeUser;
+use de::adframe::lib::StringFunctions;
+use de::adframe::components::company::gen::ListADFRAME_COMPANY;
+1;
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $thisUser 		= new AdframeUser($ENV{ADFRAME_CHANNEL});
+	my $listCompany		= new ListADFRAME_COMPANY();
+	
+	configure($xmlfile,$componentname);
+	
+	my $companyRef = $listCompany->getADFRAME_COMPANY("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and IS_ACTIVE=1",'COMPANY','','');
+	$adframe->makeRepetition('LOOP_COMPANY',$ListADFRAME_COMPANY::QUAL,$companyRef);
+	
+	if ($thisUser->initById($in{ADFRAME_USER_ID}) )
+	{
+	
+		# unveränderlich:
+		$adframe->setValue('EMAIL',$thisUser->getEMAIL());
+		$adframe->setValue('CR_DATE',$thisUser->getCR_DATE());
+		$adframe->setValue('ADMIT',$thisUser->getADMIT());
+		
+		my @roles = split(/,/, $thisUser->getROLES());
+		$adframe->makeRepetition('LOOP_ROLES','!ROLE!',\@roles);
+		
+		if ($in{adframe_event} eq 'userdb_edit_form')
+		{
+			my @inputs = qw(ACCOUNT_NO GENDER TITLE FIRSTNAME NAME STREET ZIPCODE CITY COUNTRY FON FAX BIRTHDAY PROFESSION LOGIN PASSWD LICENCEKEY MOBIL ADFRAME_COMPANY_ID POSITION FON_COMPANY HOBBY EXTENSION EXTENSION_ID);
+			$adframe->setTypeAndDescr('ACCOUNT_NO','alphanum','Kundennummer');
+			$adframe->setTypeAndDescr('GENDER','none','Geschlecht');			
+			$adframe->setTypeAndDescr('TITLE','alphanum','Anrede');
+			$adframe->setTypeAndDescr('FIRSTNAME','alphanum','Vorname');
+			$adframe->setTypeAndDescr('NAME','alphanum','Nachname');
+			$adframe->setTypeAndDescr('STREET','alphanum','Strasse');
+			$adframe->setTypeAndDescr('ZIPCODE','alphanum','PLZ');
+			$adframe->setTypeAndDescr('CITY','alphanum','Ort');
+			$adframe->setTypeAndDescr('COUNTRY','alphanum','Land');
+			$adframe->setTypeAndDescr('FON','alphanum','Telefon');
+			$adframe->setTypeAndDescr('FAX','alphanum','Fax');
+			$adframe->setTypeAndDescr('BIRTHDAY_DAY','none','Geburtstag: Tag');
+			$adframe->setTypeAndDescr('BIRTHDAY_MONTH','none','Geburtstag: Monat');
+			$adframe->setTypeAndDescr('BIRTHDAY_YEAR','none','Geburtstag: Jahr');
+			$adframe->setTypeAndDescr('PROFESSION','alphanum','Beruf');
+			$adframe->setTypeAndDescr('LOGIN','alphanum','Login');
+			$adframe->setTypeAndDescr('PASSWD','alphanum','Passwort');
+			$adframe->setTypeAndDescr('LICENCEKEY','alphanum','Licencekey');
+			$adframe->setTypeAndDescr('MOBIL','alphanum','Mobiltelefon-Nummer');
+			$adframe->setTypeAndDescr('ADFRAME_COMPANY_ID','none','Firma');
+			$adframe->setTypeAndDescr('POSITION','alphanum','Firma: Position');
+			$adframe->setTypeAndDescr('FON_COMPANY','alphanum','Firma: Telefon');
+			$adframe->setTypeAndDescr('HOBBY','alphanum','Hobby');
+			$adframe->setTypeAndDescr('EXTENSION','alphanum','Zusatz: Text');
+			$adframe->setTypeAndDescr('EXTENSION_ID','num','Zusatz: ID');
+			
+			my $birthday = '000-00-00';
+
+			if (checkIfNotAllEmpty('BIRTHDAY_DAY','BIRTHDAY_MONTH','BIRTHDAY_YEAR'))
+			{
+				$error ='Bitte Geburtstags-Felder überprüfen!\n';
+			}
+			elsif ($in{BIRTHDAY_YEAR} ne '')
+			{
+				$birthday = "$in{BIRTHDAY_YEAR}".'-'."$in{BIRTHDAY_MONTH}".'-'."$in{BIRTHDAY_DAY}"
+			}
+			
+			if (! $thisUser->setLOGIN($in{LOGIN}))
+			{
+				$error = 'Bitte ein anderes Login verwenden.Dieses Login existiert bereits';
+			}
+			if ($error ne '')
+			{	
+				$adframe->showAlert($error);
+			}
+			elsif (! $adframe->alertRequestErrors(@inputs) )
+			{
+				$thisUser->setACCOUNT_NO($in{ACCOUNT_NO});
+				$thisUser->setGENDER($in{GENDER});
+				$thisUser->setTITLE($in{TITLE});
+				$thisUser->setFIRSTNAME($in{FIRSTNAME});
+				$thisUser->setNAME($in{NAME});
+				$thisUser->setSTREET($in{STREET});
+				$thisUser->setZIPCODE($in{ZIPCODE});
+				$thisUser->setCITY($in{CITY});
+				$thisUser->setCOUNTRY($in{COUNTRY});
+				$thisUser->setFON($in{FON});
+				$thisUser->setFAX($in{FAX});
+				$thisUser->setBIRTHDAY($birthday);
+				$thisUser->setPROFESSION($in{PROFESSION});
+				$thisUser->setCOMPANY($in{COMPANY});
+				$thisUser->setPASSWD($in{PASSWD});
+				$thisUser->setLICENCEKEY($in{LICENCEKEY});
+				$thisUser->setMOBIL($in{MOBIL});
+				$thisUser->setADFRAME_COMPANY_ID($in{ADFRAME_COMPANY_ID});
+				$thisUser->setPOSITION($in{POSITION});
+				$thisUser->setFON_COMPANY($in{FON_COMPANY});	
+				$thisUser->setHOBBY($in{HOBBY});
+				$thisUser->setEXTENSION($in{EXTENSION});
+				$thisUser->setEXTENSION_ID($in{EXTENSION_ID});				
+
+				if ($thisUser->save())
+				{
+					if ($in{adframe_action} eq 'EDITROLE')
+					{
+						newDoc('admin/adframe/components/userdb/userdb_user_editrole');
+					}
+					else
+					{
+						newDoc('admin/adframe/components/userdb/userdb_overview');
+					}
+				}
+				else
+				{
+					$adframe->showAlert('Der Datensatz konnte leider nicht gespeichert werden!');
+				}
+			
+			}
+		}
+		else
+		{
+			my $birthday = $thisUser->getBIRTHDAY();
+			my ($bYear,$bMonth,$bDay) = split(/-/, $birthday);	
+			
+			$adframe->setValue('ACCOUNT_NO',$thisUser->getACCOUNT_NO());
+			$adframe->setValue('GENDER',$thisUser->getGENDER());
+			$adframe->setValue('TITLE',$thisUser->getTITLE());
+			$adframe->setValue('FIRSTNAME',$thisUser->getFIRSTNAME());
+			$adframe->setValue('NAME',$thisUser->getNAME());
+			$adframe->setValue('STREET',$thisUser->getSTREET());
+			$adframe->setValue('ZIPCODE',$thisUser->getZIPCODE());
+			$adframe->setValue('CITY',$thisUser->getCITY());
+			$adframe->setValue('COUNTRY',$thisUser->getCOUNTRY());
+			$adframe->setValue('FON',$thisUser->getFON());
+			$adframe->setValue('FAX',$thisUser->getFAX());
+			$adframe->setValue('BIRTHDAY',);
+			$adframe->setValue('PROFESSION',$thisUser->getPROFESSION());
+			$adframe->setValue('COMPANY',$thisUser->getCOMPANY());
+			$adframe->setValue('LOGIN',$thisUser->getLOGIN());
+			$adframe->setValue('PASSWD',$thisUser->getPASSWD());
+			$adframe->setValue('LICENCEKEY',$thisUser->getLICENCEKEY());
+			$adframe->setValue('BIRTHDAY_YEAR',$bYear);
+			$adframe->setValue('BIRTHDAY_MONTH',$bMonth);
+			$adframe->setValue('BIRTHDAY_DAY',$bDay);
+			$adframe->setValue('MOBIL',$thisUser->getMOBIL());
+			$adframe->setValue('ADFRAME_COMPANY_ID',$thisUser->getADFRAME_COMPANY_ID());
+			$adframe->setValue('POSITION',$thisUser->getPOSITION());
+			$adframe->setValue('FON_COMPANY',$thisUser->getFON_COMPANY());
+			$adframe->setValue('HOBBY',$thisUser->getHOBBY());
+			$adframe->setValue('EXTENSION',$thisUser->getEXTENSION());
+			$adframe->setValue('EXTENSION_ID',$thisUser->getEXTENSION_ID());
+		}
+	}
+	else
+	{
+		$adframe->showAlert('Keine Editiermöglichkeit!\nLeider sind die Daten für diesen Benutzer zz. nicht abrufbar');
+	}
+
+	my $USERDB_SEARCH_ITEM = $in{USERDB_SEARCH_ITEM};
+	my $USERDB_SEARCH_STRING = $in{USERDB_SEARCH_STRING};
+	$adframe->setValue('USERDB_SEARCH_ITEM_VALUE',$USERDB_SEARCH_ITEM);
+	$adframe->setValue('USERDB_SEARCH_STRING_VALUE',StringFunctions::encode2Http($USERDB_SEARCH_STRING));
+		
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}
+
+sub checkIfNotAllEmpty
+{
+	# returns: 
+	#  1 if one ore more is not clear and not all are set
+	#  0 if all are set or none is set
+	my @inkeys  = @_;
+	my $count	= 0;
+	my $allSet	= 0;
+	foreach my $k (@inkeys)
+	{
+		$count++;
+		if ($in{$k} ne '')
+		{
+			$allSet++;
+		}
+	}
+	if (($allSet==0) || ($allSet==$count))
+	{
+		return 0;
+	}
+	return 1;
+}

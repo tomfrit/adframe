@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> 
+
+<configuration>
+<mcms channel="allride" area="mcms">
+
+	<category>mcms_group1_news' or AREA like 'mcms_group2_team' or AREA like 'mcms_group6_staff') AND (IMG_4_4 LIKE 'MCMS_IMG_4_4__</category>
+	<imagedir>/cms/</imagedir>
+
+	<displayimport>&#60;link rel='stylesheet' href='/styles.css'&#62;</displayimport>
+	<hrefstyle>content-m</hrefstyle>
+	
+	<articlelist>
+		<image>IMG_0_2</image>
+		<imageattributes>width=80 height=67</imageattributes>
+	</articlelist>
+	
+	<httpgenerator>
+	</httpgenerator>	
+</mcms>
+</configuration>

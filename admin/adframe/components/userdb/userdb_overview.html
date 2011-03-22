@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title></title>
+	<link rel="stylesheet" href="/admin/adframe/css/global.css">
+	<link rel="stylesheet" href="/admin/adframe/css/components.css">
+
+	<script language="javascript">
+	function deleteUser(adframe_user_id,name)
+	{
+		var messagedel = "Soll der Eintrag "+name+" wirklich geloescht werden ?";
+		var okdel = confirm(messagedel);
+		if (okdel)
+		{
+			stdel = "/cgi-bin/adframe/admin/adframe/components/userdb/userdb_overview.html?id=<!-- #id# -->&adframe_event=userdb_user_delete&ADFRAME_USER_ID="+adframe_user_id+"&componentname=<!-- #componentname# -->&page=<!-- #page# -->&sortby=<!-- #sortby# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->";
+			self.location.replace(stdel);
+		}
+	}
+	</script>
+</head>
+<body class="BodyContainerWhite" bgcolor="#ffffff">
+
+<div id="componentheadline">&Uuml;bersicht - <!-- #COMPONENTTITLE# --></div>
+
+<div id="componentcontent">
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+	<form name="userdb_search_form" action="/cgi-bin/adframe/admin/adframe/components/userdb/userdb_overview.html" method="post">
+	<input type="hidden" name="componentname" value="<!-- #componentname# -->">
+	<input type="hidden" name="sortby" value="<!-- #sortby# -->">
+		<tr>
+			<td class="componentheadtd" valign="top">SUCHE NACH</td>
+			<td class="componentcontenttd" align="right">
+				<select name="USERDB_SEARCH_ITEM">
+					<option value="NAME">NAME
+					<option value="FIRSTNAME">VORNAME
+					<option value="EMAIL">EMAIL
+					<option value="CITY">STADT
+					<option value="LOGIN">LOGIN
+					<option value="COMPANY">FIRMA
+					<option value="ROLES">ROLLE
+				</select></td>
+			<td class="componentcontenttd" align="left"><input type="text" name="USERDB_SEARCH_STRING" size="30"></td>
+			<td class="componentcontenttd" align="right"><input type="submit" value="start search"></td>
+		</tr>
+	</form>
+	</table>
+	
+	<table><tr><td height="20"></td></tr></table>	
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" align="left"><b>&nbsp;<font color="#ff0000"><!-- #count# --> Eintr&auml;ge</font> gefunden ( Suchoption: <font color="#ff0000"><!-- #USERDB_SEARCH_OPTION# --></font>  sortiert nach <!-- #USERDB_SORT_OPTION# --> )</td>
+		</tr>
+	</table>
+	
+	<table><tr><td></td></tr></table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" width="50"><a href="/admin/adframe/components/userdb/userdb_overview.html?sortby=ADFRAME_USER_ID&componentname=<!-- #componentname# -->&page=<!-- #page# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->" class="tdinnernormunderline">ID</a></td>
+			<td class="componentheadtd" width="150"><a href="/admin/adframe/components/userdb/userdb_overview.html?sortby=NAME&componentname=<!-- #componentname# -->&page=<!-- #page# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->" class="tdinnernormunderline">NAME</a></td>
+			<td class="componentheadtd" width="150"><a href="/admin/adframe/components/userdb/userdb_overview.html?sortby=FIRSTNAME&componentname=<!-- #componentname# -->&page=<!-- #page# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->" class="tdinnernormunderline">VORNAME</a></td>
+			<td class="componentheadtd" width="150"><a href="/admin/adframe/components/userdb/userdb_overview.html?sortby=EMAIL&componentname=<!-- #componentname# -->&page=<!-- #page# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->" class="tdinnernormunderline">EMAIL</a></td>
+			<td class="componentheadtd" width="100"><a href="/admin/adframe/components/userdb/userdb_overview.html?sortby=CR_DATE&componentname=<!-- #componentname# -->&page=<!-- #page# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->" class="tdinnernormunderline">DATUM</a></td>
+			<td class="componentheadtd" width="150">ROLLEN</td>
+			<td class="componentheadtd" width="18" valign="middle" align="center">&nbsp;</td>		
+			<td class="componentheadtd" width="18" valign="middle" align="center">&nbsp;</td>
+		</tr>
+		<repetition name="LOOP_USERDB_USER">
+		<tr>
+			<td class="componentcontenttd" width="50">!ADFRAME_USER_ID!</td>
+			<td class="componentcontenttd" width="150">!NAME!&nbsp;</td>
+			<td class="componentcontenttd" width="150">!FIRSTNAME!&nbsp;</td>
+			<td class="componentcontenttd" width="150">!EMAIL!</td>
+			<td class="componentcontenttd" width="100">!CR_DATE_DAY!.!CR_DATE_MONTH!.!CR_DATE_YEAR!</td>
+			<td class="componentcontenttd" width="150">!ROLES!&nbsp;</td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a noadd href="javascript: deleteUser(!ADFRAME_USER_ID!,'!FIRSTNAME! !NAME!');"><img src="/admin/adframe/img/icon_delete.gif" alt="DELETE !FIRSTNAME! !NAME!" width="18" height="18" border="0"></a></td>
+			<td class="componentcontenttd" width="18" valign="middle" align="center"><a href="/admin/adframe/components/userdb/userdb_user_edit.html?componentname=<!-- #componentname# -->&ADFRAME_USER_ID=!ADFRAME_USER_ID!&page=<!-- #page# -->&sortby=<!-- #sortby# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->" class="tdinnernorm"><img src="/admin/adframe/img/icon_edit.gif" alt="EDIT '!FIRSTNAME! !NAME!'" width="18" height="18" border="0"></a></td>
+		</tr>
+		</repetition name="LOOP_USERDB_USER">
+	</table>
+
+	<table><tr><td></td></tr></table>
+	
+	<table border="0" class="componenttable" cellpadding="0" cellspacing="1" width="600" align="center">
+		<tr>
+			<td class="componentheadtd" width="18"><a href="/admin/adframe/components/userdb/userdb_overview.html?componentname=<!-- #componentname# -->&nextpage=prev&page=<!-- #page# -->&sortby=<!-- #sortby# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->"><img src="/admin/adframe/img/icon_left.gif" width=18 height=18 alt="" border="0"></a></td>
+			<td class="componentheadtd" align="center"><b>Seite <!-- #page# --> von <!-- #allpages# --></b></td>
+			<td class="componentheadtd" width="18"><a href="/admin/adframe/components/userdb/userdb_overview.html?componentname=<!-- #componentname# -->&nextpage=next&page=<!-- #page# -->&sortby=<!-- #sortby# -->&USERDB_SEARCH_ITEM=<!-- #USERDB_SEARCH_ITEM_VALUE# -->&USERDB_SEARCH_STRING=<!-- #USERDB_SEARCH_STRING_VALUE# -->"><img src="/admin/adframe/img/icon_right.gif" width=18 height=18 alt="" border="0"></a></td>			
+		</tr>
+	</table>
+	
+
+</div>
+
+</body>
+</html>

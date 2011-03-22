@@ -1,0 +1,367 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ListADFRAME_MCMS;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::components::mcms::McmsDbManager;
+use de::adframe::lib::io::HttpTemplateGenerator;
+1;
+
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $ITEMS_PER_PAGE	= 10;
+
+	my $componentname	= $in{componentname};
+	my $conf			= configure($xmlfile,$componentname);
+	my $mcmsconf		= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+
+	my $list			= new ListADFRAME_MCMS();
+	my $error			= '';
+
+	$adframe->setSwitch('SWITCH_TOPARTICLE','off');
+					
+	if (ref $mcmsconf) 
+	{
+	    my $topArticleEnabled 	= 0;
+	    my $topCnf =  $mcmsconf->getValue('configuration:mcms','area',$componentname,'toparticle');
+
+	    if ($topCnf =~ /enabled/i)
+	    {
+	    	$topArticleEnabled 	= 1;
+	    	$adframe->setSwitch('SWITCH_TOPARTICLE','on');
+	    }
+	    
+		if (($in{adframe_event} ne '') && ($in{ADFRAME_MCMS_ID} >0))
+		{
+			if ($in{adframe_event} eq '_set__online')
+			{
+				my $mcms 	= new ClassADFRAME_MCMS();
+				if ($mcms->initById($in{ADFRAME_MCMS_ID}))
+				{
+					if ($mcms->getP_STATUS() <1 )
+					{
+						$mcms->setP_DATE("now()");
+						$mcms->setP_STATUS(1);
+						if ($mcms->save() > 0)
+						{
+							$mcms->setP_DATE("now()");
+							$mcms->save();
+							
+							if (! pregenerate($mcmsconf))
+							{
+							
+								$error = 'Der Artikel kann nicht online generiert werden!';	
+							}
+						}
+						else
+						{
+							$error = 'Der Artikel kann nicht online gestellt werden!';
+						}
+					}
+					else
+					{
+						$error = 'Der Artikel kann nicht online gestellt werden!';
+					}
+				}
+				else
+				{
+					$error = 'Der Artikel kann nicht online gestellt werden!';
+				}
+			}
+			elsif ($in{adframe_event} eq '_set__offline')
+			{
+				my $mcms 	= new ClassADFRAME_MCMS();
+			
+				if ($mcms->initById($in{ADFRAME_MCMS_ID}))
+				{
+					if ($mcms->getP_STATUS() >0 )
+					{
+						$mcms->setP_STATUS(0);
+						$mcms->setP_DATE("now()");
+						if (! $mcms->save())
+						{
+							$error = 'Der Artikel kann nicht offline geschaltet werden!';
+						}
+						elsif (! pregenerate($mcmsconf))
+						{
+							$error = 'Der Artikel kann nicht online generiert werden!';	
+						}
+					}
+					else
+					{
+						$error = 'Der Artikel kann nicht offline geschaltet werden!';
+					}
+				}
+				else
+				{
+					$error = 'Der Artikel kann nicht offline geschaltet werden!';
+				}
+			}
+			elsif ($in{adframe_event} eq '_set__top')
+			{
+				my $mcms 	= new ClassADFRAME_MCMS();
+				if ($mcms->initById($in{ADFRAME_MCMS_ID}))
+				{
+					if ($mcms->getP_STATUS() == 1 )
+					{
+						$mcms->setP_DATE("now()");
+						$mcms->setP_STATUS(2);
+						if ($mcms->save() > 0)
+						{
+							$mcms->setP_DATE("now()");
+							$mcms->save();
+							
+							if (! pregenerate($mcmsconf))
+							{
+							
+								$error = 'Der Artikel kann nicht online generiert werden!\n(Bitte zuerst den Artikel online stellen)';	
+							}
+						}
+						else
+						{
+							$error = 'Der Artikel kann nicht als Topmeldung aktiviert werden!\n(Bitte zuerst den Artikel online stellen)';
+						}
+					}
+					else
+					{
+						$error = 'Der Artikel kann nicht als Topmeldung aktiviert werden!\n(Bitte zuerst den Artikel online stellen)';
+					}
+				}
+				else
+				{
+					$error = 'Der Artikel kann nicht als Topmeldung aktiviert werden!\n(Bitte zuerst den Artikel online stellen)';
+				}
+			}
+			elsif ($in{adframe_event} eq '_unset__top')
+			{
+				my $mcms 	= new ClassADFRAME_MCMS();
+			
+				if ($mcms->initById($in{ADFRAME_MCMS_ID}))
+				{
+					if ($mcms->getP_STATUS() == 2 )
+					{
+						$mcms->setP_STATUS(1);
+						$mcms->setP_DATE("now()");
+						if (! $mcms->save())
+						{
+							$error = 'Der Artikel kann nicht als Topmeldung deaktiviert werden!';
+						}
+						elsif (! pregenerate($mcmsconf))
+						{
+							$error = 'Der Artikel kann nicht als Topmeldung deaktiviert werden!';	
+						}
+					}
+					else
+					{
+						$error = 'Der Artikel kann nicht als Topmeldung deaktiviert werden!';
+					}
+				}
+				else
+				{
+					$error = 'Der Artikel kann nicht als Topmeldung deaktiviert werden!';
+				}
+			}
+			elsif ($in{adframe_event} eq '__mcms_rank_down')
+			{
+				my $mcmsman = new McmsDbManager();
+				$mcmsman->toggleRank($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_MCMS_ID},'down');
+				if (! pregenerate($mcmsconf))
+				{
+					$error = 'Die Übersichtsseiten können nicht online generiert werden!';	
+				}				
+			}	
+			elsif ($in{adframe_event} eq '__mcms_rank_up')
+			{
+				my $mcmsman = new McmsDbManager();
+				$mcmsman->toggleRank($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_MCMS_ID},'up');
+				if (! pregenerate($mcmsconf))
+				{
+					$error = 'Die Übersichtsseiten können nicht online generiert werden!';	
+				}				
+			}
+			elsif ($in{adframe_event} eq '__mcms_delete')
+			{
+				my $mcms 	= new ClassADFRAME_MCMS();
+			
+				if ($mcms->initById($in{ADFRAME_MCMS_ID}))
+				{	
+					$mcms->setP_DATE("now()");
+					$mcms->setP_STATUS(-1);
+					$mcms->setIS_ARCHIVE(1);
+					$mcms->setIS_ACTIVE(0);
+					$mcms->setRANK_NO(-1);
+					$mcms->setPARENT_RANK_NO(-1);
+					if (! $mcms->save())
+					{
+						$error = 'Der Artikel kann nicht gelöscht werden!';
+					}
+					elsif (! pregenerate($mcmsconf))
+					{
+						$error = 'Die Übersichtsseiten können nicht online generiert werden!';	
+					}					
+				}
+				else
+				{
+					$error = 'Der Artikel kann nicht gelöscht werden!';
+				}
+			}
+		}
+
+		$adframe->setValue('GENIMAGEDIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir'));
+		$adframe->setValue('displayimport',$mcmsconf->getValue('configuration:mcms','area',$componentname,'displayimport'));
+		$adframe->setValue('SAISON',$saison);
+
+		# pages etc:
+		my $count		= $list->getCountADFRAME_MCMS("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and AREA='$componentname' and IS_ARCHIVE=0 and IS_ACTIVE=1");
+
+		my $allpages	= int($count/$ITEMS_PER_PAGE);	
+		if ($count % $ITEMS_PER_PAGE > 0)
+		{
+			$allpages+=1;
+		}
+		my $page		= $in{page} || 1;
+
+		if ($in{nextpage} eq 'next')
+		{
+			if (($page*$ITEMS_PER_PAGE) >= $count)
+			{
+				$page = 1;
+			}
+			else
+			{
+				$page++;
+			}
+		}
+		elsif ($in{nextpage} eq 'prev')
+		{
+			$page--;
+			if ($page<1)
+			{
+				$page = $allpages;
+			}
+		}
+
+		my $start	= ($page-1) * $ITEMS_PER_PAGE;
+
+		$allpages = 1 if ($allpages<1);
+		$adframe->setValue('page',$page);
+		$adframe->setValue('allpages',$allpages);
+		$adframe->setValue('count',$count);
+
+		# fill loops
+		my $orderby = 'RANK_NO desc, ADFRAME_MCMS_ID desc';
+		my $dataRef = $list->getADFRAME_MCMS("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and AREA='$componentname' and IS_ARCHIVE=0 and IS_ACTIVE=1",$orderby,$start,$ITEMS_PER_PAGE);
+		
+		my $teaserimagename = $mcmsconf->getAttribute('src','configuration:mcms:articlelist:image','name','listimage');
+	
+		if ($teaserimagename !~ /IMG_/)
+		{
+			$teaserimagename = 'IMG_0_1';
+		}
+		my $imageattributes = $mcmsconf->getAttribute('attributes','configuration:mcms:articlelist:image','name','listimage');
+		if ($imageattributes !~ /width/i)
+		{
+			$imageattributes = 'width="100" height="100"';
+		}		
+		
+		my $qual	= $ListADFRAME_MCMS::QUAL;
+		$qual =~ s/\!$teaserimagename\!/\!TEASERIMAGE\!/;
+		
+		$adframe->setValue('TEASERIMAGE_ATTRIBUTES',$imageattributes);
+		
+		$adframe->makeRepetition('LOOP_MCMS',$qual,$dataRef);
+	
+		if (@{ $dataRef } == ())
+		{
+			$adframe->setSwitch('SWITCH_NODATA','on');
+		}
+		else
+		{
+			$adframe->setSwitch('SWITCH_NODATA','off');
+			
+			my @data 	= @{ $dataRef };
+			my @help	= ();
+			for (my $i=0;$i<=$#data;$i++)
+			{
+				@help = split(/\|/, $data[$i]);
+				#debug(@help);
+				if ($help[6] >=1)
+				{
+					$adframe->setSwitch('SWITCH_P_STATUS_ON_'.$help[0],'on');
+					$adframe->setSwitch('SWITCH_P_STATUS_OFF_'.$help[0],'off');
+				}
+				else
+				{
+					$adframe->setSwitch('SWITCH_P_STATUS_ON_'.$help[0],'off');
+					$adframe->setSwitch('SWITCH_P_STATUS_OFF_'.$help[0],'on');				
+				}
+				
+				if ($help[6] ==2)
+				{
+					$adframe->setSwitch('SWITCH_TOP_ON_'.$help[0],'on');
+					$adframe->setSwitch('SWITCH_TOP_OFF_'.$help[0],'off');
+				}
+				else
+				{
+					$adframe->setSwitch('SWITCH_TOP_ON_'.$help[0],'off');
+					$adframe->setSwitch('SWITCH_TOP_OFF_'.$help[0],'on');				
+				}
+				if (($help[31]  =~ /DEFIMG\_0\_2/) && ($help[32]  =~ /DEFIMG\_0\_3/))
+				{
+					$adframe->setToDict('SWITCH_IMG_TEASER_'.$help[0],'switch','','',0);
+				}
+	
+			}			
+		}	
+		if ($error ne '')
+		{
+			$adframe->showAlert($error);
+		}
+	}
+	else
+	{
+		$adframe->showAlert('Die Konfiguration kann leider nicht geladen werden!');
+	}
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);	
+}
+
+sub pregenerate
+{
+	my $mcmsconf	= shift;
+	my @tmpl 		= $mcmsconf->getAllTagsWith('template','configuration:mcms:httpgenerator','','');
+	my $gen 		= new HttpTemplateGenerator();
+	my $ok			= 1;
+	foreach my $t (@tmpl)
+	{
+		my $url = 'http://'.$ENV{ADFRAME_SERVER_NAME}.'/cgi-bin/adframe/'.$t->getAttribute('url');
+		my $storefile = $ENV{ADFRAME_DOC_PATH}.'/'.$t->getAttribute('storefile');
+						
+		if (! $gen->generate($url,$storefile))
+		{
+			$ok = 0;
+		}
+	}
+	return $ok;
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}
+

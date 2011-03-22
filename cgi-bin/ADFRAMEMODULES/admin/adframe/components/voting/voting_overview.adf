@@ -1,0 +1,54 @@
+use de::adframe::components::voting::gen::ListADFRAME_VOTING_CATEGORY;
+use de::adframe::components::voting::gen::ClassADFRAME_VOTING_CATEGORY;
+use de::adframe::lib::DateTime;
+1;
+sub common
+{
+
+	my $componentname	= $in{componentname};
+	my $list		= new ListADFRAME_VOTING_CATEGORY();
+	my $timeman		= new DateTime();	
+	
+
+
+	if ($in{YEAR} eq '')
+	{
+		$in{YEAR}		= $timeman->getYear();
+		$in{MONTH}		= '';
+		$adframe->setValue('YEAR',$in{YEAR});
+		$adframe->setValue('MONTH',$in{MONTH});
+	}
+
+	if ($in{adframe_event} eq 'voting_delete')
+	{
+		if ($in{ADFRAME_VOTING_CATEGORY_ID} > 0)
+		{
+			$class= new ClassADFRAME_VOTING_CATEGORY();
+			$class->initById($in{ADFRAME_VOTING_CATEGORY_ID});
+			$class->setIS_ACTIVE(0);
+			if (!$class->save()) 
+			{
+				$class->getErrorMessage();
+			}
+		
+		}
+	}
+	$addCond = " AND month(CR_DATE) = '$in{MONTH}'" if ($in{MONTH} ne '');
+	my $votings = $list->getADFRAME_VOTING_CATEGORY("IS_ACTIVE=1 AND year(CR_DATE) = '$in{YEAR}' $addCond");
+
+	$adframe->makeRepetition('LOOP_VOTING',$ListADFRAME_VOTING_CATEGORY::QUAL,$votings);
+	@voteArr = @{$votings};
+
+	if ($#voteArr == -1)
+	{
+		$adframe->setSwitch('SWITCH_NODATA','on');
+	}
+	else
+	{
+		$adframe->setSwitch('SWITCH_NODATA','off');
+	}
+	
+	$adframe->setValue('YEAR_VALUE',$in{YEAR});
+	$adframe->setValue('MONTH_VALUE',$in{MONTH});
+}
+

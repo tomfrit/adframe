@@ -1,0 +1,63 @@
+package ClassList<!-- #TableName# -->;
+use de::adframe::lib::db::DbAdapter; @ISA=qw(DbAdapter); 
+use <!-- #PACKAGE_GEN_PATH# -->::Class<!-- #TableName# -->;
+
+sub getObjects
+{
+	my $this			= shift;
+	my $condition		= shift;
+	my $orderBy			= shift;
+	my $start			= shift;
+	my $limit			= shift;
+	my $sqlcondition	= "<!-- #PK_NAME# -->>0";
+	if ($condition ne '')
+	{
+		$sqlcondition = $condition;
+	}
+	if ($start>=0 && $limit>0)
+	{
+		$sqlcondition.=" limit $start,$limit"; 
+	}
+	my @data 	= $this->get('<!-- #TableName# -->','<!-- #PK_NAME# -->',$sqlcondition); 
+	my @objects	= ();
+	for (my $i=0;$i<=$#data;$i++)
+	{
+		my $object = new Class<!-- #TableName# -->();
+		if ($object->initById($data[$i]))
+		{
+			push(@objects,$object);
+		}
+		else
+		{
+			$this->addErrorMessage("Cannot create Object by ID: $data[$i]");
+		}
+	}
+	return @objects;
+}
+
+sub getErrorMessage
+{
+	my $this	= shift;
+	return $this->{errormessage};
+}
+
+# private:
+sub addErrorMessage
+{
+	my $this	= shift;
+	my $mess	= shift;
+	$this->{errormessage}.='ClassList<!-- #TableName# -->: '.$mess.'\n';   
+}
+
+1;
+__END__
+
+=head1 NAME ClassList<!-- #TableName# -->
+
+=head2 extends DbAdapter
+
+=head1 METHODS
+
+getObjects<!-- #TableName# -->(String: condition, String: orderBy, Int: start, Int: limit)
+
+getErrorMessage();

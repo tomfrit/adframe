@@ -1,0 +1,160 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::user::AdframeUser;
+use de::adframe::components::user::gen::ListADFRAME_USERROLE;
+use de::adframe::lib::StringFunctions;
+1;
+sub common
+{
+	my $ITEMS_PER_PAGE 	= 20;
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $thisUser 		= new AdframeUser($ENV{ADFRAME_CHANNEL});
+	my $adminUser		= new AdframeUser($ENV{ADFRAME_CHANNEL});
+	my $roleList		= new ListADFRAME_USERROLE();
+	my $roleRef			= $roleList->getADFRAME_USERROLE("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}'",'ROLE','','');
+	my %roleHash		= ();
+	my @help			= ();
+	my $adminStatus 	= 0;
+	my $previousAdmin	= '';
+	my $message			= '';
+	
+	configure($xmlfile,$componentname);
+
+	if (! $adminUser->initById($adframe->getFromSession('ADFRAME_USER_ID')))
+	{
+		$adframe->showAlert('Sie haben keine Berechtigung, diesen Bereich einzusehen!');
+	}
+	elsif ($thisUser->initById($in{ADFRAME_USER_ID}) )
+	{ 
+		foreach my $k (@{ $roleRef })
+		{
+			@help = split(/\|/,$k);
+			$roleRef{$help[0]} = $help[2];
+		}
+		
+		if ($in{adframe_event} eq 'userdb_editrole_form')
+		{
+			# checken, ob vor dem Rollen-Löschen Admin-Rechte gesetzt waren:
+			if ($thisUser->hasRole('ADMINISTRATOR') )
+			{
+				$previousAdmin = 'ADMINISTRATOR';
+			}
+			
+			$thisUser->deleteAllRoles();
+			
+			my $tmpId	= '';
+			
+			foreach my $k (keys %in)
+			{
+				if ($k =~ /USERROLE_\d+/)
+				{
+					$tmpId = $k;
+					$tmpId=~s/\D//g;
+
+					if ($roleRef{$tmpId} ne '')
+					{
+						$thisUser->addRole($roleRef{$tmpId});
+					}
+				}
+			}
+
+			# wenn keine Adminrechte, kann auch die ADMINISTRATOR-Rolle nicht verändert werden:			
+			if (! $adminUser->hasRole('ADMINISTRATOR'))
+			{
+				if (($previousAdmin eq 'ADMINISTRATOR') && (! $thisUser->hasRole('ADMINISTRATOR')) )
+				{
+					$thisUser->addRole('ADMINISTRATOR');
+					$message = 'Hinweis: Sie haben keine Berechtigung, den ADMINISTRATOR-Status zu verändern!';
+				}
+				elsif (($previousAdmin eq '') && ($thisUser->hasRole('ADMINISTRATOR')) )
+				{
+					$thisUser->deleteRole('ADMINISTRATOR');
+					$message = 'Hinweis: Sie haben keine Berechtigung, den ADMINISTRATOR-Status zu verändern!';
+				}
+			}
+			
+			# wenn ADMINISTRATOR sich selbst die Rolle entziehen will:
+			if (($adminUser->hasRole('ADMINISTRATOR')) && ($thisUser->getADFRAME_USER_ID() == $adminUser->getADFRAME_USER_ID()) )
+			{
+				if (! $thisUser->hasRole('ADMINISTRATOR'))
+				{
+					$thisUser->addRole('ADMINISTRATOR');
+					$message = 'Sie können sich nicht selbst den Administrator-Status entziehen!\nOhne Administrationsrechte würden Sie sich aus dem Adminbereich endgültig aussperren!';
+				}
+			}
+			
+			if ($thisUser->save())
+			{
+				if ($message ne '')
+				{
+					$adframe->showAlert($message);
+				}
+				else
+				{
+					newDoc('admin/adframe/components/userdb/userdb_user_edit');
+				}
+			}
+			else
+			{
+				$adframe->showAlert('Die Rollenzuordnung konnte leider nicht gespeichert werden!');
+			}
+		}
+		else
+		{
+		
+			foreach my $r (keys %roleHash)
+			{	
+				$adframe->setToDict('USERROLE_'.$r,'checkbox','none','','checked')
+			}
+		}
+		
+		my @roles = ();
+		
+		foreach my $k (@{ $roleRef })
+		{
+			@help = split(/\|/,$k);
+			if ($thisUser->hasRole($help[2]) )
+			{
+				push(@roles,"$k|checked");
+			}
+			else
+			{
+				push(@roles,"$k|");
+			}
+		}
+		
+		$adframe->makeRepetition('LOOP_ROLES',$ListADFRAME_USERROLE::QUAL.'|!checked!',\@roles);
+			
+		# unveränderlich:
+		$adframe->setValue('ADFRAME_USER_ID',$thisUser->getADFRAME_USER_ID());
+		$adframe->setValue('EMAIL',$thisUser->getEMAIL());
+		$adframe->setValue('FIRSTNAME',$thisUser->getFIRSTNAME());
+		$adframe->setValue('NAME',$thisUser->getNAME());
+		
+		my $USERDB_SEARCH_ITEM = $in{USERDB_SEARCH_ITEM};
+		my $USERDB_SEARCH_STRING = $in{USERDB_SEARCH_STRING};
+		$adframe->setValue('USERDB_SEARCH_ITEM_VALUE',$USERDB_SEARCH_ITEM);
+		$adframe->setValue('USERDB_SEARCH_STRING_VALUE',StringFunctions::encode2Http($USERDB_SEARCH_STRING));
+	}
+	else
+	{
+		$adframe->showAlert('Keine Editiermöglichkeit!\nLeider sind die Daten für diesen Benutzer zz. nicht abrufbar');
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

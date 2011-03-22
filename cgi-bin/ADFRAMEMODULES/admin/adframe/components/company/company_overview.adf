@@ -1,0 +1,100 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::company::gen::ListADFRAME_COMPANY;
+use de::adframe::components::company::gen::ClassADFRAME_COMPANY;
+$DELETE_ERRORMESSAGE = 'Die Firma konnte leider nicht gelöscht werden';
+1;
+sub common
+{
+	my $ITEMS_PER_PAGE 	= 10;
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $listCompany		= new ListADFRAME_COMPANY();
+	
+	configure($xmlfile,$componentname);
+	my $area			= $adframe->getValue('area');
+	
+	if ($in{adframe_event} eq 'company_deactivate')
+	{
+		my $company = new ClassADFRAME_COMPANY();
+		
+		my $delerror = '';
+		
+		if (($in{ADFRAME_COMPANY_ID} > 0) && ($company->initById($in{ADFRAME_COMPANY_ID})) )
+		{
+			$company->setIS_ACTIVE(0);
+			if ( ! $company->save())
+			{
+				$delerror = $company->getErrorMessage();
+			}
+		}
+		else
+		{
+			$delerror = $DELETE_ERRORMESSAGE;
+		}
+		
+		if ($delerror ne '')
+		{
+			$adframe->showAlert($delerror);
+		}
+	}
+	
+	# pages etc:
+	my $count		= $listCompany->getCountADFRAME_COMPANY("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and AREA='$area' and IS_ACTIVE=1");
+
+	my $allpages	= int($count/$ITEMS_PER_PAGE);	
+
+	if ($count % $ITEMS_PER_PAGE > 0)
+	{
+		$allpages+=1;
+	}
+	my $page		= $in{page} || 1;
+
+	if ($in{nextpage} eq 'next')
+	{
+		if (($page*$ITEMS_PER_PAGE) >= $count)
+		{
+			$page = 1;
+		}
+		else
+		{
+			$page++;
+		}
+	}
+	elsif ($in{nextpage} eq 'prev')
+	{
+		$page--;
+		if ($page<1)
+		{
+			$page = $allpages;
+		}
+	}
+	
+	my $start	= ($page-1) * $ITEMS_PER_PAGE;
+			
+	$allpages = 1 if ($allpages ==0);		
+	$adframe->setValue('page',$page);
+	$adframe->setValue('allpages',$allpages);
+	$adframe->setValue('count',$count);
+
+	my $companyRef = $listCompany->getADFRAME_COMPANY("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and AREA='$area' and IS_ACTIVE=1",$in{orderby},$start,$ITEMS_PER_PAGE);
+	$adframe->makeRepetition('LOOP_COMPANIES',$ListADFRAME_COMPANY::QUAL,$companyRef);
+	
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('area',$conf->getAttribute('area','configuration:admin:component','name',$componentname));				
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

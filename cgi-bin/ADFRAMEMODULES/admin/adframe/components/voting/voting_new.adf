@@ -1,0 +1,74 @@
+use de::adframe::components::voting::gen::ClassADFRAME_VOTING_CATEGORY;
+use de::adframe::lib::db::DbAdapter;
+use de::adframe::lib::DateTime;
+1;
+sub common
+{
+	my $IMAGE_EMPTY		= 'clear_dot.gif';
+	my $db			= new DbAdapter;
+	my $componentname	= $in{componentname};
+	my $timeman		= new DateTime();
+
+	my $voting_category	= new ClassADFRAME_VOTING_CATEGORY;
+
+
+	if ($in{adframe_event} eq 'voting_new_form')
+	{
+		
+		$adframe->setTypeAndDescr('TITLE','none,required','Frage');
+		if (! $adframe->alertRequestErrors(TITLE))
+		{
+			my $testFrom	= "$in{START_YEAR}"."$in{START_MONTH}"."$in{START_DAY}";
+			my $testTo	= "$in{END_YEAR}"."$in{END_MONTH}"."$in{END_DAY}";
+			
+			
+			
+			if ($testFrom<=$testTo || $in{ITEM_0} > 0)
+			{
+				my $FROM_DATE 	= "$in{START_YEAR}".'-'."$in{START_MONTH}".'-'."$in{START_DAY}".' 00:00:00';
+				my $TO_DATE 	= "$in{END_YEAR}".'-'."$in{END_MONTH}".'-'."$in{END_DAY}".' 23:59:59';
+
+				if ($db->get('ADFRAME_VOTING_CATEGORY','count(ADFRAME_VOTING_CATEGORY_ID)',"((CR_DATE > '$FROM_DATE') AND (CR_DATE < '$TO_DATE')) OR ((END_DATE > '$FROM_DATE') AND (END_DATE < '$TO_DATE')) AND IS_ACTIVE=1") eq 0 || $in{ITEM_0} > 0)
+				{
+					$voting_category->setTITLE($in{TITLE});
+					$voting_category->setTEXT($in{TEXT});
+					$voting_category->setITEM_0($in{ITEM_0});
+					$voting_category->setCR_DATE($FROM_DATE);
+					$voting_category->setEND_DATE($TO_DATE);
+					$voting_category->setIMG('DEFIMG_0_0.gif');
+					$voting_category->setVOTES(0);
+					$voting_category->setIS_ACTIVE(1);
+					$VOTING_CATEGORY_ID = $voting_category->save();
+				
+					if ($VOTING_CATEGORY_ID >0)
+					{
+						$adframe->internLocation("admin/adframe/components/voting/voting_edit.html?ADFRAME_VOTING_CATEGORY_ID=$VOTING_CATEGORY_ID");
+						
+					}
+					else
+					{
+						$adframe->showAlert($voting_category->getErrorMessage());
+					}
+				}
+				else
+				{
+					$adframe->showAlert('In dem Zeitraum liegt bereits eine Umfrage');	
+				}
+			}
+			else
+			{
+				$adframe->showAlert('Das Anfangsdatum darf nicht nach dem Enddatum liegen');
+			}
+		}
+	}
+	else
+	{
+		$adframe->setValue('START_YEAR',$timeman->getYear());
+		$adframe->setValue('START_MONTH',$timeman->getMonth());
+		$adframe->setValue('START_DAY',$timeman->getDay());
+		$adframe->setValue('END_YEAR',$timeman->getYear());
+		$adframe->setValue('END_MONTH',$timeman->getMonth());
+		$adframe->setValue('END_DAY',$timeman->getDay());
+	}
+}
+

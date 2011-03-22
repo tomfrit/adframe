@@ -1,0 +1,62 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::dates::DatesDbManager;
+1;
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $datesman 		= new DatesDbManager();
+
+	configure($xmlfile,$componentname);
+	
+	if ($in{adframe_event} eq 'category_overview_form')
+	{
+		$adframe->setTypeAndDescr('CATEGORY','alphanum,required','Kategorie');
+
+		if (! $adframe->alertRequestErrors('CATEGORY'))
+		{
+			if ($datesman->saveCategory($ENV{ADFRAME_CHANNEL},$componentname,-1,$in{CATEGORY}))
+			{
+				$adframe->setValue('CATEGORY','');
+			}
+			else
+			{
+				$adframe->showAlert($datesman->getErrorMessage());
+			}
+		}
+	}
+	elsif ($in{adframe_event} eq 'category_delete')
+	{
+		if ($in{ADFRAME_DATESCATEGORY_ID} > 0)
+		{
+			if ($datesman->deleteCategory($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATESCATEGORY_ID}))
+			{
+				$adframe->setValue('CATEGORY','');
+			}
+			else
+			{
+				$adframe->showAlert($datesman->getErrorMessage());
+			}
+		}
+	}
+
+	my ($qual,$categoryRef) = $datesman->getCategories($ENV{ADFRAME_CHANNEL},$componentname,-1);
+	$adframe->makeRepetition('LOOP_CATEGORY',$qual,$categoryRef);
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

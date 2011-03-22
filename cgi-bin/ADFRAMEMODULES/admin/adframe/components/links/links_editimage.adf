@@ -1,0 +1,118 @@
+use de::adframe::lib::xml::XMLConfiguration;
+
+use de::adframe::lib::io::HttpUploader;
+1;
+sub common
+{
+	my $xmlfile 				= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname 			= $in{componentname};
+	
+	my $IMAGE_FIELD				= $in{EDIT_IMAGE};
+	my $ADFRAME_LINKS_ID			= $in{ADFRAME_LINKS_ID};
+	my $IMAGE_UPLOADPATH	= configure($xmlfile,$componentname,$IMAGE_FIELD);
+	
+
+	
+	#debug($imgSize,$IMAGE_UPLOADPATH);
+	
+	$adframe->setValue('ADFRAME_LINKS_ID',$ADFRAME_LINKS_ID);
+
+	if (($ADFRAME_LINKS_ID > 0) && ($IMAGE_FIELD =~ /IMAGE_/))
+	{
+		my $uploadpath = "$ENV{ADFRAME_DOC_PATH}"."$IMAGE_UPLOADPATH";
+
+		if (-e "$uploadpath")
+		{
+			if (($in{adframe_event} eq 'links_editimage_form') && ($in{FILE_IMAGE} ne ''))
+			{
+				my $uploader 		= new HttpUploader();
+				
+				my $tmpfilename 	= 'TEMP_LINKS_'.$in{EDIT_IMAGE}.'_'.$ADFRAME_DATES_ID;
+				
+				my $imagefilename 	= 'LINKS_'.$in{EDIT_IMAGE}.'_'.$ADFRAME_DATES_ID.'.jpg';
+				
+				
+				
+				my $dbTempName 		= $uploader->storeImage($uploadpath,$tmpfilename,$in{FILE_IMAGE});
+				
+				my $dbFileName		= $uploader->resize($uploadpath,$dbTempName,$imagefilename,$imgSize,yes);	
+				
+				if ($dbFileName ne '')
+				{
+					if ($datesman->updateItem($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATES_ID},$in{EDIT_IMAGE},$dbFileName))
+					{
+						$adframe->internLocation("admin/adframe/components/dates/dates_edit.html?componentname=$componentname&ADFRAME_DATES_ID=$ADFRAME_DATES_ID&EDIT_IMAGE=");
+					}
+					else
+					{
+						$adframe->showAlert('Die Datei konnte leider nicht erstellt werden');
+					}
+				}
+				else
+				{
+					$adframe->showAlert($datesman->getErrorMessage());
+				}
+			}
+
+			my %dateData = $datesman->getDateById($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_DATES_ID});
+			$adframe->setValue('THE_IMAGE',$dateData{"$in{EDIT_IMAGE}"});
+
+		}
+		else
+		{
+			$adframe->error('Project Configuration error! Uploadpath '.$uploadpath.' does not exist');
+		}
+	}
+	else
+	{
+		$adframe->error('Project Configuration error');
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	my $IMAGE_FIELD		= shift;
+	my $retUploadPath	= '';
+	$imgSize	= '';
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$conf->setCursorAt('configuration:admin:component','name',$componentname);
+
+		foreach my $c ($conf->enumElements())
+		{
+			my $tag		  	= $c->getTag();
+			my $fieldname 	= $c->getAttribute('name');
+			my $active  	= $c->getAttribute('active');
+			my $required 	= $c->getAttribute('required');
+			my $uploadpath 	= $c->getAttribute('uploadpath');
+			my $width 		= $c->getAttribute('width');
+			my $height 		= $c->getAttribute('height');
+			my $title		= $c->getAttribute('title');
+			my $size		= $c->getAttribute('size');
+
+			if (($tag eq 'field') && ($active eq 'true') && ($fieldname eq $IMAGE_FIELD))
+			{
+				$adframe->setValue('IMAGE_UPLOADPATH',$uploadpath) if ($uploadpath ne '');
+				$adframe->setValue('IMAGE_WIDTH',$width) if ($width ne '');
+				$adframe->setValue('IMAGE_HEIGHT',$height) if ($height ne '');
+				$adframe->setValue('IMAGE_TITLE',$title);
+				$retUploadPath = $uploadpath;
+				$imgSize = $size;
+				last;
+			}
+		}
+		
+		return $retUploadPath;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

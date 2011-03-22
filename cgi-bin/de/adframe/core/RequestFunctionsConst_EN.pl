@@ -1,0 +1,11 @@
+1;
+$WRONG_CHARS = 'Please don\'t use the character(s) #wrg# for #descr#\n';
+$NO_INPUT    = '#descr# is empty\n';
+$NO_EMAIL    = 'Please use the format [user@host.domain] for #descr#.\n';
+$WRONG_EXACT_LENGTH = '#descr# must have a length of #num# characters.\n';
+$WRONG_MAX_LENGTH 	= '#descr# must have a maximal length of #num# characters..\n';
+$WRONG_MIN_LENGTH 	= '#descr# must have a length not less than #num# characters.\n';
+$WRONG_MIN_ALTER 	= 'Your age must be over 18.\n';
+$WRONG_MAX_VALUE_WITHOUT_ZERO = 'Value of #descr# must not be 0.\n';
+$ESC_CHAR_MESSAGE 	= '..has not allowed characters!';
+1;

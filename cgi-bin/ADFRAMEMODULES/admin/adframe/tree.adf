@@ -1,0 +1,196 @@
+use de::adframe::lib::xml::XMLParser;
+use de::adframe::lib::tree::TreeManager;
+
+1;
+sub common
+{
+	$componentconfpath	= 'ADFRAMEMODULES/admin/adframe/components';
+	$channelconfpath	= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf';
+	$generalconffile 	= $channelconfpath.'/general.xml';
+
+	if (-f $generalconffile)
+	{
+		my $generalconf 	= new XMLParser();
+		
+		$generalconf->initFromFile($generalconffile);
+	
+		my $treeStart	= $generalconf->findElement('configuration:admin:navtree','name',$in{navtree});
+		
+		if (ref $treeStart)
+		{
+			displayTree($generalconf,$treeStart,$in{navtree});
+		}
+	}
+}
+
+sub displayTree
+{
+	my $conf 			= shift;
+	my $treeStart		= shift;
+	my $navtree			= shift;
+	my $treeName		= 'start'; # hmm !
+	my $tag				= '';
+	my $name			= '';
+	my $title			= '';
+	my $url				= '';
+	my $parent			= '';
+	my $parentName		= '';
+	my $parentObj		= undef;
+	my $componentname	= '';	
+	my $man 			= new TreeManager();
+	my $rootFolder 		= $man->initTree("Start","/admin/adframe/start");
+	my %treeObj			= ($treeName,$rootFolder);
+	my @tree    		= $conf->getElementList($treeStart);
+	my @treeElements 	= parseXMLConfiguration(@tree);
+	
+	$adframe->setValue('contentStartTemplate',$treeStart->getAttribute('startpage'));
+
+	for (my $i=0;$i<=$#treeElements;$i++)
+	{
+		$tag			= $treeElements[$i]->getTag();		
+		$name 			= $treeElements[$i]->getAttribute('name');
+		$title 			= $treeElements[$i]->getAttribute('title');
+		$url 			= $treeElements[$i]->getAttribute('url');
+		$parent 		= $treeElements[$i]->getParent();
+		$parentName		= '';
+		$componentname	= $treeElements[$i]->getAttribute('componentname');
+		
+		if ($componentname ne '')
+		{
+			$url.='?componentname='.$componentname;
+		}
+		
+		if (ref $parent)
+		{
+			$parentName = $parent->getAttribute('name');
+			if (($parentName eq '') || ($parentName eq $navtree))
+			{
+				$parentName = $treeName;
+			}
+			$parentObj = $treeObj{"$parentName"};
+		}
+		
+		if ($tag eq 'folder')
+		{
+			$treeObj{"$name"} = $man->addFolder($title,$url,$parentObj);
+		}
+		elsif ($tag eq 'item')
+		{
+			$treeObj{"$name"} = $man->addItem($title,$url,$parentObj);
+		}
+		push (@t,"$tag - $name - $parentName - $parent");
+	}
+
+	my $jsText = $man->displayJavascriptTree();
+
+	$adframe->setValue('TreeLines',$jsText);
+
+}
+
+sub parseXMLConfiguration
+{
+	my @tree			= @_;
+	my @importFileTree	= ();
+	my @treeElements 	= ();
+	
+	# imports testen:
+	for (my $i=0;$i<=$#tree;$i++)
+	{
+		my $tag		= $tree[$i]->getTag();
+		
+		if ($tag eq 'import')
+		{
+			my $file 		= $tree[$i]->getAttribute('file');
+			
+			if ($file ne '')
+			{
+				if (-f "$channelconfpath/$file")
+				{
+					my @subItems = _loadSubConf("$channelconfpath/$file",'','');
+					@importFileTree = (@importFileTree,@subItems);
+				}
+			}
+			else
+			{
+				push(@importFileTree,$tree[$i]);
+			}
+		}
+		else
+		{
+			push(@importFileTree,$tree[$i]);
+		}
+	}
+	
+	# components testen:
+	for (my $i=0;$i<=$#importFileTree;$i++)
+	{
+		my $tag		= $importFileTree[$i]->getTag();
+		
+		if ($tag eq 'import')
+		{
+			my $component	= $importFileTree[$i]->getAttribute('component');
+			my $name		= $importFileTree[$i]->getAttribute('name');
+			my $title		= $importFileTree[$i]->getAttribute('title');
+			my $parentObj	= $importFileTree[$i]->getParent();
+			
+			if ($component ne '')
+			{
+				if (-f "$componentconfpath/$component/tree.xml")
+				{	
+					my @subItems = _loadSubConf("$componentconfpath/$component/tree.xml",$name,$title,$parentObj);
+					@treeElements = (@treeElements,@subItems);
+				}
+			}
+			else
+			{	
+				push(@treeElements,$importFileTree[$i]);
+			}
+		}
+		else
+		{
+			push(@treeElements,$importFileTree[$i]);
+		}
+	}
+	return @treeElements;
+}
+
+sub _loadSubConf
+{
+	my $file			= shift;
+	my $componentname	= shift;
+	my $componenttitle	= shift;
+	my $parentObj		= shift;
+	my @confElements	= ();
+	my $fileConf 		= new XMLParser();
+	my $componenttype	= '';
+
+	if (-f $file)
+	{
+		$fileConf->initFromFile($file);
+		my $treeStart	= $fileConf->findElement('configuration');
+		@confElements = $fileConf->getElementList($treeStart);
+		
+		if ($componentname ne '')
+		{
+			foreach my $c (@confElements)
+			{
+				$c->setAttribute('componentname',$componentname);				
+				
+				$componenttype = $c->getAttribute('type');
+				
+				if ($componenttype eq 'componentstartfolder')
+				{
+					if ($componenttitle ne '')
+					{
+						$c->setAttribute('title',$componenttitle);
+					}
+					if (ref $parentObj)
+					{
+						$c->setParent($parentObj);
+					}
+				}
+			}
+		}
+	}
+	return @confElements;
+}

@@ -1,0 +1,131 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::forum::ForumDbManager;
+use de::adframe::components::mcms::gen::ListADFRAME_MCMS;
+
+
+1;
+
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $AREA			= $in{componentname};
+	my $ITEMS_PER_PAGE 	= 10;
+	my $forumman 		= new ForumDbManager();
+	my $list 	= new ListADFRAME_MCMS();
+		
+	configure($xmlfile,$AREA);
+	
+	# events:
+	if ($in{adframe_event} eq 'deleteitem')
+	{
+		if ($AREA ne 'motox_artikelforum') {
+		
+			if (! $forumman->deleteItem($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_FORUM_ID}))
+			{
+				$adframe->showAlert('Der Eintrag konnte leider NICHT gelöscht werden !');
+			}
+		}
+		else { $adframe->showAlert('Artikel können hier NICHT gelöscht werden !'); }
+	}
+	elsif ($in{adframe_event} eq 'deletecomment')
+	{
+		if (! $forumman->deleteComment($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_FORUMCOMMENT_ID}))
+		{
+			$adframe->showAlert('Der Kommentar konnte leider NICHT gelöscht werden !');
+		}
+	}
+
+	# categories:
+	my $catDataRef 	= $forumman->getCategories($ENV{ADFRAME_CHANNEL},$AREA);
+	$adframe->makeRepetition('LOOP_FORUM_CATEGORIES',$ForumDbManager::QUAL_CATEGORY,$catDataRef);
+	
+	$adframe->setValue('ADFRAME_FORUMCATEGORY_ID_VALUE',$in{ADFRAME_FORUMCATEGORY_ID});;
+
+	# pages etc:
+	my $count		= $forumman->getItemCount($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_FORUMCATEGORY_ID});
+	my $allpages	= int($count/$ITEMS_PER_PAGE);	
+	if ($count % $ITEMS_PER_PAGE > 0)
+	{
+		$allpages+=1;
+	}
+	my $page		= $in{page} || 1;
+
+	if ($in{nextpage} eq 'next')
+	{
+		if (($page*$ITEMS_PER_PAGE) >= $count)
+		{
+			$page = 1;
+		}
+		else
+		{
+			$page++;
+		}
+	}
+	elsif ($in{nextpage} eq 'prev')
+	{
+		$page--;
+		if ($page<1)
+		{
+			$page = $allpages;
+		}
+	}
+	
+	my $start	= ($page-1) * $ITEMS_PER_PAGE;
+			
+	$adframe->setValue('page',$page);
+	$adframe->setValue('allpages',$allpages);
+	$adframe->setValue('count',$count);
+
+	# fill loops:
+	
+	
+	if ($AREA eq 'motox_artikelforum') {
+		my $cond = "ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and SEL = 'ja' AND P_STATUS>0";
+		my $artikel    = $list->getADFRAME_MCMS($cond,'CR_DATE desc',0);
+		my @artikelRef 	= @{$artikel};
+		@guestValues	= ();
+		my @h = ();
+		for (my $i=0;$i<=$#artikelRef;$i++) {
+			my @h = split(/\|/, $artikelRef[$i]);
+			push(@guestValues,"$h[0]|$h[13]|$h[44]");
+		}
+		$adframe->makeRepetition('LOOP_FORUM','!ADFRAME_FORUM_ID!|!SUBJECT!|!COMMENT!',\@guestValues);
+		#debug($ListADFRAME_MCMS::QUAL);
+	}
+	else {	
+		my ($qual,$refValues,$start) = $forumman->getItems($ENV{ADFRAME_CHANNEL},$AREA,$in{ADFRAME_FORUMCATEGORY_ID},$start,$ITEMS_PER_PAGE);
+		$adframe->makeRepetition('LOOP_FORUM',$qual,$refValues);
+		@guestValues	= @{ $refValues };
+	}
+
+	
+	my @data		= ();
+
+	for (my $i=0;$i<=$#guestValues;$i++)
+	{
+		@data = split(/\|/,$guestValues[$i]);
+		my ($comqual,$commentRef) = $forumman->getComments($ENV{ADFRAME_CHANNEL},$AREA,$data[0]);
+		$adframe->makeRepetition("SUBCOMMENT_$data[0]",$comqual,$commentRef);
+
+		my ($redqual,$admincommentRef) = $forumman->getAdminComments($ENV{ADFRAME_CHANNEL},$AREA,$data[0]);
+		$adframe->makeRepetition("ADMINSUBCOMMENT_$data[0]",$redqual,$admincommentRef);
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}
+

@@ -1,0 +1,250 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::user::AdframeUser;
+use de::adframe::lib::DateTime;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::components::mcms::McmsDbManager;
+1;
+
+sub common
+{
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname		= $in{componentname};
+	my $conf				= configure($xmlfile,$componentname);
+	my $date				= new DateTime();
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));	
+	my $mcms				= new ClassADFRAME_MCMS();
+	$adframe->setValue('JS_CODE','');
+	
+	if (ref $mcmsconf)
+	{		
+		my $fieldsRef = $mcmsconf->getNewSerialized();
+		$adframe->makeRepetition('LOOP_FIELDS',$McmsConfiguration::FIELD_ARRAY_QUAL,$fieldsRef);
+		my @help 		= ();
+		my @inputKeys	= ();
+		
+		foreach my $it (@{ $fieldsRef })
+		{
+			@help = split(/\|/,$it);
+			
+			$adframe->setSwitch('SWITCH_text_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_selector_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_display_'.$help[0],'off');
+			$adframe->setSwitch('SWITCH_'.$help[1].'_'.$help[0],'on');
+			
+			if ($help[1] =~ /text/)
+			{
+				$adframe->setToDict($help[0],$help[1],$help[3],$help[2],$in{$help[0]});
+				push(@inputKeys,$help[0]);	
+				my $tValue = $in{$help[0]};
+				if ($in{$mcms_new_form} eq '')
+				{
+					if ($help[5] =~ /^db:/)
+					{
+						$help[5] =~ s/\n//g;
+						$help[5] =~ s/\r//g;
+						$help[5] =~ s/^db://;
+						$sqlQ = $in{SEL} || 0;
+						$help[5] =~ s/#SEL#/$sqlQ /g;
+						$tValue = $mcms->query($help[5]);
+					}
+					elsif ($help[5] ne '')
+					{
+						$help[5] =~ s/\#/\|/g;
+						$help[5] =~ s/\n//g;
+						$tValue = split(/,/,$tValue);
+					}	
+				}
+				$adframe->setValue($help[0].'_VALUE',$tValue);
+			}
+			elsif ($help[1] =~ /selector/)
+			{
+				$adframe->setToDict($help[0],'select',$help[3],$help[2],'');
+				push(@inputKeys,$help[0]);	
+				my @sValues = ();
+				if ($help[5] =~ /^db:/)
+				{
+					$help[5] =~ s/\n//g;
+					$help[5] =~ s/\r//g;
+					$help[5] =~ s/^db://;
+					$help[5] =~ s/\#/\|/g;
+					@sValues = $mcms->query($help[5]);
+				}
+				else
+				{
+					$help[5] =~ s/\#/\|/g;
+					$help[5] =~ s/\n//g;
+					@sValues = split(/,/,$help[5]);
+				}
+				$adframe->makeRepetition('LOOP_SELECTOR_'.$help[0],'!FIELD_VAL!|!FIELD_OPTION!',\@sValues);
+
+				$adframe->setValue('SEL',$in{$help[0]});
+			}
+			elsif ($help[1] =~ /hidden/)
+			{
+				$adframe->setToDict($help[0],'hidden','',$help[2],'');
+				push(@inputKeys,$help[0]);				
+				if($help[5]=~/field:/)
+				{
+					my $jsval = $help[5];
+					$jsval=~s/field://;
+					my $jsCode = $adframe->getFromDict('JS_CODE','value');
+					if ($jsval =~ /SEL:text/i)
+					{
+						$jsCode .= 'self.document.mcms_new_form.'.$help[0].'.value=self.document.mcms_new_form.SEL.options[self.document.mcms_new_form.SEL.selectedIndex].text;';
+					}
+					$adframe->setValue("JS_CODE",$jsCode);
+				}
+			}				
+		}
+		
+		if ($in{adframe_event} eq 'blog_new_form')
+		{
+			
+			my @fields	= $mcmsconf->getFieldsByNames('A_NAME','A_EMAIL','HEADLINE',@inputKeys); 
+			foreach my $m (@fields)
+			{
+				$adframe->setTypeAndDescr($m->getName(),$m->getChartest(),$m->getTitle());
+			}
+			
+			if (! $adframe->alertRequestErrors('A_NAME','A_EMAIL','HEADLINE',@inputKeys))
+			{
+				$date->setYear($in{CR_DATE_YEAR});
+				$date->setMonth($in{CR_DATE_MONTH});
+				$date->setDay($in{CR_DATE_DAY});
+				$date->setHour($in{CR_DATE_HOUR});
+				
+				# Initialisierung des Artikels:
+				$mcms->setADFRAME_CHANNEL($ENV{ADFRAME_CHANNEL});
+				$mcms->setAREA($componentname);
+				$mcms->setCATEGORY($mcmsconf->getValue('configuration:mcms','area',$componentname,'category'));
+				$mcms->setETIKETT($mcmsconf->getValue('configuration:mcms','area',$componentname,'etikett'));
+				
+				$mcms->setSAISON($mcmsconf->getValue('configuration:mcms','area',$componentname,'saison'));
+
+				$mcms->setRANK_NO(0);
+				$mcms->setPAGE_COUNT(0);
+				$mcms->setP_STATUS(0);
+				$mcms->setIS_ARCHIVE(0);
+				$mcms->setA_NAME($in{A_NAME});
+				$mcms->setA_EMAIL($in{A_EMAIL});
+				$mcms->setHEADLINE($in{HEADLINE});
+				$mcms->setP_DATE(""); # now()
+				$mcms->setCR_DATE($date->getMysqlFormatted);
+				
+				$mcms->setITEM_1_1($adframe->getFromSession('ADFRAME_USER_ID'));
+				
+				my @img = qw(IMG_0_0 IMG_0_1 IMG_0_2 IMG_0_3 IMG_0_4 IMG_1_0 IMG_1_1 IMG_1_2 IMG_1_3 IMG_1_4 IMG_2_1 IMG_2_2 IMG_2_3 IMG_2_4 IMG_3_1 IMG_3_2 IMG_3_3 IMG_3_4 IMG_4_1 IMG_4_2 IMG_4_3 IMG_4_4 IMG_5_1 IMG_5_2 IMG_5_3 IMG_5_4 VIDEO_1_1 VIDEO_1_2 PIC_VIDEO_1_1 PIC_VIDEO_1_2);
+ 				my @fields	= $mcmsconf->getFieldsByNames(@img); 
+ 				foreach my $im (@fields)
+ 				{
+ 					$mcms->setValue($im->getName(),$im->getDefault());
+ 					main::logger($im->getName().' - '.$im->getDefault());
+ 				}
+							
+				$mcms->setIS_ACTIVE(1);
+
+ 				foreach my $imm (@inputKeys)
+ 				{
+ 					$mcms->setValue($imm,$in{"$imm"});
+ 				}
+ 				
+				my $mcmsman 	= new McmsDbManager();
+				my $lastRank	= $mcmsman->getNextRankNo($ENV{ADFRAME_CHANNEL},$componentname);
+				my $parentLastRank = $mcmsman->getNextParentRankNo($ENV{ADFRAME_CHANNEL});
+				$mcms->setRANK_NO($lastRank);
+				$mcms->setPARENT_RANK_NO($parentLastRank);
+				
+				my $mcmsId = $mcms->save();
+				
+				if ($mcmsId>0)
+				{
+				#	handleMail();
+					$adframe->internLocation("/admin/adframe/components/blog/blog_edit.html?componentname=$componentname&ADFRAME_MCMS_ID=$mcmsId&new=new");
+				}
+				else
+				{
+					$adframe->showAlert('Der Artikel konnte nicht gespeichert werden');
+				}
+			}	
+		}
+		else
+		{
+
+			my $adframeUserId	= $adframe->getFromSession('ADFRAME_USER_ID');
+			my $user			= new AdframeUser();
+
+			if ($user->initById($adframeUserId))
+			{
+				$adframe->setValue('A_NAME', $user->getFIRSTNAME().' '.$user->getNAME());
+				$adframe->setValue('A_EMAIL',$user->getEMAIL());
+			}
+			$adframe->setValue('CR_DATE_DAY',$date->getDay());
+			$adframe->setValue('CR_DATE_MONTH',$date->getMonth());
+			$adframe->setValue('CR_DATE_YEAR',$date->getYear());
+			$adframe->setValue('CR_DATE_HOUR',$date->getHour());
+			$adframe->setValue('CR_DATE_MINUTE',$date->getMinute());			
+		}	
+	}
+	else
+	{
+		$adframe->showAlert('Die Konfiguration für diesen Bereich konnte nicht geladen werden');
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}
+
+
+sub handleMail
+{
+
+	
+	use de::adframe::lib::mail::MailManager;
+	use de::adframe::lib::xml::XMLConfiguration;
+	
+	
+	$XML_MAIL_CONF 		= 'conf/fbmx_mailconf.xml';
+
+	
+	
+	
+	
+	my $mailReceiptman	= new MailManager($ENV{ADFRAME_CHANNEL});
+	
+	my $conf = new XMLConfiguration($XML_MAIL_CONF);
+	# configure email
+	$mailReceiptman->setEmailAddress('oliver.klobes@skateboardmsm.de,oliver.tielsch@skateboardmsm.de,mail@ericmirbach.com');
+	$mailReceiptman->setEmailBcc($conf->getValue('configuration:forum:newblogentry:receiptemailbcc'));
+	$mailReceiptman->setEmailSender($conf->getValue('configuration:forum:newblogentry:receiptemailsender'));
+	$mailReceiptman->setEmailSubject($conf->getValue('configuration:forum:newblogentry:receiptemailsubject'));
+	$mailReceiptman->setEmailTemplate($conf->getValue('configuration:forum:newblogentry:receiptemailtemplate'));
+
+	my %mailVal = ();
+	
+	
+
+
+	# mail:
+	if ($mailReceiptman->mailTemplate(%mailVal))
+	{
+		return 1;
+	}
+	return 0;
+}

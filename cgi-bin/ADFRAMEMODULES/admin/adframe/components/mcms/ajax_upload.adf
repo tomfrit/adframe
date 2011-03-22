@@ -1,0 +1,70 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::lib::io::HttpUploader;
+$MAX_IMAGE_WIDTH = 350;
+1;
+
+sub common
+{
+	my $ADFRAME_MCMS_ID	= $in{ADFRAME_MCMS_ID};
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $conf					= configure($xmlfile,$componentname);
+	my $mcmsconf			= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+	my $genimagedir		=	$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir');
+	my $uploadpath 		= "$ENV{ADFRAME_DOC_PATH}"."$genimagedir";
+	#debug();
+
+
+	#debug($genimagedir,$ENV{ADFRAME_DOC_PATH},$ENV{ADFRAME_CHANNEL},$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+
+	if ($in{adframe_event} eq 'ajax_upload_form')
+	{
+		#debug();
+
+		if(($in{FILE_IMAGE} ne '') && (-e $uploadpath))
+		{
+			  opendir(my $dh, $uploadpath) || die "can't opendir $genimagedir: $!";
+				@images = grep { /IMAGE_($ADFRAME_MCMS_ID)_[0-9]+\.(jpg|png|gif)/ && -f "$uploadpath/$_" } readdir($dh);
+			closedir $dh;
+			$num = scalar(@images) +1;
+
+			while (glob $uploadpath."/IMAGE_".$ADFRAME_MCMS_ID."_".sprintf("%03d", $num).".*") { $num++ };
+			my $uploader 		= new HttpUploader();
+
+
+			my $imagefilename 	= 'IMAGE_'.$ADFRAME_MCMS_ID.'_'.sprintf("%03d", $num);
+			my $tempName		= 'TEMP_'.$imagefilename;
+			my $tempFileName 		= $uploader->storeImage($uploadpath,$tempName,$in{FILE_IMAGE});
+			my $image			= $uploader->resize($uploadpath,$tempFileName,$imagefilename.'.jpg',$MAX_IMAGE_WIDTH);
+			my $thumb			= $uploader->resize($uploadpath,$tempFileName,'THUMB_'.$imagefilename.'.jpg','30x30');
+			my $half				= $uploader->resize($uploadpath,$tempFileName,'HALF_'.$imagefilename.'.jpg',($MAX_IMAGE_WIDTH/2),'yes');
+
+		}
+
+		else
+		{
+			$adframe->error('Project Configuration error!');
+		}
+	}
+
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

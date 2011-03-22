@@ -1,0 +1,186 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::mcms::McmsConfiguration;
+use de::adframe::components::mcms::gen::ListADFRAME_MCMS;
+use de::adframe::components::mcms::gen::ClassADFRAME_MCMS;
+use de::adframe::components::mcms::McmsDbManager;
+use de::adframe::lib::io::HttpTemplateGenerator;
+1;
+
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $ITEMS_PER_PAGE	= 10;
+	my $componentname	= $in{componentname};
+	my $conf			= configure($xmlfile,$componentname);
+	my $mcmsconf		= new McmsConfiguration('ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/'.$conf->getAttribute('import','configuration:admin:component','name',$componentname));
+	
+	my $list			= new ListADFRAME_MCMS();
+	my $error			= '';
+	if (ref $mcmsconf) 
+	{
+		if (($in{adframe_event} ne '') && ($in{ADFRAME_MCMS_ID} >0))
+		{
+			if ($in{adframe_event} eq '__mcms_rank_down')
+			{
+				my $mcmsman = new McmsDbManager();
+				$mcmsman->toggleParentRank($ENV{ADFRAME_CHANNEL},$category,$in{ADFRAME_MCMS_ID},'down');
+				if (! pregenerate($mcmsconf))
+				{
+					$error = 'Die Übersichtsseiten können nicht online generiert werden!';	
+				}				
+			}	
+			elsif ($in{adframe_event} eq '__mcms_rank_up')
+			{
+				my $mcmsman = new McmsDbManager();
+				$mcmsman->toggleParentRank($ENV{ADFRAME_CHANNEL},$category,$in{ADFRAME_MCMS_ID},'up');
+				if (! pregenerate($mcmsconf))
+				{
+					$error = 'Die Übersichtsseiten können nicht online generiert werden!';	
+				}			
+			}
+			
+		}
+		$adframe->setValue('GENIMAGEDIR',$mcmsconf->getValue('configuration:mcms','area',$componentname,'imagedir'));
+		$adframe->setValue('displayimport',$mcmsconf->getValue('configuration:mcms','area',$componentname,'displayimport'));
+		
+		my $category = $mcmsconf->getValue('configuration:mcms','channel',$ENV{ADFRAME_CHANNEL},'category');
+
+		# pages etc:
+		my $count		= $list->getCountADFRAME_MCMS("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and P_STATUS=1 and IS_ACTIVE=1 and AREA like '%$category%' ");
+
+		my $allpages	= int($count/$ITEMS_PER_PAGE);	
+		if ($count % $ITEMS_PER_PAGE > 0)
+		{
+			$allpages+=1;
+		}
+		my $page		= $in{page} || 1;
+
+		if ($in{nextpage} eq 'next')
+		{
+			if (($page*$ITEMS_PER_PAGE) >= $count)
+			{
+				$page = 1;
+			}
+			else
+			{
+				$page++;
+			}
+		}
+		elsif ($in{nextpage} eq 'prev')
+		{
+			$page--;
+			if ($page<1)
+			{
+				$page = $allpages;
+			}
+		}
+
+		my $start	= ($page-1) * $ITEMS_PER_PAGE;
+
+		$allpages = 1 if ($allpages<1);
+		$adframe->setValue('page',$page);
+		$adframe->setValue('allpages',$allpages);
+		$adframe->setValue('count',$count);
+
+		# fill loops
+		my $orderby = 'PARENT_RANK_NO desc, CR_DATE desc';
+		my $dataRef = $list->getADFRAME_MCMS("ADFRAME_CHANNEL='$ENV{ADFRAME_CHANNEL}' and AREA like '%$category%' and P_STATUS=1 and IS_ACTIVE=1",$orderby,$start,$ITEMS_PER_PAGE);
+	
+		my $teaserimagename = $mcmsconf->getValue('configuration:mcms:articlelist:image');		
+		
+		if ($teaserimagename !~ /IMG_/)
+		{
+			$teaserimagename = 'IMG_0_3';
+		}
+		my $imageattributes = $mcmsconf->getAttribute('attributes','configuration:mcms:articlelist:image','name','listimage');
+		
+		
+		if ($imageattributes !~ /width/i)
+		{
+			$imageattributes = 'width="100" height="100"';
+		}		
+		
+		my $qual	= $ListADFRAME_MCMS::QUAL;
+		$qual =~ s/\!$teaserimagename\!/\!TEASERIMAGE\!/;
+	
+		$adframe->setValue('TEASERIMAGE_ATTRIBUTES',$imageattributes);
+		
+		$adframe->makeRepetition('LOOP_MCMS',$qual,$dataRef);
+	
+		if (@{ $dataRef } == ())
+		{
+			$adframe->setSwitch('SWITCH_NODATA','on');
+		}
+		else
+		{
+			$adframe->setSwitch('SWITCH_NODATA','off');
+			
+			my @data 	= @{ $dataRef };
+			my @help	= ();
+			for (my $i=0;$i<=$#data;$i++)
+			{
+				@help = split(/\|/, $data[$i]);
+				
+				if ($help[6] ==1)
+				{
+					$adframe->setSwitch('SWITCH_P_STATUS_ON_'.$help[0],'on');
+					$adframe->setSwitch('SWITCH_P_STATUS_OFF_'.$help[0],'off');
+				}
+				else
+				{
+					$adframe->setSwitch('SWITCH_P_STATUS_ON_'.$help[0],'off');
+					$adframe->setSwitch('SWITCH_P_STATUS_OFF_'.$help[0],'on');				
+				}
+			}			
+		}	
+		if ($error ne '')
+		{
+			$adframe->showAlert($error);
+		}
+	}
+	else
+	{
+		$adframe->showAlert('Die Konfiguration kann leider nicht geladen werden!');
+	}
+	srand($$|time);
+	my $rnd = rand($#prods)+10;
+	$adframe->setValue('RANDOM',$rnd);	
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}
+
+sub pregenerate
+{
+	my $mcmsconf	= shift;
+	my @tmpl 		= $mcmsconf->getAllTagsWith('template','configuration:mcms:httpgenerator','','');
+	my $gen 		= new HttpTemplateGenerator();
+	my $ok			= 1;
+	foreach my $t (@tmpl)
+	{
+		my $url = 'http://'.$ENV{ADFRAME_SERVER_NAME}.'/cgi-bin/adframe/'.$t->getAttribute('url');
+		my $storefile = $ENV{ADFRAME_DOC_PATH}.'/'.$t->getAttribute('storefile');
+						
+		if (! $gen->generate($url,$storefile))
+		{
+			$ok = 0;
+		}
+	}
+	return $ok;
+}

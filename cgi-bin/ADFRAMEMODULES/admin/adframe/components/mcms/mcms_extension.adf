@@ -1,0 +1,7 @@
+1;
+
+sub common
+{
+	$adframe->setValue('componentname',$in{componentname});
+	$adframe->setValue('ADFRAME_MCMS_ID',$in{ADFRAME_MCMS_ID});
+}

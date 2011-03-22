@@ -1,0 +1,84 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::forum::ForumDbManager;
+use de::adframe::lib::io::HttpUploader;
+1;
+sub common
+{
+	my $xmlfile 			= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname 		= $in{componentname};
+	
+	my $IMAGE_FIELD			= $in{EDIT_IMAGE};
+	my $ADFRAME_FORUMCATEGORY_ID	= $in{ADFRAME_FORUMCATEGORY_ID};
+	my $IMAGE_UPLOADPATH		= configure($xmlfile,$componentname,$IMAGE_FIELD);
+	my $cmsman	 		= new ForumDbManager();
+	
+	$adframe->setValue('ADFRAME_FORUMCATEGORY_ID',$ADFRAME_FORUMCATEGORY_ID);
+	my %catData = $cmsman->getCategoryById($ENV{ADFRAME_CHANNEL},$componentname,$ADFRAME_FORUMCATEGORY_ID);
+
+	if (($ADFRAME_FORUMCATEGORY_ID > 0) && ($catData{ADFRAME_FORUMCATEGORY_ID}>0) && ($IMAGE_FIELD =~ /IMG_/))
+	{
+		my $uploadpath = "$ENV{ADFRAME_DOC_PATH}"."$IMAGE_UPLOADPATH";
+
+		$adframe->setValue('IMAGE_TITLE',$IMAGE_FIELD);
+		
+		if (-e "$uploadpath")
+		{
+			if (($in{adframe_event} eq 'category_editimage_form') && ($in{FILE_IMAGE} ne ''))
+			{
+				my $uploader 		= new HttpUploader();
+				my $imagefilename 	= 'FORUMCATEGORY_'.$in{EDIT_IMAGE}.'_'.$ADFRAME_FORUMCATEGORY_ID;
+				my $dbFileName 		= $uploader->storeImage($uploadpath,$imagefilename,$in{FILE_IMAGE});
+				
+				if ($dbFileName ne '')
+				{
+					if ($cmsman->updateCategoryItem($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_FORUMCATEGORY_ID},$in{EDIT_IMAGE},$dbFileName))
+					{
+						$adframe->internLocation("admin/adframe/components/forum/category_edit.html?componentname=$componentname&ADFRAME_FORUMCATEGORY_ID=$ADFRAME_FORUMCATEGORY_ID&EDIT_IMAGE=");
+					}
+					else
+					{
+						$adframe->showAlert('Die Datei konnte leider nicht erstellt werden');
+					}
+				}
+				else
+				{
+					$adframe->showAlert('Die Datei konnte leider nicht erstellt werden.\nDer Zugriff auf das Server-Dateisystem ist nicht freigegeben !');
+				}
+			}
+
+			$adframe->setValue('THE_IMAGE',$catData{"$in{EDIT_IMAGE}"});
+
+		}
+		else
+		{
+			$adframe->error('Project Configuration error! Uploadpath '.$uploadpath.' does not exist');
+		}
+	}
+	else
+	{
+		$adframe->error('Project Configuration error');
+	}
+}
+
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	my $IMAGE_FIELD		= shift;
+	my $uploadPath	= '';
+
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+
+		# register from conf:
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+
+		my $uploadPath = $conf->getAttribute('imagepath','configuration:admin:component','name',$componentname);
+		return $uploadPath;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}

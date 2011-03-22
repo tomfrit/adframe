@@ -1,0 +1,55 @@
+use de::adframe::lib::xml::XMLConfiguration;
+use de::adframe::components::teasercms::TeaserCmsDbManager;
+1;
+sub common
+{
+	my $xmlfile 		= 'ADFRAMEMODULES/admin/channel/'.$ENV{ADFRAME_CHANNEL}.'/conf/general.xml';
+	my $componentname	= $in{componentname};
+	my $teaserman 		= new TeaserCmsDbManager();
+
+	configure($xmlfile,$componentname);
+
+	if ($in{adframe_event} eq 'category_edit_form')
+	{
+		$adframe->setTypeAndDescr('CATEGORY','alphanum,required','Kategorie');
+		
+		if (! $adframe->alertRequestErrors('CATEGORY'))
+		{
+			if ($teaserman->saveCategory($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_TEASERCMSCATEGORY_ID},$in{CATEGORY}))
+			{
+				$in{CATEGORY} = '';
+				$adframe->setValue('CATEGORY','');
+				newDoc('admin/adframe/components/teasercms/category_overview');
+			}
+			else
+			{
+				$adframe->showAlert($datesman->getErrorMessage());
+			}
+		}
+	}
+	else
+	{
+		my %category = $teaserman->getCategoryById($ENV{ADFRAME_CHANNEL},$componentname,$in{ADFRAME_TEASERCMSCATEGORY_ID});
+		$adframe->setValue('CATEGORY',$category{CATEGORY});
+	}
+
+	my ($qual,$categoryRef) = $teaserman->getCategories($ENV{ADFRAME_CHANNEL},$componentname,-1);
+	$adframe->makeRepetition('LOOP_CATEGORY',$qual,$categoryRef);
+
+}
+sub configure
+{
+	my $xmlfile			= shift;
+	my $componentname	= shift;
+	if (my $conf = new XMLConfiguration($xmlfile))
+	{
+		$adframe->setValue('COMPONENTTITLE',$conf->getAttribute('title','configuration:admin:component','name',$componentname));
+		$adframe->setValue('componentname',$componentname);
+		return $conf;
+	}
+	else
+	{
+		$adframe->error("Configuration error at $xmlconf");
+		return 0;
+	}
+}
